@@ -1,0 +1,67 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: rapid-tech-store-ingress
+  namespace: rapid-tech-store
+  annotations:
+    kubernetes.io/ingress.class: "gce"
+    kubernetes.io/ingress.global-static-ip-name: "rapid-tech-store-ip"
+    networking.gke.io/managed-certificates: "rapid-tech-store-ssl-cert"
+    kubernetes.io/ingress.allow-http: "false"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+spec:
+  rules:
+  - host: api.rapidtechstore.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: rapid-tech-store-backend-service
+            port:
+              number: 80
+  - host: www.api.rapidtechstore.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: rapid-tech-store-backend-service
+            port:
+              number: 80
+---
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: rapid-tech-store-ssl-cert
+  namespace: rapid-tech-store
+spec:
+  domains:
+    - api.rapidtechstore.com
+    - www.api.rapidtechstore.com
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rapid-tech-store-backend-nodeport
+  namespace: rapid-tech-store
+  labels:
+    app: rapid-tech-store-backend
+spec:
+  type: NodePort
+  ports:
+  - port: 80
+    targetPort: 3000
+    protocol: TCP
+    name: http
+  selector:
+    app: rapid-tech-store-backend

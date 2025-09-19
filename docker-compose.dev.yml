@@ -1,0 +1,151 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:14-alpine
+    container_name: rapidtechstore-postgres-dev
+    environment:
+      POSTGRES_DB: rapidtechstore_dev
+      POSTGRES_USER: rapidtechstore
+      POSTGRES_PASSWORD: password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./prisma/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - rapidtechstore-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rapidtechstore -d rapidtechstore_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: rapidtechstore-redis-dev
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+      - ./redis.conf:/usr/local/etc/redis/redis.conf:ro
+    networks:
+      - rapidtechstore-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    command: redis-server /usr/local/etc/redis/redis.conf
+
+  # Backend Application (for development)
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: rapidtechstore-backend-dev
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://rapidtechstore:password@postgres:5432/rapidtechstore_dev
+      - REDIS_URL=redis://redis:6379
+    ports:
+      - "3000:3000"
+      - "9229:9229" # Debug port
+    volumes:
+      - ./backend:/app/backend
+      - /app/backend/node_modules
+      - ./prisma:/app/prisma
+    networks:
+      - rapidtechstore-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    command: npm run dev
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Adminer (Database Management)
+  adminer:
+    image: adminer:4.8.1
+    container_name: rapidtechstore-adminer-dev
+    ports:
+      - "8080:8080"
+    networks:
+      - rapidtechstore-network
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+      ADMINER_DESIGN: pepa-linha
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  # Redis Commander (Redis Management)
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: rapidtechstore-redis-commander-dev
+    ports:
+      - "8081:8081"
+    networks:
+      - rapidtechstore-network
+    environment:
+      REDIS_HOSTS: local:redis:6379
+      HTTP_USER: admin
+      HTTP_PASSWORD: admin
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  # Mailhog (Email Testing)
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: rapidtechstore-mailhog-dev
+    ports:
+      - "1025:1025" # SMTP
+      - "8025:8025" # Web UI
+    networks:
+      - rapidtechstore-network
+    restart: unless-stopped
+
+  # Nginx (Reverse Proxy for development)
+  nginx:
+    image: nginx:alpine
+    container_name: rapidtechstore-nginx-dev
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.dev.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    networks:
+      - rapidtechstore-network
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  rapidtechstore-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

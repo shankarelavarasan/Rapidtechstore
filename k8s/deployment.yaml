@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rapid-tech-store-backend
+  namespace: rapid-tech-store
+  labels:
+    app: rapid-tech-store-backend
+    version: v1
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: rapid-tech-store-backend
+  template:
+    metadata:
+      labels:
+        app: rapid-tech-store-backend
+        version: v1
+    spec:
+      containers:
+      - name: backend
+        image: gcr.io/PROJECT_ID/rapid-tech-store-backend:latest
+        ports:
+        - containerPort: 3000
+          name: http
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT
+          value: "3000"
+        envFrom:
+        - secretRef:
+            name: rapid-tech-store-secrets
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          runAsUser: 1001
+          capabilities:
+            drop:
+            - ALL
+      securityContext:
+        fsGroup: 1001
+      serviceAccountName: rapid-tech-store-sa
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rapid-tech-store-backend-service
+  namespace: rapid-tech-store
+  labels:
+    app: rapid-tech-store-backend
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 3000
+    protocol: TCP
+    name: http
+  selector:
+    app: rapid-tech-store-backend
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: rapid-tech-store-sa
+  namespace: rapid-tech-store
+  annotations:
+    iam.gke.io/gcp-service-account: rapid-tech-store@PROJECT_ID.iam.gserviceaccount.com

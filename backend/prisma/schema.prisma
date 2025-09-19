@@ -1,0 +1,352 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// User Management
+model User {
+  id                String   @id @default(uuid())
+  email             String   @unique
+  password          String?
+  firstName         String?
+  lastName          String?
+  phoneNumber       String?
+  profileImage      String?
+  isEmailVerified   Boolean  @default(false)
+  emailVerificationToken String?
+  passwordResetToken String?
+  passwordResetExpires DateTime?
+  lastLoginAt       DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relationships
+  subscriptions     Subscription[]
+  reviews           Review[]
+  downloads         Download[]
+  favorites         Favorite[]
+
+  @@map("users")
+}
+
+// Developer Management
+model Developer {
+  id                    String   @id @default(uuid())
+  email                 String   @unique
+  password              String
+  companyName           String
+  businessEmail         String
+  website               String
+  gstNumber             String?
+  taxId                 String?
+  address               String
+  phoneNumber           String
+  isEmailVerified       Boolean  @default(false)
+  emailVerificationToken String?
+  domainVerificationMethod String? // 'dns' or 'meta'
+  domainVerificationToken String?
+  isDomainVerified      Boolean  @default(false)
+  verificationStatus    String          @default("PENDING")
+  rejectionReason       String?
+  approvedAt            DateTime?
+  approvedBy            String?
+  bankDetails           String?
+  payoutMethod          String       @default("BANK_TRANSFER")
+  payoneerEmail         String?
+  isActive              Boolean  @default(true)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  // Relationships
+  apps                  App[]
+  payouts               Payout[]
+  analytics             DeveloperAnalytics[]
+
+  @@map("developers")
+}
+
+// DeveloperStatus: PENDING, APPROVED, REJECTED, SUSPENDED
+
+// PayoutMethod: BANK_TRANSFER, PAYONEER, WISE, PAYPAL
+
+// App Management
+model App {
+  id                String   @id @default(uuid())
+  name              String
+  description       String
+  shortDescription  String?
+  website           String
+  category          String
+  subcategory       String?
+  icon              String?
+  screenshots       String
+  bannerImage       String?
+  version           String   @default("1.0.0")
+  packageName       String   @unique
+  minAndroidVersion String   @default("5.0")
+  targetSdkVersion  String   @default("34")
+  permissions       String
+  features          String?
+  pricing           String
+  price             Float?   @default(0)
+  subscriptionPlans String?
+  isPublished       Boolean  @default(false)
+  publishedAt       DateTime?
+  lastUpdated       DateTime @default(now())
+  downloadCount     Int      @default(0)
+  rating            Float?   @default(0)
+  reviewCount       Int      @default(0)
+  status            String @default("DRAFT")
+  rejectionReason   String?
+  metadata          String?
+  conversionConfig  String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relationships
+  developerId       String
+  developer         Developer @relation(fields: [developerId], references: [id], onDelete: Cascade)
+  subscriptions     Subscription[]
+  reviews           Review[]
+  downloads         Download[]
+  favorites         Favorite[]
+  analytics         AppAnalytics[]
+
+  @@map("apps")
+}
+
+// Enums converted to string constants for SQLite compatibility
+// AppCategory: PRODUCTIVITY, BUSINESS, EDUCATION, ENTERTAINMENT, FINANCE, HEALTH_FITNESS, LIFESTYLE, NEWS_MAGAZINES, PHOTOGRAPHY, SHOPPING, SOCIAL, SPORTS, TOOLS, TRAVEL_LOCAL, AI_ML, DESIGN, DEVELOPER_TOOLS
+// PricingType: FREE, PAID, FREEMIUM, SUBSCRIPTION  
+// AppStatus: DRAFT, SUBMITTED, UNDER_REVIEW, APPROVED, REJECTED, PUBLISHED, SUSPENDED
+
+// Subscription Management
+model Subscription {
+  id                String   @id @default(uuid())
+  userId            String
+  appId             String
+  planId            String?
+  status            String
+  startDate         DateTime @default(now())
+  endDate           DateTime?
+  autoRenew         Boolean  @default(true)
+  amount            Float
+  currency          String   @default("INR")
+  googlePlayToken   String?
+  googlePlayOrderId String?
+  razorpayPaymentId String?
+  razorpayOrderId   String?
+  paymentMethod     String?
+  lastPaymentDate   DateTime?
+  nextBillingDate   DateTime?
+  cancelledAt       DateTime?
+  cancellationReason String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relationships
+  user              User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  app               App  @relation(fields: [appId], references: [id], onDelete: Cascade)
+  transactions      Transaction[]
+
+  @@map("subscriptions")
+}
+
+// SubscriptionStatus: ACTIVE, CANCELLED, EXPIRED, PAUSED, PENDING
+
+// Transaction Management
+model Transaction {
+  id                String   @id @default(uuid())
+  subscriptionId    String
+  amount            Float
+  currency          String   @default("INR")
+  status            String
+  paymentMethod     String
+  paymentGateway    String
+  gatewayTransactionId String?
+  gatewayOrderId    String?
+  gatewayResponse   String?
+  developerShare    Float?
+  platformFee       Float?
+  taxes             Float?
+  netAmount         Float?
+  processedAt       DateTime?
+  failureReason     String?
+  refundAmount      Float?
+  refundedAt        DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relationships
+  subscription      Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@map("transactions")
+}
+
+// TransactionStatus: PENDING, COMPLETED, FAILED, REFUNDED, CANCELLED
+
+// Payout Management
+model Payout {
+  id                String   @id @default(uuid())
+  developerId       String
+  amount            Float
+  currency          String   @default("INR")
+  period            String   // "2023-11" format
+  status            String
+  method            String
+  bankDetails       String?
+  payoneerEmail     String?
+  gatewayPayoutId   String?
+  gatewayResponse   String?
+  processedAt       DateTime?
+  failureReason     String?
+  transactionIds    String
+  taxDeducted       Float?
+  netAmount         Float
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relationships
+  developer         Developer @relation(fields: [developerId], references: [id], onDelete: Cascade)
+
+  @@map("payouts")
+}
+
+// PayoutStatus: PENDING, PROCESSING, COMPLETED, FAILED, CANCELLED
+
+// Review and Rating System
+model Review {
+  id          String   @id @default(uuid())
+  userId      String
+  appId       String
+  rating      Int      // 1-5
+  title       String?
+  comment     String?
+  isVerified  Boolean  @default(false)
+  isHelpful   Int      @default(0)
+  isReported  Boolean  @default(false)
+  reportReason String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relationships
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  app         App  @relation(fields: [appId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, appId])
+  @@map("reviews")
+}
+
+// Download Tracking
+model Download {
+  id          String   @id @default(uuid())
+  userId      String?
+  appId       String
+  deviceInfo  String?
+  ipAddress   String?
+  userAgent   String?
+  source      String?  // "search", "category", "featured", etc.
+  createdAt   DateTime @default(now())
+
+  // Relationships
+  user        User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  app         App   @relation(fields: [appId], references: [id], onDelete: Cascade)
+
+  @@map("downloads")
+}
+
+// Favorites/Wishlist
+model Favorite {
+  id        String   @id @default(uuid())
+  userId    String
+  appId     String
+  createdAt DateTime @default(now())
+
+  // Relationships
+  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  app       App  @relation(fields: [appId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, appId])
+  @@map("favorites")
+}
+
+// Analytics
+model AppAnalytics {
+  id              String   @id @default(uuid())
+  appId           String
+  date            DateTime
+  downloads       Int      @default(0)
+  activeUsers     Int      @default(0)
+  newSubscriptions Int     @default(0)
+  revenue         Float    @default(0)
+  rating          Float?
+  reviewCount     Int      @default(0)
+  crashCount      Int      @default(0)
+  sessionDuration Float?   // in minutes
+  retentionRate   Float?   // percentage
+  createdAt       DateTime @default(now())
+
+  // Relationships
+  app             App @relation(fields: [appId], references: [id], onDelete: Cascade)
+
+  @@unique([appId, date])
+  @@map("app_analytics")
+}
+
+model DeveloperAnalytics {
+  id              String   @id @default(uuid())
+  developerId     String
+  date            DateTime
+  totalDownloads  Int      @default(0)
+  totalRevenue    Float    @default(0)
+  activeApps      Int      @default(0)
+  newSubscriptions Int     @default(0)
+  averageRating   Float?
+  totalReviews    Int      @default(0)
+  createdAt       DateTime @default(now())
+
+  // Relationships
+  developer       Developer @relation(fields: [developerId], references: [id], onDelete: Cascade)
+
+  @@unique([developerId, date])
+  @@map("developer_analytics")
+}
+
+// System Configuration
+model SystemConfig {
+  id          String   @id @default(uuid())
+  key         String   @unique
+  value       String
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("system_config")
+}
+
+// Admin Management
+model Admin {
+  id          String   @id @default(uuid())
+  email       String   @unique
+  password    String
+  firstName   String
+  lastName    String
+  role        String    @default("MODERATOR")
+  permissions String?
+  isActive    Boolean  @default(true)
+  lastLoginAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("admins")
+}
+
+// AdminRole: SUPER_ADMIN, ADMIN, MODERATOR, SUPPORT
