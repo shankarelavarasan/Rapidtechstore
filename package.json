@@ -1,11 +1,30 @@
 {
   "name": "rapid-tech-store",
   "version": "1.0.0",
-  "description": "A comprehensive app marketplace platform - PROPRIETARY SOFTWARE",
-  "author": "Shankar Elavarasan - Rapid Tech",
+  "description": "A comprehensive digital tech marketplace platform for software, SaaS, AI/AGI tools, IDE addons, plugins, and digital solutions - PROPRIETARY SOFTWARE",
+  "author": "Shankar Elavarasan <shankarelavarasan90@gmail.com> (Rapid Tech - Complete Tech Marketplace)",
   "license": "PROPRIETARY",
+  "copyright": "Copyright (c) 2024 Rapid Tech - Shankar Elavarasan. All rights reserved.",
   "main": "index.js",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "PRIVATE - Unauthorized access prohibited"
+  },
+  "keywords": [
+    "digital-marketplace",
+    "software",
+    "saas",
+    "ai-tools",
+    "agi",
+    "ide-addons",
+    "plugins",
+    "digital-solutions",
+    "tech-tools",
+    "proprietary",
+    "rapid-tech",
+    "online-store"
+  ],
   "scripts": {
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:docker\"",
     "dev:backend": "cd backend && npm run dev",
@@ -34,31 +53,11 @@
     "docs:api": "cd backend && npm run docs:generate",
     "clean": "rm -rf node_modules backend/node_modules backend/dist coverage"
   },
-  "keywords": [
-    "marketplace",
-    "app-store",
-    "independent-platform",
-    "software-distribution",
-    "developer-platform",
-    "payment-processing",
-    "subscription-management",
-    "ai-discovery",
-    "compliance-automation",
-    "global-marketplace",
-    "saas-platform",
-    "revenue-sharing",
-    "digital-commerce"
-  ],
-  "author": "Rapid Tech Store",
-  "license": "PROPRIETARY",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/rapid-tech-store/platform.git"
-  },
   "bugs": {
-    "url": "https://github.com/rapid-tech-store/platform/issues"
+    "url": "mailto:shankarelavarasan90@gmail.com",
+    "email": "shankarelavarasan90@gmail.com"
   },
-  "homepage": "https://rapidtechstore.com",
+  "homepage": "PRIVATE - Rapid Tech Store",
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=8.0.0"

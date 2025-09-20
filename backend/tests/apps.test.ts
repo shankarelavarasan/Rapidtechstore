@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { app } from '../src/index';
+import app from '../src/index';
 import { prisma } from './setup';
 
 describe('App Management', () => {
@@ -479,7 +479,7 @@ describe('App Management', () => {
 
   describe('POST /api/apps/:id/download', () => {
     it('should track app download', async () => {
-      const initialDownloads = testApp.downloads || 0;
+      const initialDownloads = testApp.downloadCount || 0;
 
       const response = await request(app)
         .post(`/api/apps/${testApp.id}/download`)
@@ -492,7 +492,7 @@ describe('App Management', () => {
       const updatedApp = await prisma.app.findUnique({
         where: { id: testApp.id },
       });
-      expect(updatedApp?.downloads).toBe(initialDownloads + 1);
+      expect(updatedApp?.downloadCount).toBe(initialDownloads + 1);
 
       // Verify download record was created
       const downloadRecord = await prisma.download.findFirst({

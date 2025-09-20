@@ -4,8 +4,8 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import { createAppError } from '../middleware/errorHandler';
-import { emailService } from '../services/emailService';
-import logger from '../utils/logger';
+import { sendEmail, emailTemplates } from '../services/emailService';
+import { logger } from '../utils/logger';
 
 const prisma = new PrismaClient();
 
@@ -55,7 +55,7 @@ export const registerUser = async (req: Request, res: Response, next: NextFuncti
         password: hashedPassword,
         dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
         country,
-        emailVerified: false,
+        isEmailVerified: false,
       },
     });
 
@@ -73,11 +73,11 @@ export const registerUser = async (req: Request, res: Response, next: NextFuncti
 
     // Send verification email
     try {
-      await emailService.sendEmail(
-        email,
-        'Welcome to Rapid Tech Store - Verify Your Email',
-        emailService.templates.userWelcome(name, verificationToken)
-      );
+      await sendEmail({
+        to: email,
+        subject: 'Welcome to Rapid Tech Store - Verify Your Email',
+        html: `<p>Welcome ${name}! Please verify your email with token: ${verificationToken}</p>`
+      });
     } catch (emailError) {
       logger.error('Failed to send verification email:', emailError);
       // Don't fail registration if email fails
@@ -94,7 +94,7 @@ export const registerUser = async (req: Request, res: Response, next: NextFuncti
           id: user.id,
           name: user.name,
           email: user.email,
-          emailVerified: user.emailVerified,
+          emailVerified: user.isEmailVerified,
           country: user.country,
         },
         token,
@@ -118,6 +118,10 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
     });
 
     if (!user) {
+      throw createAppError('Invalid email or password', 401);
+    }
+
+    if (!user.password) {
       throw createAppError('Invalid email or password', 401);
     }
 
@@ -149,7 +153,7 @@ export const loginUser = async (req: Request, res: Response, next: NextFunction)
           id: user.id,
           name: user.name,
           email: user.email,
-          emailVerified: user.emailVerified,
+          emailVerified: user.isEmailVerified,
           country: user.country,
           preferences: user.preferences,
         },
@@ -174,7 +178,7 @@ export const getUserProfile = async (req: AuthenticatedRequest, res: Response, n
         id: true,
         name: true,
         email: true,
-        emailVerified: true,
+        isEmailVerified: true,
         dateOfBirth: true,
         country: true,
         preferences: true,
@@ -225,7 +229,7 @@ export const updateUserProfile = async (req: AuthenticatedRequest, res: Response
         id: true,
         name: true,
         email: true,
-        emailVerified: true,
+        isEmailVerified: true,
         dateOfBirth: true,
         country: true,
         preferences: true,
@@ -257,6 +261,10 @@ export const changePassword = async (req: AuthenticatedRequest, res: Response, n
 
     if (!user) {
       throw createAppError('User not found', 404);
+    }
+
+    if (!user.password) {
+      throw createAppError('User has no password set', 400);
     }
 
     // Verify current password
@@ -317,11 +325,11 @@ export const forgotPassword = async (req: Request, res: Response, next: NextFunc
 
     // Send reset email
     try {
-      await emailService.sendEmail(
-        email,
-        'Password Reset - Rapid Tech Store',
-        emailService.templates.passwordReset(user.name, resetToken)
-      );
+      await sendEmail({
+        to: email,
+        subject: 'Password Reset - Rapid Tech Store',
+        html: `<p>Hello ${user.name}! Use this token to reset your password: ${resetToken}</p>`
+      });
     } catch (emailError) {
       logger.error('Failed to send password reset email:', emailError);
       throw createAppError('Failed to send password reset email', 500);
@@ -482,6 +490,7 @@ export const subscribeToApp = async (req: AuthenticatedRequest, res: Response, n
         purchaseToken,
         productId,
         orderId,
+        amount: 0, // TODO: Get actual amount from purchase data
         status: 'ACTIVE',
         startDate: new Date(),
         // endDate will be calculated based on subscription type

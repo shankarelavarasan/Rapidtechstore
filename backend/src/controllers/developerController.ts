@@ -5,7 +5,7 @@ import { generateToken } from '../middleware/auth';
 import { createAppError } from '../middleware/errorHandler';
 import { sendEmail } from '../services/emailService';
 import crypto from 'crypto';
-import logger from '../utils/logger';
+import { logger } from '../utils/logger';
 
 const prisma = new PrismaClient();
 
@@ -29,7 +29,7 @@ export const registerDeveloper = async (
       firstName,
       lastName,
       companyName,
-      companyWebsite,
+      website,
       phoneNumber,
       country,
       address,
@@ -61,7 +61,7 @@ export const registerDeveloper = async (
         firstName,
         lastName,
         companyName,
-        companyWebsite,
+        website,
         phoneNumber,
         country,
         address,
@@ -87,11 +87,7 @@ export const registerDeveloper = async (
       await sendEmail({
         to: email,
         subject: 'Welcome to Rapid Tech Store - Verify Your Email',
-        template: 'developerWelcome',
-        data: {
-          firstName,
-          verificationLink: `${process.env.FRONTEND_URL}/verify-email?token=${emailVerificationToken}`,
-        },
+        html: `<p>Welcome ${firstName}! Please verify your email by clicking this link: <a href="${process.env.FRONTEND_URL}/verify-email?token=${emailVerificationToken}">Verify Email</a></p>`
       });
     } catch (emailError) {
       logger.error('Failed to send verification email:', emailError);
@@ -104,7 +100,7 @@ export const registerDeveloper = async (
       data: { developer },
     });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 
@@ -227,7 +223,7 @@ export const getDeveloperProfile = async (
         firstName: true,
         lastName: true,
         companyName: true,
-        companyWebsite: true,
+        website: true,
         phoneNumber: true,
         country: true,
         address: true,
@@ -267,7 +263,7 @@ export const updateDeveloperProfile = async (
       firstName,
       lastName,
       companyName,
-      companyWebsite,
+      website,
       phoneNumber,
       country,
       address,
@@ -281,7 +277,7 @@ export const updateDeveloperProfile = async (
         firstName,
         lastName,
         companyName,
-        companyWebsite,
+        website,
         phoneNumber,
         country,
         address,
@@ -294,7 +290,7 @@ export const updateDeveloperProfile = async (
         firstName: true,
         lastName: true,
         companyName: true,
-        companyWebsite: true,
+        website: true,
         phoneNumber: true,
         country: true,
         address: true,
@@ -380,7 +376,7 @@ export const getDeveloperDashboard = async (
 
     const monthlyRevenue = await prisma.transaction.aggregate({
       where: {
-        app: { developerId },
+        App: { developerId },
         status: 'COMPLETED',
         createdAt: { gte: startOfMonth },
       },
@@ -413,7 +409,7 @@ export const getDeveloperDashboard = async (
           appsCount,
           totalDownloads,
           activeSubscriptions,
-          monthlyRevenue: monthlyRevenue._sum.amount || 0,
+          monthlyRevenue: monthlyRevenue._sum?.amount || 0,
         },
         recentApps,
       },
@@ -524,8 +520,13 @@ export const getDeveloperAnalytics = async (
         startDate.setDate(endDate.getDate() - 30);
     }
 
-    const where: any = {
+    const downloadWhere: any = {
       app: { developerId },
+      createdAt: { gte: startDate, lte: endDate },
+    };
+
+    const transactionWhere: any = {
+      App: { developerId },
       createdAt: { gte: startDate, lte: endDate },
     };
 
@@ -613,8 +614,8 @@ export const getDeveloperPayouts = async (
           id: true,
           amount: true,
           status: true,
-          paymentMethod: true,
-          transactionId: true,
+          method: true,
+          transactionIds: true,
           createdAt: true,
           processedAt: true,
           failureReason: true,
@@ -679,22 +680,18 @@ export const requestPasswordReset = async (
       await sendEmail({
         to: email,
         subject: 'Password Reset - Rapid Tech Store',
-        template: 'passwordReset',
-        data: {
-          firstName: developer.firstName,
-          resetLink: `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`,
-        },
+        html: `<p>Hello ${developer.firstName}! Click this link to reset your password: <a href="${process.env.FRONTEND_URL}/reset-password?token=${resetToken}">Reset Password</a></p>`
       });
     } catch (emailError) {
       logger.error('Failed to send password reset email:', emailError);
     }
 
-    res.json({
+    return res.json({
       success: true,
       message: 'If the email exists, a password reset link has been sent.',
     });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 
@@ -787,3 +784,6 @@ export const changePassword = async (
     next(error);
   }
 };
+
+// Alias for forgotPassword (same as requestPasswordReset)
+export const forgotPassword = requestPasswordReset;

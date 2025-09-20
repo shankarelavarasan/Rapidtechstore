@@ -1,3 +1,15 @@
+/**
+ * RAPID TECH STORE - FRONTEND APPLICATION
+ * 
+ * Copyright (c) 2024 RAPID TECH - SHANKAR ELAVARASAN <shankarelavarasan90@gmail.com>
+ * ALL RIGHTS RESERVED - PROPRIETARY SOFTWARE
+ * 
+ * This file is part of the Rapid Tech Store platform.
+ * Unauthorized copying, modification, distribution, or use is strictly prohibited.
+ * 
+ * For licensing inquiries: shankarelavarasan90@gmail.com
+ */
+
 import React, { useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Layout from './components/layout/Layout'

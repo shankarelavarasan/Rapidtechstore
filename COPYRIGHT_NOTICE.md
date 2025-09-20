@@ -43,11 +43,32 @@ This project is protected under international copyright laws. Any unauthorized u
 - **NO UNAUTHORIZED ACCESS:** This code is for authorized personnel only
 - **NO REVERSE ENGINEERING:** Attempting to reverse engineer any part of this system is strictly prohibited
 
+### DIGITAL FINGERPRINTING & TRACKING
+
+This codebase contains unique digital fingerprints and tracking mechanisms. Any unauthorized use can be detected and traced back to the source.
+
 ### CONTACT FOR PERMISSIONS
 
 For any licensing inquiries or permission requests, contact:
 **Shankar Elavarasan**
-**Rapid Tech**
+**Email: shankarelavarasan90@gmail.com**
+**Company: Rapid Tech**
+
+### ENFORCEMENT NOTICE
+
+- All code commits are tracked and attributed to the original author
+- Digital signatures and timestamps provide legal evidence of ownership
+- Automated monitoring systems detect unauthorized usage
+- Legal action will be pursued for any violations
+
+### INTERNATIONAL PROTECTION
+
+This work is protected under:
+- United States Copyright Law
+- International Copyright Treaties
+- Berne Convention
+- WIPO Copyright Treaty
+- Trade Secret Laws
 
 ### DISCLAIMER
 
@@ -55,6 +76,8 @@ This software is provided "AS IS" without warranty of any kind. The owner assume
 
 ---
 
-**© 2024 RAPID TECH - SHANKAR ELAVARASAN. ALL RIGHTS RESERVED.**
+**© 2024 RAPID TECH - SHANKAR ELAVARASAN <shankarelavarasan90@gmail.com>. ALL RIGHTS RESERVED.**
+
+**THIS CONTENT, CONCEPT, CODE, AND ALL INTELLECTUAL PROPERTY IS FULLY PROTECTED AND PATTERNED UNDER THE SAME AUTHOR AND EMAIL. NO ONE MAY USE ANY CONTENT, CONCEPT, CODE, OR ANY ELEMENT WITHOUT EXPLICIT WRITTEN PERMISSION.**
 
 **UNAUTHORIZED USE IS STRICTLY PROHIBITED AND WILL BE PROSECUTED TO THE FULL EXTENT OF THE LAW.**

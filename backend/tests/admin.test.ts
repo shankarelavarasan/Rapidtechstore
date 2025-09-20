@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { app } from '../src/index';
+import app from '../src/index';
 import { prisma } from './setup';
 
 describe('Admin Functionality', () => {
@@ -413,7 +413,7 @@ describe('Admin Functionality', () => {
       await prisma.reviewReport.create({
         data: {
           reviewId: review.id,
-          userId: developer.id,
+          reporterId: developer.id,
           reason: 'SPAM',
           description: 'This is clearly spam',
         },
@@ -422,7 +422,7 @@ describe('Admin Functionality', () => {
       await prisma.appReport.create({
         data: {
           appId: testApp.id,
-          userId: user.id,
+          reporterId: user.id,
           reason: 'INAPPROPRIATE_CONTENT',
           description: 'App contains inappropriate content',
         },
@@ -496,7 +496,7 @@ describe('Admin Functionality', () => {
       reviewReport = await prisma.reviewReport.create({
         data: {
           reviewId: review.id,
-          userId: developer.id,
+          reporterId: developer.id,
           reason: 'SPAM',
           description: 'This is clearly spam',
         },
@@ -585,7 +585,6 @@ describe('Admin Functionality', () => {
             currency: 'INR',
             status: 'COMPLETED',
             paymentMethod: 'RAZORPAY',
-            transactionId: 'test_analytics_1',
           },
           {
             userId: user.id,
@@ -594,7 +593,6 @@ describe('Admin Functionality', () => {
             currency: 'INR',
             status: 'COMPLETED',
             paymentMethod: 'PAYPAL',
-            transactionId: 'test_analytics_2',
           },
         ],
       });

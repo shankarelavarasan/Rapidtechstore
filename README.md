@@ -627,6 +627,12 @@ npm run deploy
 4. Add tests
 5. Submit a pull request
 
+## 👨‍💻 Author
+
+**Shankar Elavarasan**  
+*Founder & Lead Developer - Rapid Tech*  
+📧 Email: [shankarelavarasan90@gmail.com](mailto:shankarelavarasan90@gmail.com)
+
 ## 📄 License
 
 This project is proprietary software owned by Rapid Tech Store. All rights reserved.

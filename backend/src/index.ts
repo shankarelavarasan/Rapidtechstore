@@ -1,3 +1,15 @@
+/**
+ * RAPID TECH STORE - MAIN SERVER
+ * 
+ * Copyright (c) 2024 RAPID TECH - SHANKAR ELAVARASAN <shankarelavarasan90@gmail.com>
+ * ALL RIGHTS RESERVED - PROPRIETARY SOFTWARE
+ * 
+ * This file is part of the Rapid Tech Store platform.
+ * Unauthorized copying, modification, distribution, or use is strictly prohibited.
+ * 
+ * For licensing inquiries: shankarelavarasan90@gmail.com
+ */
+
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';

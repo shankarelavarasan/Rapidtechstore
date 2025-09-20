@@ -83,6 +83,57 @@ async function cleanupDatabase() {
 // Export prisma instance for tests
 export { prisma };
 
+// Export test utility functions
+export const createTestUser = async (overrides = {}) => {
+  return prisma.user.create({
+    data: {
+      email: `test-${randomBytes(4).toString('hex')}@example.com`,
+      name: 'Test User',
+      role: 'USER',
+      isEmailVerified: true,
+      ...overrides,
+    },
+  });
+};
+
+export const createTestDeveloper = async (overrides = {}) => {
+  return prisma.user.create({
+    data: {
+      email: `dev-${randomBytes(4).toString('hex')}@example.com`,
+      name: 'Test Developer',
+      role: 'DEVELOPER',
+      isEmailVerified: true,
+      ...overrides,
+    },
+  });
+};
+
+export const createTestApp = async (developerId: string, overrides = {}) => {
+  return prisma.app.create({
+    data: {
+      name: `Test App ${randomBytes(4).toString('hex')}`,
+      description: 'A test application',
+      category: 'PRODUCTIVITY',
+      website: 'https://example.com',
+      packageName: `com.test.app${randomBytes(4).toString('hex')}`,
+      screenshots: 'https://example.com/screenshot1.png',
+      permissions: 'CAMERA,STORAGE',
+      pricing: 'FREE',
+      developerId,
+      ...overrides,
+    },
+  });
+};
+
+export const generateJWT = (userId: string, role = 'USER') => {
+  const jwt = require('jsonwebtoken');
+  return jwt.sign(
+    { userId, role },
+    process.env.JWT_SECRET || 'test-secret',
+    { expiresIn: '1h' }
+  );
+};
+
 // Mock external services
 
 jest.mock('../src/services/emailService', () => ({

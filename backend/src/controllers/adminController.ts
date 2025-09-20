@@ -198,7 +198,7 @@ export const getDevelopers = async (
           lastName: true,
           email: true,
           companyName: true,
-          companyWebsite: true,
+          website: true,
           country: true,
           verificationStatus: true,
           isActive: true,

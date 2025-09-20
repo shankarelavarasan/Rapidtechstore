@@ -21,21 +21,33 @@ model User {
   phoneNumber            String?
   profileImage           String?
   isEmailVerified        Boolean   @default(false)
+  isActive               Boolean   @default(true)
+  status                 String    @default("ACTIVE") // ACTIVE, SUSPENDED, BANNED
+  role                   String    @default("USER") // USER, ADMIN, DEVELOPER
+  country                String?
+  dateOfBirth            DateTime?
   emailVerificationToken String?
+  emailVerificationExpires DateTime?
   passwordResetToken     String?
   passwordResetExpires   DateTime?
   lastLoginAt            DateTime?
+  preferences            String?   // JSON string for user preferences
   stripeCustomerId       String?   @unique
   createdAt              DateTime  @default(now())
   updatedAt              DateTime  @updatedAt
 
   // Relationships
-  subscriptions   Subscription[]
-  reviews         Review[]
-  downloads       Download[]
-  favorites       Favorite[]
-  purchases       Purchase[]
-  unifiedPayments UnifiedPayment[]
+  subscriptions        Subscription[]
+  reviews              Review[]
+  downloads            Download[]
+  favorites            Favorite[]
+  purchases            Purchase[]
+  unifiedPayments      UnifiedPayment[]
+  reviewReports        ReviewReport[]
+  appReports           AppReport[]
+  reviewHelpful        ReviewHelpful[]
+  refreshTokens        RefreshToken[]
+  passwordResetTokens  PasswordResetToken[]
 
   @@map("users")
 }
@@ -45,6 +57,8 @@ model Developer {
   id                       String    @id @default(uuid())
   email                    String    @unique
   password                 String
+  firstName                String
+  lastName                 String
   companyName              String
   businessEmail            String
   website                  String
@@ -52,8 +66,12 @@ model Developer {
   taxId                    String?
   address                  String
   phoneNumber              String
+  country                  String
   isEmailVerified          Boolean   @default(false)
   emailVerificationToken   String?
+  emailVerificationExpires DateTime?
+  passwordResetToken       String?
+  passwordResetExpires     DateTime?
   domainVerificationMethod String? // 'dns' or 'meta'
   domainVerificationToken  String?
   isDomainVerified         Boolean   @default(false)
@@ -107,6 +125,8 @@ model App {
   publishedAt       DateTime?
   lastUpdated       DateTime  @default(now())
   downloadCount     Int       @default(0)
+  views             Int       @default(0)
+  subscriptionCount Int       @default(0)
   rating            Float?    @default(0)
   reviewCount       Int       @default(0)
   status            String    @default("DRAFT")
@@ -126,6 +146,7 @@ model App {
   analytics       AppAnalytics[]
   purchases       Purchase[]
   unifiedPayments UnifiedPayment[]
+  reports         AppReport[]
 
   @@map("apps")
 }
@@ -141,6 +162,7 @@ model Subscription {
   userId             String
   appId              String
   planId             String?
+  productId          String?
   status             String
   startDate          DateTime  @default(now())
   endDate            DateTime?
@@ -149,6 +171,8 @@ model Subscription {
   currency           String    @default("INR")
   googlePlayToken    String?
   googlePlayOrderId  String?
+  purchaseToken      String?
+  orderId            String?
   razorpayPaymentId  String?
   razorpayOrderId    String?
   paymentMethod      String?
@@ -251,6 +275,8 @@ model Review {
   // Relationships
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   app  App  @relation(fields: [appId], references: [id], onDelete: Cascade)
+  reports ReviewReport[]
+  helpful ReviewHelpful[]
 
   @@unique([userId, appId])
   @@map("reviews")
@@ -339,6 +365,7 @@ model Purchase {
   amount                Float
   currency              String    @default("USD")
   status                String    @default("PENDING") // PENDING, COMPLETED, FAILED, REFUNDED
+  paymentMethod         String?   // STRIPE, RAZORPAY, PAYPAL, etc.
   stripePaymentIntentId String?   @unique
   purchaseDate          DateTime  @default(now())
   refundedAt            DateTime?
@@ -645,4 +672,84 @@ model PaymentAnalytics {
   @@index([date, gateway])
   @@index([gateway, region])
   @@map("payment_analytics")
+}
+
+// Review Report Model
+model ReviewReport {
+  id          String   @id @default(uuid())
+  reviewId    String
+  reporterId  String
+  reason      String
+  description String?
+  status      String   @default("PENDING") // PENDING, REVIEWED, RESOLVED, DISMISSED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relationships
+  review   Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  reporter User   @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+
+  @@map("review_reports")
+}
+
+// App Report Model
+model AppReport {
+  id          String   @id @default(uuid())
+  appId       String
+  reporterId  String
+  reason      String
+  description String?
+  status      String   @default("PENDING") // PENDING, REVIEWED, RESOLVED, DISMISSED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relationships
+  app      App  @relation(fields: [appId], references: [id], onDelete: Cascade)
+  reporter User @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+
+  @@map("app_reports")
+}
+
+// Review Helpful Model
+model ReviewHelpful {
+  id       String @id @default(uuid())
+  reviewId String
+  userId   String
+  helpful  Boolean // true for helpful, false for not helpful
+  createdAt DateTime @default(now())
+
+  // Relationships
+  review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([reviewId, userId])
+  @@map("review_helpful")
+}
+
+// Refresh Token Model
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  // Relationships
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
+}
+
+// Password Reset Token Model
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  // Relationships
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("password_reset_tokens")
 }
