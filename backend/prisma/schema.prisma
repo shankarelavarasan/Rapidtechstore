@@ -12,62 +12,67 @@ datasource db {
 
 // User Management
 model User {
-  id                String   @id @default(uuid())
-  email             String   @unique
-  password          String?
-  firstName         String?
-  lastName          String?
-  phoneNumber       String?
-  profileImage      String?
-  isEmailVerified   Boolean  @default(false)
+  id                     String    @id @default(uuid())
+  email                  String    @unique
+  password               String?
+  firstName              String?
+  lastName               String?
+  name                   String?
+  phoneNumber            String?
+  profileImage           String?
+  isEmailVerified        Boolean   @default(false)
   emailVerificationToken String?
-  passwordResetToken String?
-  passwordResetExpires DateTime?
-  lastLoginAt       DateTime?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  passwordResetToken     String?
+  passwordResetExpires   DateTime?
+  lastLoginAt            DateTime?
+  stripeCustomerId       String?   @unique
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
 
   // Relationships
-  subscriptions     Subscription[]
-  reviews           Review[]
-  downloads         Download[]
-  favorites         Favorite[]
+  subscriptions   Subscription[]
+  reviews         Review[]
+  downloads       Download[]
+  favorites       Favorite[]
+  purchases       Purchase[]
+  unifiedPayments UnifiedPayment[]
 
   @@map("users")
 }
 
 // Developer Management
 model Developer {
-  id                    String   @id @default(uuid())
-  email                 String   @unique
-  password              String
-  companyName           String
-  businessEmail         String
-  website               String
-  gstNumber             String?
-  taxId                 String?
-  address               String
-  phoneNumber           String
-  isEmailVerified       Boolean  @default(false)
-  emailVerificationToken String?
+  id                       String    @id @default(uuid())
+  email                    String    @unique
+  password                 String
+  companyName              String
+  businessEmail            String
+  website                  String
+  gstNumber                String?
+  taxId                    String?
+  address                  String
+  phoneNumber              String
+  isEmailVerified          Boolean   @default(false)
+  emailVerificationToken   String?
   domainVerificationMethod String? // 'dns' or 'meta'
-  domainVerificationToken String?
-  isDomainVerified      Boolean  @default(false)
-  verificationStatus    String          @default("PENDING")
-  rejectionReason       String?
-  approvedAt            DateTime?
-  approvedBy            String?
-  bankDetails           String?
-  payoutMethod          String       @default("BANK_TRANSFER")
-  payoneerEmail         String?
-  isActive              Boolean  @default(true)
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  domainVerificationToken  String?
+  isDomainVerified         Boolean   @default(false)
+  verificationStatus       String    @default("PENDING")
+  rejectionReason          String?
+  approvedAt               DateTime?
+  approvedBy               String?
+  bankDetails              String?
+  payoutMethod             String    @default("BANK_TRANSFER")
+  payoneerEmail            String?
+  isActive                 Boolean   @default(true)
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime  @updatedAt
 
   // Relationships
-  apps                  App[]
-  payouts               Payout[]
-  analytics             DeveloperAnalytics[]
+  apps            App[]
+  payouts         Payout[]
+  analytics       DeveloperAnalytics[]
+  unifiedPayments UnifiedPayment[]
 
   @@map("developers")
 }
@@ -78,7 +83,8 @@ model Developer {
 
 // App Management
 model App {
-  id                String   @id @default(uuid())
+  id                String    @id @default(uuid())
+  developerId       String
   name              String
   description       String
   shortDescription  String?
@@ -88,36 +94,38 @@ model App {
   icon              String?
   screenshots       String
   bannerImage       String?
-  version           String   @default("1.0.0")
-  packageName       String   @unique
-  minAndroidVersion String   @default("5.0")
-  targetSdkVersion  String   @default("34")
+  version           String    @default("1.0.0")
+  packageName       String    @unique
+  minAndroidVersion String    @default("5.0")
+  targetSdkVersion  String    @default("34")
   permissions       String
   features          String?
   pricing           String
-  price             Float?   @default(0)
+  price             Float?    @default(0)
   subscriptionPlans String?
-  isPublished       Boolean  @default(false)
+  isPublished       Boolean   @default(false)
   publishedAt       DateTime?
-  lastUpdated       DateTime @default(now())
-  downloadCount     Int      @default(0)
-  rating            Float?   @default(0)
-  reviewCount       Int      @default(0)
-  status            String @default("DRAFT")
+  lastUpdated       DateTime  @default(now())
+  downloadCount     Int       @default(0)
+  rating            Float?    @default(0)
+  reviewCount       Int       @default(0)
+  status            String    @default("DRAFT")
   rejectionReason   String?
   metadata          String?
   conversionConfig  String?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
   // Relationships
-  developerId       String
-  developer         Developer @relation(fields: [developerId], references: [id], onDelete: Cascade)
-  subscriptions     Subscription[]
-  reviews           Review[]
-  downloads         Download[]
-  favorites         Favorite[]
-  analytics         AppAnalytics[]
+  developer       Developer        @relation(fields: [developerId], references: [id], onDelete: Cascade)
+  subscriptions   Subscription[]
+  transactions    Transaction[]
+  downloads       Download[]
+  favorites       Favorite[]
+  reviews         Review[]
+  analytics       AppAnalytics[]
+  purchases       Purchase[]
+  unifiedPayments UnifiedPayment[]
 
   @@map("apps")
 }
@@ -129,32 +137,33 @@ model App {
 
 // Subscription Management
 model Subscription {
-  id                String   @id @default(uuid())
-  userId            String
-  appId             String
-  planId            String?
-  status            String
-  startDate         DateTime @default(now())
-  endDate           DateTime?
-  autoRenew         Boolean  @default(true)
-  amount            Float
-  currency          String   @default("INR")
-  googlePlayToken   String?
-  googlePlayOrderId String?
-  razorpayPaymentId String?
-  razorpayOrderId   String?
-  paymentMethod     String?
-  lastPaymentDate   DateTime?
-  nextBillingDate   DateTime?
-  cancelledAt       DateTime?
+  id                 String    @id @default(uuid())
+  userId             String
+  appId              String
+  planId             String?
+  status             String
+  startDate          DateTime  @default(now())
+  endDate            DateTime?
+  autoRenew          Boolean   @default(true)
+  amount             Float
+  currency           String    @default("INR")
+  googlePlayToken    String?
+  googlePlayOrderId  String?
+  razorpayPaymentId  String?
+  razorpayOrderId    String?
+  paymentMethod      String?
+  lastPaymentDate    DateTime?
+  nextBillingDate    DateTime?
+  cancelledAt        DateTime?
   cancellationReason String?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
   // Relationships
-  user              User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  app               App  @relation(fields: [appId], references: [id], onDelete: Cascade)
-  transactions      Transaction[]
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  app             App              @relation(fields: [appId], references: [id], onDelete: Cascade)
+  transactions    Transaction[]
+  unifiedPayments UnifiedPayment[]
 
   @@map("subscriptions")
 }
@@ -163,29 +172,32 @@ model Subscription {
 
 // Transaction Management
 model Transaction {
-  id                String   @id @default(uuid())
-  subscriptionId    String
-  amount            Float
-  currency          String   @default("INR")
-  status            String
-  paymentMethod     String
-  paymentGateway    String
+  id                   String    @id @default(uuid())
+  subscriptionId       String
+  amount               Float
+  currency             String    @default("INR")
+  status               String
+  paymentMethod        String
+  paymentGateway       String
   gatewayTransactionId String?
-  gatewayOrderId    String?
-  gatewayResponse   String?
-  developerShare    Float?
-  platformFee       Float?
-  taxes             Float?
-  netAmount         Float?
-  processedAt       DateTime?
-  failureReason     String?
-  refundAmount      Float?
-  refundedAt        DateTime?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  gatewayOrderId       String?
+  gatewayResponse      String?
+  developerShare       Float?
+  platformFee          Float?
+  taxes                Float?
+  netAmount            Float?
+  processedAt          DateTime?
+  failureReason        String?
+  refundAmount         Float?
+  refundedAt           DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
 
   // Relationships
-  subscription      Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  subscription    Subscription     @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  unifiedPayments UnifiedPayment[]
+  App             App?             @relation(fields: [appId], references: [id])
+  appId           String?
 
   @@map("transactions")
 }
@@ -194,27 +206,27 @@ model Transaction {
 
 // Payout Management
 model Payout {
-  id                String   @id @default(uuid())
-  developerId       String
-  amount            Float
-  currency          String   @default("INR")
-  period            String   // "2023-11" format
-  status            String
-  method            String
-  bankDetails       String?
-  payoneerEmail     String?
-  gatewayPayoutId   String?
-  gatewayResponse   String?
-  processedAt       DateTime?
-  failureReason     String?
-  transactionIds    String
-  taxDeducted       Float?
-  netAmount         Float
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id              String    @id @default(uuid())
+  developerId     String
+  amount          Float
+  currency        String    @default("INR")
+  period          String // "2023-11" format
+  status          String
+  method          String
+  bankDetails     String?
+  payoneerEmail   String?
+  gatewayPayoutId String?
+  gatewayResponse String?
+  processedAt     DateTime?
+  failureReason   String?
+  transactionIds  String
+  taxDeducted     Float?
+  netAmount       Float
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   // Relationships
-  developer         Developer @relation(fields: [developerId], references: [id], onDelete: Cascade)
+  developer Developer @relation(fields: [developerId], references: [id], onDelete: Cascade)
 
   @@map("payouts")
 }
@@ -223,22 +235,22 @@ model Payout {
 
 // Review and Rating System
 model Review {
-  id          String   @id @default(uuid())
-  userId      String
-  appId       String
-  rating      Int      // 1-5
-  title       String?
-  comment     String?
-  isVerified  Boolean  @default(false)
-  isHelpful   Int      @default(0)
-  isReported  Boolean  @default(false)
+  id           String   @id @default(uuid())
+  userId       String
+  appId        String
+  rating       Int // 1-5
+  title        String?
+  comment      String?
+  isVerified   Boolean  @default(false)
+  isHelpful    Int      @default(0)
+  isReported   Boolean  @default(false)
   reportReason String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   // Relationships
-  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  app         App  @relation(fields: [appId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  app  App  @relation(fields: [appId], references: [id], onDelete: Cascade)
 
   @@unique([userId, appId])
   @@map("reviews")
@@ -246,18 +258,18 @@ model Review {
 
 // Download Tracking
 model Download {
-  id          String   @id @default(uuid())
-  userId      String?
-  appId       String
-  deviceInfo  String?
-  ipAddress   String?
-  userAgent   String?
-  source      String?  // "search", "category", "featured", etc.
-  createdAt   DateTime @default(now())
+  id         String   @id @default(uuid())
+  userId     String?
+  appId      String
+  deviceInfo String?
+  ipAddress  String?
+  userAgent  String?
+  source     String? // "search", "category", "featured", etc.
+  createdAt  DateTime @default(now())
 
   // Relationships
-  user        User? @relation(fields: [userId], references: [id], onDelete: SetNull)
-  app         App   @relation(fields: [appId], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  app  App   @relation(fields: [appId], references: [id], onDelete: Cascade)
 
   @@map("downloads")
 }
@@ -270,8 +282,8 @@ model Favorite {
   createdAt DateTime @default(now())
 
   // Relationships
-  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  app       App  @relation(fields: [appId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  app  App  @relation(fields: [appId], references: [id], onDelete: Cascade)
 
   @@unique([userId, appId])
   @@map("favorites")
@@ -279,44 +291,66 @@ model Favorite {
 
 // Analytics
 model AppAnalytics {
-  id              String   @id @default(uuid())
-  appId           String
-  date            DateTime
-  downloads       Int      @default(0)
-  activeUsers     Int      @default(0)
-  newSubscriptions Int     @default(0)
-  revenue         Float    @default(0)
-  rating          Float?
-  reviewCount     Int      @default(0)
-  crashCount      Int      @default(0)
-  sessionDuration Float?   // in minutes
-  retentionRate   Float?   // percentage
-  createdAt       DateTime @default(now())
+  id               String   @id @default(uuid())
+  appId            String
+  date             DateTime
+  downloads        Int      @default(0)
+  activeUsers      Int      @default(0)
+  newSubscriptions Int      @default(0)
+  revenue          Float    @default(0)
+  rating           Float?
+  reviewCount      Int      @default(0)
+  crashCount       Int      @default(0)
+  sessionDuration  Float? // in minutes
+  retentionRate    Float? // percentage
+  createdAt        DateTime @default(now())
 
   // Relationships
-  app             App @relation(fields: [appId], references: [id], onDelete: Cascade)
+  app App @relation(fields: [appId], references: [id], onDelete: Cascade)
 
   @@unique([appId, date])
   @@map("app_analytics")
 }
 
 model DeveloperAnalytics {
-  id              String   @id @default(uuid())
-  developerId     String
-  date            DateTime
-  totalDownloads  Int      @default(0)
-  totalRevenue    Float    @default(0)
-  activeApps      Int      @default(0)
-  newSubscriptions Int     @default(0)
-  averageRating   Float?
-  totalReviews    Int      @default(0)
-  createdAt       DateTime @default(now())
+  id               String   @id @default(uuid())
+  developerId      String
+  date             DateTime
+  totalDownloads   Int      @default(0)
+  totalRevenue     Float    @default(0)
+  activeApps       Int      @default(0)
+  newSubscriptions Int      @default(0)
+  averageRating    Float?
+  totalReviews     Int      @default(0)
+  createdAt        DateTime @default(now())
 
   // Relationships
-  developer       Developer @relation(fields: [developerId], references: [id], onDelete: Cascade)
+  developer Developer @relation(fields: [developerId], references: [id], onDelete: Cascade)
 
   @@unique([developerId, date])
   @@map("developer_analytics")
+}
+
+// Purchase Management
+model Purchase {
+  id                    String    @id @default(uuid())
+  userId                String
+  appId                 String
+  amount                Float
+  currency              String    @default("USD")
+  status                String    @default("PENDING") // PENDING, COMPLETED, FAILED, REFUNDED
+  stripePaymentIntentId String?   @unique
+  purchaseDate          DateTime  @default(now())
+  refundedAt            DateTime?
+  refundAmount          Float?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  // Relationships
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  app  App  @relation(fields: [appId], references: [id], onDelete: Cascade)
+
+  @@map("purchases")
 }
 
 // System Configuration
@@ -334,19 +368,281 @@ model SystemConfig {
 
 // Admin Management
 model Admin {
-  id          String   @id @default(uuid())
-  email       String   @unique
+  id          String    @id @default(uuid())
+  email       String    @unique
   password    String
   firstName   String
   lastName    String
   role        String    @default("MODERATOR")
   permissions String?
-  isActive    Boolean  @default(true)
+  isActive    Boolean   @default(true)
   lastLoginAt DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   @@map("admins")
 }
 
 // AdminRole: SUPER_ADMIN, ADMIN, MODERATOR, SUPPORT
+
+// ===== UNIFIED PAYMENT ORCHESTRATION MODELS =====
+
+// Unified Payment Transactions (replaces/extends Transaction model)
+model UnifiedPayment {
+  id String @id @default(uuid())
+
+  // Basic payment info
+  userId         String?
+  developerId    String?
+  appId          String?
+  subscriptionId String?
+  amount         Float
+  currency       String
+  description    String?
+
+  // Gateway routing info
+  gateway              String // stripe, razorpay, payoneer, wise, paypal
+  gatewayTransactionId String?
+  gatewayOrderId       String?
+  gatewayResponse      String? // JSON response from gateway
+
+  // Geo-location info
+  country          String?
+  region           String?
+  ipAddress        String?
+  detectedLocation String? // JSON geo-location data
+
+  // Payment status and flow
+  status        String  @default("PENDING") // PENDING, PROCESSING, COMPLETED, FAILED, CANCELLED, REFUNDED
+  paymentType   String // payment, payout
+  paymentMethod String? // card, bank_transfer, wallet, etc.
+
+  // Financial breakdown
+  grossAmount Float // Original amount
+  platformFee Float? // Platform commission
+  gatewayFee  Float? // Gateway processing fee
+  taxes       Float? // Applicable taxes
+  netAmount   Float? // Amount after all deductions
+
+  // Conversion and currency
+  originalCurrency String? // If currency conversion happened
+  originalAmount   Float? // Original amount before conversion
+  exchangeRate     Float? // Conversion rate used
+
+  // Timing
+  initiatedAt DateTime  @default(now())
+  processedAt DateTime?
+  completedAt DateTime?
+  failedAt    DateTime?
+
+  // Error handling
+  failureReason String?
+  retryCount    Int     @default(0)
+  maxRetries    Int     @default(3)
+
+  // Refund info
+  refundAmount    Float?
+  refundedAt      DateTime?
+  refundReason    String?
+  refundGatewayId String?
+
+  // Metadata and tracking
+  metadata        String? // JSON metadata
+  clientSecret    String? // For frontend integration
+  returnUrl       String?
+  cancelUrl       String?
+  webhookReceived Boolean @default(false)
+  webhookData     String? // JSON webhook data
+
+  // Audit trail
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  user         User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  developer    Developer?    @relation(fields: [developerId], references: [id], onDelete: SetNull)
+  app          App?          @relation(fields: [appId], references: [id], onDelete: SetNull)
+  subscription Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+
+  // Related records
+  paymentEvents  PaymentEvent[]
+  paymentRetries PaymentRetry[]
+  Transaction    Transaction?   @relation(fields: [transactionId], references: [id])
+  transactionId  String?
+
+  @@index([gateway, status])
+  @@index([userId, status])
+  @@index([developerId, status])
+  @@index([country, region])
+  @@index([currency, gateway])
+  @@index([createdAt])
+  @@map("unified_payments")
+}
+
+// Payment Events for audit trail and debugging
+model PaymentEvent {
+  id              String   @id @default(uuid())
+  paymentId       String
+  eventType       String // initiated, gateway_called, webhook_received, status_changed, failed, completed
+  eventData       String? // JSON event data
+  gatewayResponse String? // Gateway response if applicable
+  errorMessage    String?
+  timestamp       DateTime @default(now())
+
+  // Relationships
+  payment UnifiedPayment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+
+  @@index([paymentId, eventType])
+  @@index([timestamp])
+  @@map("payment_events")
+}
+
+// Payment Retry tracking
+model PaymentRetry {
+  id              String    @id @default(uuid())
+  paymentId       String
+  retryNumber     Int
+  gateway         String // Gateway used for this retry
+  reason          String // Why retry was needed
+  status          String // PENDING, COMPLETED, FAILED
+  gatewayResponse String?
+  errorMessage    String?
+  retriedAt       DateTime  @default(now())
+  completedAt     DateTime?
+
+  // Relationships
+  payment UnifiedPayment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+
+  @@index([paymentId, retryNumber])
+  @@map("payment_retries")
+}
+
+// Gateway Configuration and Health
+model GatewayConfig {
+  id                  String  @id @default(uuid())
+  gateway             String  @unique // stripe, razorpay, payoneer, wise, paypal
+  isEnabled           Boolean @default(true)
+  supportedRegions    String // JSON array of supported regions
+  supportedCurrencies String // JSON array of supported currencies
+  supportsPayments    Boolean @default(true)
+  supportsPayouts     Boolean @default(true)
+  priority            Int     @default(1)
+  minAmount           Float? // Minimum amount in cents/smallest unit
+  maxAmount           Float? // Maximum amount in cents/smallest unit
+
+  // API Configuration
+  apiEndpoint     String?
+  apiVersion      String?
+  webhookEndpoint String?
+
+  // Health monitoring
+  isHealthy       Boolean   @default(true)
+  lastHealthCheck DateTime?
+  healthCheckData String? // JSON health check response
+
+  // Rate limiting
+  rateLimit       Int? // Requests per minute
+  rateLimitWindow Int? // Window in minutes
+
+  // Metadata
+  metadata  String? // JSON configuration metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("gateway_configs")
+}
+
+// Currency Exchange Rates
+model CurrencyRate {
+  id           String    @id @default(uuid())
+  fromCurrency String
+  toCurrency   String
+  rate         Float
+  source       String // API source (e.g., 'fixer.io', 'exchangerate-api')
+  validFrom    DateTime  @default(now())
+  validUntil   DateTime?
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+
+  @@unique([fromCurrency, toCurrency, validFrom])
+  @@index([fromCurrency, toCurrency, isActive])
+  @@map("currency_rates")
+}
+
+// Webhook Events from all gateways
+model WebhookEvent {
+  id           String    @id @default(uuid())
+  gateway      String // stripe, razorpay, payoneer, wise, paypal
+  eventType    String // payment.succeeded, payment.failed, etc.
+  eventId      String // Gateway's event ID
+  paymentId    String? // Our unified payment ID if matched
+  rawPayload   String // Complete webhook payload
+  signature    String? // Webhook signature for verification
+  isVerified   Boolean   @default(false)
+  isProcessed  Boolean   @default(false)
+  processedAt  DateTime?
+  errorMessage String?
+  retryCount   Int       @default(0)
+  receivedAt   DateTime  @default(now())
+
+  @@unique([gateway, eventId])
+  @@index([gateway, eventType])
+  @@index([paymentId])
+  @@index([isProcessed, receivedAt])
+  @@map("webhook_events")
+}
+
+// Geo-location cache for IP addresses
+model GeoLocationCache {
+  id         String   @id @default(uuid())
+  ipAddress  String   @unique
+  country    String
+  region     String
+  city       String?
+  timezone   String?
+  currency   String?
+  source     String // IP geolocation service used
+  confidence Float? // Confidence score if available
+  cachedAt   DateTime @default(now())
+  expiresAt  DateTime // Cache expiration
+
+  @@index([ipAddress])
+  @@index([country, region])
+  @@index([expiresAt])
+  @@map("geo_location_cache")
+}
+
+// Payment Analytics and Reporting
+model PaymentAnalytics {
+  id       String   @id @default(uuid())
+  date     DateTime // Date for analytics (daily aggregation)
+  gateway  String
+  region   String?
+  currency String
+
+  // Volume metrics
+  totalTransactions      Int @default(0)
+  successfulTransactions Int @default(0)
+  failedTransactions     Int @default(0)
+
+  // Amount metrics
+  totalAmount      Float @default(0)
+  successfulAmount Float @default(0)
+  averageAmount    Float @default(0)
+
+  // Performance metrics
+  successRate           Float  @default(0) // Percentage
+  averageProcessingTime Float? // In seconds
+
+  // Fee metrics
+  totalFees    Float @default(0)
+  gatewayFees  Float @default(0)
+  platformFees Float @default(0)
+
+  createdAt DateTime @default(now())
+
+  @@unique([date, gateway, region, currency])
+  @@index([date, gateway])
+  @@index([gateway, region])
+  @@map("payment_analytics")
+}

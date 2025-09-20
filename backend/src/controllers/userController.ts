@@ -703,7 +703,7 @@ export const getUserFavorites = async (req: AuthenticatedRequest, res: Response,
               description: true,
               icon: true,
               category: true,
-              averageRating: true,
+              rating: true,
               downloadCount: true,
               developer: {
                 select: {
@@ -928,7 +928,7 @@ export const createReview = async (req: AuthenticatedRequest, res: Response, nex
     await prisma.app.update({
       where: { id: appId },
       data: {
-        averageRating: avgRating._avg.rating || 0,
+        rating: avgRating._avg.rating || 0,
         reviewCount: avgRating._count.rating,
       },
     });
@@ -982,7 +982,7 @@ export const updateReview = async (req: AuthenticatedRequest, res: Response, nex
       await prisma.app.update({
         where: { id: review.appId },
         data: {
-          averageRating: avgRating._avg.rating || 0,
+          rating: avgRating._avg.rating || 0,
         },
       });
     }
@@ -1030,7 +1030,7 @@ export const deleteReview = async (req: AuthenticatedRequest, res: Response, nex
     await prisma.app.update({
       where: { id: review.appId },
       data: {
-        averageRating: avgRating._avg.rating || 0,
+        rating: avgRating._avg.rating || 0,
         reviewCount: avgRating._count.rating,
       },
     });
@@ -1107,6 +1107,10 @@ export const deleteUserAccount = async (req: AuthenticatedRequest, res: Response
 
     if (!user) {
       throw createAppError('User not found', 404);
+    }
+
+    if (!user.password) {
+      throw createAppError('User has no password set', 400);
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);

@@ -84,14 +84,6 @@ async function cleanupDatabase() {
 export { prisma };
 
 // Mock external services
-jest.mock('../src/services/openaiService', () => ({
-  generateRecommendations: jest.fn().mockResolvedValue([]),
-  analyzeAppContent: jest.fn().mockResolvedValue({
-    category: 'productivity',
-    tags: ['test'],
-    description: 'Test app',
-  }),
-}));
 
 jest.mock('../src/services/emailService', () => ({
   sendEmail: jest.fn().mockResolvedValue(true),
@@ -101,26 +93,7 @@ jest.mock('../src/services/emailService', () => ({
   sendPayoutNotificationEmail: jest.fn().mockResolvedValue(true),
 }));
 
-jest.mock('../src/services/storageService', () => ({
-  uploadFile: jest.fn().mockResolvedValue('https://example.com/test-file.jpg'),
-  deleteFile: jest.fn().mockResolvedValue(true),
-  generateSignedUrl: jest.fn().mockResolvedValue('https://example.com/signed-url'),
-}));
 
-jest.mock('../src/services/paymentService', () => ({
-  createPaymentIntent: jest.fn().mockResolvedValue({
-    id: 'pi_test_123',
-    client_secret: 'pi_test_123_secret',
-  }),
-  confirmPayment: jest.fn().mockResolvedValue({
-    id: 'pi_test_123',
-    status: 'succeeded',
-  }),
-  refundPayment: jest.fn().mockResolvedValue({
-    id: 'rf_test_123',
-    status: 'succeeded',
-  }),
-}));
 
 jest.mock('../src/services/payoutService', () => ({
   calculateEarnings: jest.fn().mockResolvedValue({
@@ -194,16 +167,7 @@ global.testUtils = {
     });
   },
 
-  createTestCategory: async (overrides = {}) => {
-    return prisma.category.create({
-      data: {
-        name: `Test Category ${randomBytes(4).toString('hex')}`,
-        description: 'A test category',
-        iconUrl: 'https://example.com/category-icon.png',
-        ...overrides,
-      },
-    });
-  },
+
 
   createTestReview: async (userId: string, appId: string, overrides = {}) => {
     return prisma.review.create({
@@ -317,7 +281,6 @@ declare global {
     createTestDeveloper: (overrides?: any) => Promise<any>;
     createTestAdmin: (overrides?: any) => Promise<any>;
     createTestApp: (developerId: string, overrides?: any) => Promise<any>;
-    createTestCategory: (overrides?: any) => Promise<any>;
     createTestReview: (userId: string, appId: string, overrides?: any) => Promise<any>;
     createTestPayout: (developerId: string, overrides?: any) => Promise<any>;
     generateJWT: (userId: string, role?: string) => string;

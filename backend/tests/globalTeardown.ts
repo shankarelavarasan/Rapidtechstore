@@ -10,17 +10,28 @@ export default async function globalTeardown() {
     console.log('🗑️ Cleaning test data...');
     
     // Delete in correct order to respect foreign key constraints
-    await prisma.reviewHelpful.deleteMany();
-    await prisma.reviewReport.deleteMany();
-    await prisma.appReport.deleteMany();
-    await prisma.refundRequest.deleteMany();
-    await prisma.paymentOrder.deleteMany();
+    await prisma.paymentAnalytics.deleteMany();
+    await prisma.geoLocationCache.deleteMany();
+    await prisma.webhookEvent.deleteMany();
+    await prisma.currencyRate.deleteMany();
+    await prisma.gatewayConfig.deleteMany();
+    await prisma.paymentRetry.deleteMany();
+    await prisma.paymentEvent.deleteMany();
+    await prisma.unifiedPayment.deleteMany();
     await prisma.purchase.deleteMany();
     await prisma.download.deleteMany();
+    await prisma.favorite.deleteMany();
     await prisma.review.deleteMany();
+    await prisma.appAnalytics.deleteMany();
+    await prisma.developerAnalytics.deleteMany();
     await prisma.app.deleteMany();
+    await prisma.payout.deleteMany();
+    await prisma.transaction.deleteMany();
+    await prisma.subscription.deleteMany();
+    await prisma.admin.deleteMany();
+    await prisma.developer.deleteMany();
     await prisma.user.deleteMany();
-    await prisma.category.deleteMany();
+    await prisma.systemConfig.deleteMany();
 
     await prisma.$disconnect();
     console.log('✅ Test environment cleanup complete!');

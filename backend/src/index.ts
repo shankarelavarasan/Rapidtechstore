@@ -19,6 +19,8 @@ import analyticsRoutes from './routes/analytics';
 import adminRoutes from './routes/admin';
 import verificationRoutes from './routes/verification';
 import conversionRoutes from './routes/conversion';
+import webhookRoutes from './routes/webhooks';
+import currencyRoutes from './routes/currency';
 
 // Import middleware
 import { errorHandler } from './middleware/errorHandler';
@@ -122,6 +124,8 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/verification', verificationRoutes);
 app.use('/api/conversion', conversionRoutes);
+app.use('/api/webhooks', webhookRoutes);
+app.use('/api/currency', currencyRoutes);
 
 // Error handling middleware
 app.use(notFound);

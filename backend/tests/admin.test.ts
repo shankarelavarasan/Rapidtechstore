@@ -41,8 +41,6 @@ describe('Admin Functionality', () => {
           amount: 999,
           currency: 'INR',
           status: 'COMPLETED',
-          paymentMethod: 'RAZORPAY',
-          transactionId: 'test_txn_dashboard',
         },
       });
     });
@@ -616,7 +614,6 @@ describe('Admin Functionality', () => {
 
       expect(response.body).toHaveProperty('revenue');
       expect(response.body.revenue).toHaveProperty('total');
-      expect(response.body.revenue).toHaveProperty('byPaymentMethod');
       expect(response.body.revenue).toHaveProperty('overTime');
 
       expect(response.body).toHaveProperty('apps');

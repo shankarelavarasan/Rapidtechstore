@@ -1,6 +1,10 @@
 import request from 'supertest';
-import { app } from '../src/index';
+import app from '../src/index';
 import { prisma } from './setup';
+import { PaymentOrchestrator } from '../src/services/paymentOrchestrator';
+
+// Use global testUtils
+declare const testUtils: any;
 
 describe('Payment System', () => {
   let user: any;
@@ -37,78 +41,88 @@ describe('Payment System', () => {
         amount: testApp.price,
         currency: 'INR',
         status: 'COMPLETED',
-        paymentMethod: 'RAZORPAY',
-        transactionId: 'test_txn_123',
       },
     });
   });
 
-  describe('POST /api/payments/create-order', () => {
-    const orderData = {
-      appId: '',
-      paymentMethod: 'RAZORPAY',
-    };
+  // Test data objects
+  const paymentData = {
+    appId: '',
+    amount: 999,
+    currency: 'INR',
+  };
 
+  const orderData = {
+    appId: '',
+    amount: 999,
+    currency: 'INR',
+    region: 'IN',
+    country: 'IN',
+    paymentMethod: 'card',
+    description: 'Test app purchase',
+  };
+
+  const verificationData = {
+    razorpay_order_id: 'order_test_123',
+    razorpay_payment_id: 'pay_test_123',
+    razorpay_signature: 'test_signature_123',
+  };
+
+  describe('POST /api/payments/create', () => {
     beforeEach(() => {
+      paymentData.appId = testApp.id;
       orderData.appId = testApp.id;
     });
 
-    it('should create payment order for paid app', async () => {
+    it('should create payment for paid app', async () => {
       const response = await request(app)
-        .post('/api/payments/create-order')
+        .post('/api/payments/create')
         .set('Authorization', `Bearer ${userToken}`)
-        .send(orderData)
+        .send(paymentData)
         .expect(200);
 
-      expect(response.body).toHaveProperty('orderId');
+      expect(response.body).toHaveProperty('success', true);
+      expect(response.body).toHaveProperty('transactionId');
       expect(response.body).toHaveProperty('amount', testApp.price);
       expect(response.body).toHaveProperty('currency', 'INR');
-      expect(response.body).toHaveProperty('key');
 
-      // Verify order was created in database
-      const order = await prisma.paymentOrder.findFirst({
-        where: {
-          userId: user.id,
-          appId: testApp.id,
-        },
-      });
-      expect(order).toBeTruthy();
-      expect(order?.status).toBe('PENDING');
+      // Verify payment was processed
+      expect(response.body.status).toBeDefined();
     });
 
-    it('should not create order for free app', async () => {
+    it('should not create payment for free app', async () => {
       const freeApp = await testUtils.createTestApp(developer.id, {
         price: 0,
         status: 'APPROVED',
       });
 
       const response = await request(app)
-        .post('/api/payments/create-order')
+        .post('/api/payments/create')
         .set('Authorization', `Bearer ${userToken}`)
         .send({
-          ...orderData,
+          ...paymentData,
           appId: freeApp.id,
         })
         .expect(400);
 
-      expect(response.body.error).toBe('Cannot create payment order for free app');
+      expect(response.body.error).toBe('Cannot create payment for free app');
     });
 
-    it('should not create order for already purchased app', async () => {
+    it('should not create payment for already purchased app', async () => {
       const response = await request(app)
-        .post('/api/payments/create-order')
+        .post('/api/payments/create')
         .set('Authorization', `Bearer ${userToken}`)
-        .send(orderData)
+        .send(paymentData)
         .expect(400);
 
       expect(response.body.error).toBe('App already purchased');
     });
 
-    it('should not create order for own app', async () => {
+    it('should not create payment for own app', async () => {
       const response = await request(app)
-        .post('/api/payments/create-order')
+        .post('/api/payments/create')
         .set('Authorization', `Bearer ${developerToken}`)
-        .send(orderData)
+        .send(paymentData)
         .expect(400);
 
       expect(response.body.error).toBe('Cannot purchase your own app');
@@ -116,8 +130,8 @@ describe('Payment System', () => {
 
     it('should require authentication', async () => {
       const response = await request(app)
-        .post('/api/payments/create-order')
-        .send(orderData)
+        .post('/api/payments/create')
+        .send(paymentData)
         .expect(401);
 
       expect(response.body.error).toBe('Access denied. No token provided');
@@ -168,45 +182,36 @@ describe('Payment System', () => {
     });
   });
 
-  describe('POST /api/payments/verify', () => {
-    let paymentOrder: any;
-
-    beforeEach(async () => {
-      // Create a pending payment order
-      paymentOrder = await prisma.paymentOrder.create({
-        data: {
-          userId: user.id,
-          appId: testApp.id,
-          amount: testApp.price,
-          currency: 'INR',
-          status: 'PENDING',
-          paymentMethod: 'RAZORPAY',
-          razorpayOrderId: 'order_test_123',
-        },
-      });
-    });
-
-    const verificationData = {
-      razorpay_order_id: 'order_test_123',
-      razorpay_payment_id: 'pay_test_123',
-      razorpay_signature: 'test_signature',
+  describe('POST /api/payments/confirm', () => {
+    const confirmData = {
+      paymentIntentId: 'pi_test_123',
     };
 
-    it('should verify successful payment', async () => {
-      // Mock Razorpay verification
-      jest.spyOn(require('crypto'), 'createHmac').mockReturnValue({
-        update: jest.fn().mockReturnThis(),
-        digest: jest.fn().mockReturnValue('test_signature'),
-      });
+    it('should confirm successful payment', async () => {
+      // Mock Stripe payment intent retrieval
+      const mockPaymentIntent = {
+        id: 'pi_test_123',
+        status: 'succeeded',
+        amount: testApp.price * 100, // Stripe uses cents
+        currency: 'usd',
+        metadata: {
+          userId: user.id,
+          appId: testApp.id,
+        },
+      };
+
+      jest.spyOn(require('../src/services/stripeService'), 'StripeService').mockImplementation(() => ({
+        retrievePaymentIntent: jest.fn().mockResolvedValue(mockPaymentIntent),
+      }));
 
       const response = await request(app)
-        .post('/api/payments/verify')
+        .post('/api/payments/confirm')
         .set('Authorization', `Bearer ${userToken}`)
-        .send(verificationData)
+        .send(confirmData)
         .expect(200);
 
-      expect(response.body.message).toBe('Payment verified successfully');
-      expect(response.body).toHaveProperty('purchase');
+      expect(response.body.success).toBe(true);
+      expect(response.body.message).toBe('Payment confirmed successfully');
 
       // Verify purchase was created
       const purchase = await prisma.purchase.findFirst({
@@ -217,40 +222,27 @@ describe('Payment System', () => {
       });
       expect(purchase).toBeTruthy();
       expect(purchase?.status).toBe('COMPLETED');
-
-      // Verify payment order was updated
-      const updatedOrder = await prisma.paymentOrder.findUnique({
-        where: { id: paymentOrder.id },
-      });
-      expect(updatedOrder?.status).toBe('COMPLETED');
     });
 
-    it('should reject invalid signature', async () => {
-      // Mock Razorpay verification with invalid signature
-      jest.spyOn(require('crypto'), 'createHmac').mockReturnValue({
-        update: jest.fn().mockReturnThis(),
-        digest: jest.fn().mockReturnValue('invalid_signature'),
-      });
+    it('should reject payment intent not found', async () => {
+      jest.spyOn(require('../src/services/stripeService'), 'StripeService').mockImplementation(() => ({
+        retrievePaymentIntent: jest.fn().mockResolvedValue(null),
+      }));
 
       const response = await request(app)
-        .post('/api/payments/verify')
+        .post('/api/payments/confirm')
         .set('Authorization', `Bearer ${userToken}`)
-        .send(verificationData)
-        .expect(400);
+        .send(confirmData)
+        .expect(404);
 
-      expect(response.body.error).toBe('Invalid payment signature');
-
-      // Verify payment order was marked as failed
-      const updatedOrder = await prisma.paymentOrder.findUnique({
-        where: { id: paymentOrder.id },
-      });
-      expect(updatedOrder?.status).toBe('FAILED');
+      expect(response.body.success).toBe(false);
+      expect(response.body.message).toBe('Payment intent not found');
     });
 
     it('should require authentication', async () => {
       const response = await request(app)
-        .post('/api/payments/verify')
-        .send(verificationData)
+        .post('/api/payments/confirm')
+        .send(confirmData)
         .expect(401);
 
       expect(response.body.error).toBe('Access denied. No token provided');
@@ -282,102 +274,7 @@ describe('Payment System', () => {
     });
   });
 
-  describe('GET /api/payments/orders', () => {
-    beforeEach(async () => {
-      // Create additional payment orders
-      await prisma.paymentOrder.createMany({
-        data: [
-          {
-            userId: user.id,
-            appId: testApp.id,
-            amount: 1999,
-            currency: 'INR',
-            status: 'COMPLETED',
-            paymentMethod: 'RAZORPAY',
-            razorpayOrderId: 'order_completed',
-          },
-          {
-            userId: user.id,
-            appId: testApp.id,
-            amount: 999,
-            currency: 'INR',
-            status: 'PENDING',
-            paymentMethod: 'RAZORPAY',
-            razorpayOrderId: 'order_pending',
-          },
-          {
-            userId: user.id,
-            appId: testApp.id,
-            amount: 1499,
-            currency: 'INR',
-            status: 'FAILED',
-            paymentMethod: 'RAZORPAY',
-            razorpayOrderId: 'order_failed',
-          },
-        ],
-      });
-    });
 
-    it('should get user payment orders', async () => {
-      const response = await request(app)
-        .get('/api/payments/orders')
-        .set('Authorization', `Bearer ${userToken}`)
-        .expect(200);
-
-      expect(response.body).toHaveProperty('orders');
-      expect(response.body).toHaveProperty('pagination');
-      expect(response.body.orders).toBeInstanceOf(Array);
-
-      response.body.orders.forEach((order: any) => {
-        expect(order.userId).toBe(user.id);
-        expect(order).toHaveProperty('app');
-      });
-    });
-
-    it('should filter orders by status', async () => {
-      const response = await request(app)
-        .get('/api/payments/orders?status=COMPLETED')
-        .set('Authorization', `Bearer ${userToken}`)
-        .expect(200);
-
-      response.body.orders.forEach((order: any) => {
-        expect(order.status).toBe('COMPLETED');
-      });
-    });
-
-    it('should sort orders by creation date', async () => {
-      const response = await request(app)
-        .get('/api/payments/orders?sortBy=createdAt&sortOrder=desc')
-        .set('Authorization', `Bearer ${userToken}`)
-        .expect(200);
-
-      const orders = response.body.orders;
-      for (let i = 1; i < orders.length; i++) {
-        const current = new Date(orders[i].createdAt);
-        const previous = new Date(orders[i - 1].createdAt);
-        expect(current.getTime()).toBeLessThanOrEqual(previous.getTime());
-      }
-    });
-
-    it('should paginate orders', async () => {
-      const response = await request(app)
-        .get('/api/payments/orders?page=1&limit=2')
-        .set('Authorization', `Bearer ${userToken}`)
-        .expect(200);
-
-      expect(response.body.orders.length).toBeLessThanOrEqual(2);
-      expect(response.body.pagination).toHaveProperty('page', 1);
-      expect(response.body.pagination).toHaveProperty('limit', 2);
-    });
-
-    it('should require authentication', async () => {
-      const response = await request(app)
-        .get('/api/payments/orders')
-        .expect(401);
-
-      expect(response.body.error).toBe('Access denied. No token provided');
-    });
-  });
 
   describe('GET /api/payments/purchases', () => {
     beforeEach(async () => {
@@ -395,8 +292,6 @@ describe('Payment System', () => {
           amount: anotherApp.price,
           currency: 'INR',
           status: 'COMPLETED',
-          paymentMethod: 'RAZORPAY',
-          transactionId: 'test_txn_456',
         },
       });
     });
@@ -540,14 +435,15 @@ describe('Payment System', () => {
 
       expect(response.body.message).toBe('Refund request submitted successfully');
 
-      // Verify refund request was created
-      const refundRequest = await prisma.refundRequest.findFirst({
+      // Verify purchase status was updated
+      const updatedPurchase = await prisma.purchase.findFirst({
         where: {
-          purchaseId: testPurchase.id,
+          id: testPurchase.id,
         },
       });
-      expect(refundRequest).toBeTruthy();
-      expect(refundRequest?.status).toBe('PENDING');
+      expect(updatedPurchase).toBeTruthy();
+      expect(updatedPurchase?.status).toBe('REFUNDED');
+      expect(updatedPurchase?.refundedAt).toBeTruthy();
     });
 
     it('should not allow refund for old purchases', async () => {
@@ -569,12 +465,13 @@ describe('Payment System', () => {
     });
 
     it('should not allow duplicate refund requests', async () => {
-      // Create existing refund request
-      await prisma.refundRequest.create({
+      // Mark purchase as already refunded
+      await prisma.purchase.update({
+        where: { id: testPurchase.id },
         data: {
-          purchaseId: testPurchase.id,
-          reason: 'Test reason',
-          status: 'PENDING',
+          status: 'REFUNDED',
+          refundedAt: new Date(),
+          refundAmount: testPurchase.amount,
         },
       });
 
@@ -650,8 +547,6 @@ describe('Payment System', () => {
             amount: 1999,
             currency: 'INR',
             status: 'COMPLETED',
-            paymentMethod: 'RAZORPAY',
-            transactionId: 'test_txn_analytics_1',
           },
           {
             userId: user.id,
@@ -659,8 +554,6 @@ describe('Payment System', () => {
             amount: 999,
             currency: 'INR',
             status: 'COMPLETED',
-            paymentMethod: 'PAYPAL',
-            transactionId: 'test_txn_analytics_2',
           },
         ],
       });
@@ -676,7 +569,6 @@ describe('Payment System', () => {
       expect(response.body).toHaveProperty('totalSales');
       expect(response.body).toHaveProperty('averageOrderValue');
       expect(response.body).toHaveProperty('revenueByApp');
-      expect(response.body).toHaveProperty('salesByPaymentMethod');
       expect(response.body).toHaveProperty('revenueOverTime');
     });
 
@@ -719,6 +611,359 @@ describe('Payment System', () => {
         .expect(401);
 
       expect(response.body.error).toBe('Access denied. No token provided');
+    });
+  });
+
+  describe('Payment Orchestration System', () => {
+    describe('POST /api/payments/create', () => {
+      const orchestratorPaymentData = {
+        amount: 1999,
+        currency: 'USD',
+        region: 'US',
+        country: 'US',
+        paymentMethod: 'card',
+        description: 'Test payment via orchestrator',
+        returnUrl: 'https://example.com/success',
+        cancelUrl: 'https://example.com/cancel',
+      };
+
+      it('should create payment using orchestrator', async () => {
+        const response = await request(app)
+          .post('/api/payments/create')
+          .set('Authorization', `Bearer ${userToken}`)
+          .send(orchestratorPaymentData)
+          .expect(200);
+
+        expect(response.body).toHaveProperty('success', true);
+        expect(response.body).toHaveProperty('transactionId');
+        expect(response.body).toHaveProperty('gateway');
+        expect(response.body).toHaveProperty('status');
+        expect(response.body).toHaveProperty('amount', orchestratorPaymentData.amount);
+        expect(response.body).toHaveProperty('currency', orchestratorPaymentData.currency);
+        expect(response.body).toHaveProperty('region', orchestratorPaymentData.region);
+      });
+
+      it('should route payment to appropriate gateway based on region', async () => {
+        // Test US region (should use Stripe)
+        const usResponse = await request(app)
+          .post('/api/payments/create')
+          .set('Authorization', `Bearer ${userToken}`)
+          .send({ ...orchestratorPaymentData, region: 'US', country: 'US' })
+          .expect(200);
+
+        expect(usResponse.body.gateway).toBe('stripe');
+
+        // Test India region (should use Razorpay)
+        const inResponse = await request(app)
+          .post('/api/payments/create')
+          .set('Authorization', `Bearer ${userToken}`)
+          .send({ ...orchestratorPaymentData, region: 'IN', country: 'IN', currency: 'INR' })
+          .expect(200);
+
+        expect(inResponse.body.gateway).toBe('razorpay');
+      });
+
+      it('should handle currency conversion', async () => {
+        const response = await request(app)
+          .post('/api/payments/create')
+          .set('Authorization', `Bearer ${userToken}`)
+          .send({
+            ...orchestratorPaymentData,
+            currency: 'EUR',
+            region: 'EU',
+            country: 'DE',
+          })
+          .expect(200);
+
+        expect(response.body).toHaveProperty('success', true);
+        expect(response.body.currency).toBe('EUR');
+      });
+
+      it('should validate required fields', async () => {
+        const response = await request(app)
+          .post('/api/payments/create')
+          .set('Authorization', `Bearer ${userToken}`)
+          .send({})
+          .expect(400);
+
+        expect(response.body.errors).toContain('Amount is required');
+        expect(response.body.errors).toContain('Currency is required');
+      });
+
+      it('should require authentication', async () => {
+        const response = await request(app)
+          .post('/api/payments/create')
+          .send(orchestratorPaymentData)
+          .expect(401);
+
+        expect(response.body.error).toBe('Access denied. No token provided');
+      });
+    });
+
+    describe('POST /api/payments/payout', () => {
+      const payoutData = {
+        amount: 5000,
+        currency: 'USD',
+        region: 'US',
+        country: 'US',
+        bankAccount: {
+          accountNumber: '1234567890',
+          routingNumber: '021000021',
+          bankName: 'Test Bank',
+          accountHolderName: 'John Doe',
+        },
+        description: 'Test payout via orchestrator',
+      };
+
+      it('should create payout using orchestrator', async () => {
+        const response = await request(app)
+          .post('/api/payments/payout')
+          .set('Authorization', `Bearer ${developerToken}`)
+          .send(payoutData)
+          .expect(200);
+
+        expect(response.body).toHaveProperty('success', true);
+        expect(response.body).toHaveProperty('payoutId');
+        expect(response.body).toHaveProperty('gateway');
+        expect(response.body).toHaveProperty('status');
+        expect(response.body).toHaveProperty('amount', payoutData.amount);
+        expect(response.body).toHaveProperty('currency', payoutData.currency);
+      });
+
+      it('should route payout to appropriate gateway', async () => {
+        const response = await request(app)
+          .post('/api/payments/payout')
+          .set('Authorization', `Bearer ${developerToken}`)
+          .send({ ...payoutData, region: 'EU', country: 'GB' })
+          .expect(200);
+
+        expect(response.body).toHaveProperty('gateway');
+        expect(['stripe', 'wise', 'payoneer']).toContain(response.body.gateway);
+      });
+
+      it('should require developer or admin role', async () => {
+        const response = await request(app)
+          .post('/api/payments/payout')
+          .set('Authorization', `Bearer ${userToken}`)
+          .send(payoutData)
+          .expect(403);
+
+        expect(response.body.error).toBe('Access denied. Developer or Admin role required');
+      });
+
+      it('should validate payout data', async () => {
+        const response = await request(app)
+          .post('/api/payments/payout')
+          .set('Authorization', `Bearer ${developerToken}`)
+          .send({})
+          .expect(400);
+
+        expect(response.body.errors).toContain('Amount is required');
+        expect(response.body.errors).toContain('Currency is required');
+      });
+    });
+
+    describe('GET /api/payments/status/:transactionId', () => {
+      let testTransactionId: string;
+
+      beforeEach(async () => {
+        // Create a test payment to get transaction ID
+        const response = await request(app)
+          .post('/api/payments/create')
+          .set('Authorization', `Bearer ${userToken}`)
+          .send({
+            amount: 1000,
+            currency: 'USD',
+            region: 'US',
+            country: 'US',
+            paymentMethod: 'card',
+          });
+        
+        testTransactionId = response.body.transactionId;
+      });
+
+      it('should get payment status', async () => {
+        const response = await request(app)
+          .get(`/api/payments/status/${testTransactionId}`)
+          .set('Authorization', `Bearer ${userToken}`)
+          .expect(200);
+
+        expect(response.body).toHaveProperty('transactionId', testTransactionId);
+        expect(response.body).toHaveProperty('status');
+        expect(response.body).toHaveProperty('gateway');
+      });
+
+      it('should return 404 for non-existent transaction', async () => {
+        const response = await request(app)
+          .get('/api/payments/status/non-existent-id')
+          .set('Authorization', `Bearer ${userToken}`)
+          .expect(404);
+
+        expect(response.body.error).toBe('Transaction not found');
+      });
+    });
+
+    describe('GET /api/payments/methods/:region', () => {
+      it('should get supported payment methods for region', async () => {
+        const response = await request(app)
+          .get('/api/payments/methods/US')
+          .expect(200);
+
+        expect(response.body).toHaveProperty('paymentMethods');
+        expect(response.body).toHaveProperty('gateways');
+        expect(Array.isArray(response.body.paymentMethods)).toBe(true);
+        expect(Array.isArray(response.body.gateways)).toBe(true);
+      });
+
+      it('should handle unsupported regions', async () => {
+        const response = await request(app)
+          .get('/api/payments/methods/UNSUPPORTED')
+          .expect(200);
+
+        expect(response.body.paymentMethods).toEqual([]);
+        expect(response.body.gateways).toEqual([]);
+      });
+    });
+
+    describe('POST /api/payments/convert-currency', () => {
+      const conversionData = {
+        amount: 1000,
+        fromCurrency: 'USD',
+        toCurrency: 'EUR',
+      };
+
+      it('should convert currency', async () => {
+        const response = await request(app)
+          .post('/api/payments/convert-currency')
+          .send(conversionData)
+          .expect(200);
+
+        expect(response.body).toHaveProperty('convertedAmount');
+        expect(response.body).toHaveProperty('exchangeRate');
+        expect(response.body).toHaveProperty('fromCurrency', 'USD');
+        expect(response.body).toHaveProperty('toCurrency', 'EUR');
+      });
+
+      it('should validate conversion data', async () => {
+        const response = await request(app)
+          .post('/api/payments/convert-currency')
+          .send({})
+          .expect(400);
+
+        expect(response.body.errors).toContain('Amount is required');
+        expect(response.body.errors).toContain('From currency is required');
+        expect(response.body.errors).toContain('To currency is required');
+      });
+
+      it('should handle same currency conversion', async () => {
+        const response = await request(app)
+          .post('/api/payments/convert-currency')
+          .send({
+            amount: 1000,
+            fromCurrency: 'USD',
+            toCurrency: 'USD',
+          })
+          .expect(200);
+
+        expect(response.body.convertedAmount).toBe(1000);
+        expect(response.body.exchangeRate).toBe(1);
+      });
+    });
+
+    describe('Gateway Routing Logic', () => {
+      it('should process payments for different regions', async () => {
+        // Test US payment processing
+        const usPaymentRequest = {
+          userId: 'user123',
+          amount: 100,
+          currency: 'USD',
+          ipAddress: '192.168.1.1',
+          headers: { 'x-forwarded-for': '192.168.1.1' },
+          country: 'US',
+          region: 'US',
+          metadata: { test: true }
+        };
+
+        const usResponse = await PaymentOrchestrator.processPayment(usPaymentRequest);
+        expect(usResponse).toBeDefined();
+        expect(usResponse.currency).toBe('USD');
+        expect(usResponse.region).toBe('US');
+
+        // Test India payment processing
+        const inPaymentRequest = {
+          userId: 'user123',
+          amount: 100,
+          currency: 'INR',
+          ipAddress: '192.168.1.1',
+          headers: { 'x-forwarded-for': '192.168.1.1' },
+          country: 'IN',
+          region: 'IN',
+          metadata: { test: true }
+        };
+
+        const inResponse = await PaymentOrchestrator.processPayment(inPaymentRequest);
+        expect(inResponse).toBeDefined();
+        expect(inResponse.currency).toBe('INR');
+        expect(inResponse.region).toBe('IN');
+      });
+
+      it('should process payouts for different regions', async () => {
+        const payoutRequest = {
+          developerId: 'dev123',
+          amount: 100,
+          currency: 'USD',
+          ipAddress: '192.168.1.1',
+          headers: { 'x-forwarded-for': '192.168.1.1' },
+          country: 'US',
+          region: 'US',
+          metadata: { test: true }
+        };
+
+        const response = await PaymentOrchestrator.processPayout(payoutRequest);
+        expect(response).toBeDefined();
+        expect(response.currency).toBe('USD');
+        expect(response.region).toBe('US');
+      });
+    });
+
+    describe('Error Handling and Fallbacks', () => {
+      it('should handle gateway failures gracefully', async () => {
+        // Mock a gateway failure scenario
+        jest.spyOn(PaymentOrchestrator, 'processPayment').mockRejectedValueOnce(
+          new Error('Gateway temporarily unavailable')
+        );
+
+        const response = await request(app)
+          .post('/api/payments/create')
+          .set('Authorization', `Bearer ${userToken}`)
+          .send({
+            amount: 1000,
+            currency: 'USD',
+            region: 'US',
+            country: 'US',
+            paymentMethod: 'card',
+          })
+          .expect(500);
+
+        expect(response.body.error).toContain('Payment processing failed');
+      });
+
+      it('should validate minimum and maximum amounts', async () => {
+        // Test minimum amount validation
+        const minResponse = await request(app)
+          .post('/api/payments/create')
+          .set('Authorization', `Bearer ${userToken}`)
+          .send({
+            amount: 1, // Very small amount
+            currency: 'USD',
+            region: 'US',
+            country: 'US',
+            paymentMethod: 'card',
+          })
+          .expect(400);
+
+        expect(minResponse.body.error).toContain('amount');
+      });
     });
   });
 });

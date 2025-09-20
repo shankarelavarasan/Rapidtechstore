@@ -10,7 +10,6 @@ describe('App Management', () => {
   let developerToken: string;
   let adminToken: string;
   let testApp: any;
-  let testCategory: any;
 
   beforeEach(async () => {
     // Create test users
@@ -22,9 +21,6 @@ describe('App Management', () => {
     userToken = testUtils.generateJWT(user.id, user.role);
     developerToken = testUtils.generateJWT(developer.id, developer.role);
     adminToken = testUtils.generateJWT(admin.id, admin.role);
-
-    // Create test category
-    testCategory = await testUtils.createTestCategory();
 
     // Create test app
     testApp = await testUtils.createTestApp(developer.id);

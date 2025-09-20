@@ -3,6 +3,7 @@ import { body, query, param } from 'express-validator';
 import { validateRequest } from '../middleware/validateRequest';
 import { authenticateToken, authenticateDeveloper, authenticateAdmin } from '../middleware/auth';
 import * as analyticsController from '../controllers/analyticsController';
+import { PaymentOrchestratorController } from '../controllers/paymentOrchestratorController';
 
 const router = express.Router();
 
@@ -383,6 +384,45 @@ router.delete(
   ],
   validateRequest,
   analyticsController.deleteAlert
+);
+
+// Payment analytics routes
+router.get(
+  '/payments/overview',
+  authenticateToken,
+  [
+    query('startDate').optional().isISO8601().withMessage('Start date must be valid ISO date'),
+    query('endDate').optional().isISO8601().withMessage('End date must be valid ISO date'),
+    query('region').optional().isString(),
+    query('gateway').optional().isString(),
+    query('currency').optional().isLength({ min: 3, max: 3 }).withMessage('Currency must be 3 characters')
+  ],
+  validateRequest,
+  PaymentOrchestratorController.getPaymentAnalytics
+);
+
+router.get(
+  '/payments/by-gateway',
+  authenticateToken,
+  [
+    query('startDate').optional().isISO8601().withMessage('Start date must be valid ISO date'),
+    query('endDate').optional().isISO8601().withMessage('End date must be valid ISO date'),
+    query('region').optional().isString()
+  ],
+  validateRequest,
+  PaymentOrchestratorController.getPaymentAnalytics
+);
+
+router.get(
+  '/payments/by-region',
+  authenticateToken,
+  [
+    query('startDate').optional().isISO8601().withMessage('Start date must be valid ISO date'),
+    query('endDate').optional().isISO8601().withMessage('End date must be valid ISO date'),
+    query('gateway').optional().isString()
+  ],
+  validateRequest,
+  PaymentOrchestratorController.getPaymentAnalytics
 );
 
 export default router;

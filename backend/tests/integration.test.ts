@@ -311,15 +311,19 @@ describe('Integration Tests - Complete Workflows', () => {
       const indianToken = generateJWT(indianUser.id);
 
       const indianOrderResponse = await request(app)
-        .post('/api/payments/orders')
+        .post('/api/payments/create')
         .set('Authorization', `Bearer ${indianToken}`)
         .send({
-          appId: testApp.id,
-          paymentMethod: 'RAZORPAY',
+          amount: testApp.price * 100, // Convert to cents
+          currency: 'INR',
+          region: 'IN',
+          country: 'IN',
+          paymentMethod: 'card',
+          description: `Purchase of ${testApp.name}`,
         });
 
-      expect(indianOrderResponse.status).toBe(201);
-      expect(indianOrderResponse.body.gateway).toBe('RAZORPAY');
+      expect(indianOrderResponse.status).toBe(200);
+      expect(indianOrderResponse.body.gateway).toBe('razorpay');
 
       // Test US user with Stripe
       const usUser = await prisma.user.create({
@@ -335,15 +339,19 @@ describe('Integration Tests - Complete Workflows', () => {
       const usToken = generateJWT(usUser.id);
 
       const usOrderResponse = await request(app)
-        .post('/api/payments/orders')
+        .post('/api/payments/create')
         .set('Authorization', `Bearer ${usToken}`)
         .send({
-          appId: testApp.id,
-          paymentMethod: 'STRIPE',
+          amount: testApp.price * 100, // Convert to cents
+          currency: 'USD',
+          region: 'US',
+          country: 'US',
+          paymentMethod: 'card',
+          description: `Purchase of ${testApp.name}`,
         });
 
-      expect(usOrderResponse.status).toBe(201);
-      expect(usOrderResponse.body.gateway).toBe('STRIPE');
+      expect(usOrderResponse.status).toBe(200);
+      expect(usOrderResponse.body.gateway).toBe('stripe');
     });
   });
 });

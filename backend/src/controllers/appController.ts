@@ -21,7 +21,7 @@ interface AuthenticatedRequest extends Request {
 /**
  * Get all apps (public endpoint with filtering and pagination)
  */
-export const getApps = async (req: Request, res: Response, next: NextFunction) => {
+export const getPublicApps = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const {
       page = 1,
@@ -62,7 +62,7 @@ export const getApps = async (req: Request, res: Response, next: NextFunction) =
     if (sortBy === 'downloads') {
       orderBy.downloadCount = sortOrder;
     } else if (sortBy === 'rating') {
-      orderBy.averageRating = sortOrder;
+      orderBy.rating = sortOrder;
     } else if (sortBy === 'name') {
       orderBy.name = sortOrder;
     } else {
@@ -117,7 +117,7 @@ export const getApps = async (req: Request, res: Response, next: NextFunction) =
 /**
  * Get app by ID (public endpoint)
  */
-export const getAppById = async (req: Request, res: Response, next: NextFunction) => {
+export const getPublicAppById = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
 
@@ -226,7 +226,7 @@ export const getTopCharts = async (req: Request, res: Response, next: NextFuncti
         orderBy = { downloadCount: 'desc' };
         break;
       case 'rating':
-        orderBy = { averageRating: 'desc' };
+        orderBy = { rating: 'desc' };
         break;
       case 'revenue':
         orderBy = { totalRevenue: 'desc' };
@@ -301,7 +301,14 @@ export const getCategories = async (req: Request, res: Response, next: NextFunct
 };
 
 /**
- * Create app via AI conversion (developer endpoint)
+ * Create app (alias for createAppViaAI)
+ */
+export const createApp = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  return createAppViaAI(req, res, next);
+};
+
+/**
+ * Create app via AI conversion
  */
 export const createAppViaAI = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
@@ -489,7 +496,7 @@ export const updateApp = async (req: AuthenticatedRequest, res: Response, next: 
     delete updateData.status;
     delete updateData.featured;
     delete updateData.downloadCount;
-    delete updateData.averageRating;
+    delete updateData.rating;
     delete updateData.totalRevenue;
 
     const updatedApp = await prisma.app.update({
@@ -774,7 +781,7 @@ export const getAppAnalytics = async (req: AuthenticatedRequest, res: Response, 
           name: app.name,
           totalDownloads: app.downloadCount,
           totalRevenue: app.totalRevenue,
-          overallRating: app.averageRating,
+          overallRating: app.rating,
         },
       },
     });
