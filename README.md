@@ -1,6 +1,12 @@
 # Rapid Tech Store
 
+## ⚠️ COPYRIGHT NOTICE ⚠️
+**ALL RIGHTS RESERVED - RAPID TECH - SHANKAR ELAVARASAN**
+**UNAUTHORIZED USE, COPYING, OR DISTRIBUTION IS STRICTLY PROHIBITED**
+
 An AI-powered app marketplace platform built with Node.js, TypeScript, and modern cloud technologies.
+
+**PROPRIETARY SOFTWARE - NOT FOR PUBLIC USE**
 
 ## 🚀 Features
 

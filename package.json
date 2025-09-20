@@ -1,7 +1,9 @@
 {
   "name": "rapid-tech-store",
   "version": "1.0.0",
-  "description": "Universal Intelligent Software Marketplace - Independent app store platform with AI-powered discovery, automated compliance, and global payment processing",
+  "description": "A comprehensive app marketplace platform - PROPRIETARY SOFTWARE",
+  "author": "Shankar Elavarasan - Rapid Tech",
+  "license": "PROPRIETARY",
   "main": "index.js",
   "private": true,
   "scripts": {
