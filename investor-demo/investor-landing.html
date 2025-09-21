@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rapid Tech Store - Investor Demo Portal</title>
+    <meta name="description" content="Professional investor demo portal for Rapid Tech Store - $2M Seed Round Investment Opportunity">
+    <meta name="author" content="Shankar Elavarasan">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            padding: 40px 0;
+        }
+        
+        .header h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header .tagline {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+        
+        .investment-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            backdrop-filter: blur(10px);
+        }
+        
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .demo-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .demo-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+        
+        .demo-card h3 {
+            color: #667eea;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .demo-card p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .demo-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .demo-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .metrics-section {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            text-align: center;
+        }
+        
+        .metric {
+            padding: 20px;
+        }
+        
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        
+        .metric-label {
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .contact-section {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            color: white;
+            backdrop-filter: blur(10px);
+        }
+        
+        .contact-section h3 {
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+        
+        .contact-info {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+        
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .social-links a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .social-links a:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .demo-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🚀 Rapid Tech Store</h1>
+            <p class="tagline">The Future of Digital Marketplace Technology</p>
+            <div class="investment-badge">💰 $2M Seed Round - 20% Equity</div>
+        </header>
+        
+        <div class="metrics-section">
+            <h2 style="text-align: center; margin-bottom: 30px; color: #333;">📊 Investment Opportunity</h2>
+            <div class="metrics-grid">
+                <div class="metric">
+                    <div class="metric-value">$87B+</div>
+                    <div class="metric-label">Market Size</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">70%</div>
+                    <div class="metric-label">Faster Discovery</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">$5M</div>
+                    <div class="metric-label">ARR by Year 2</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">15%</div>
+                    <div class="metric-label">Commission Rate</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="demo-grid">
+            <div class="demo-card">
+                <h3>🌟 Live Application Demo</h3>
+                <p>Experience the full Rapid Tech Store platform with AI-powered app discovery, seamless checkout, and comprehensive analytics.</p>
+                <a href="http://localhost:5174/" class="demo-button" target="_blank">Launch Live Demo</a>
+            </div>
+            
+            <div class="demo-card">
+                <h3>📊 Complete Pitch Deck</h3>
+                <p>Comprehensive investor presentation with market analysis, financial projections, and competitive landscape.</p>
+                <a href="../improved-pitch-deck.md" class="demo-button">View Pitch Deck</a>
+            </div>
+            
+            <div class="demo-card">
+                <h3>📈 Financial Projections</h3>
+                <p>Detailed revenue models, unit economics, and 5-year financial forecasts with key performance indicators.</p>
+                <a href="../pitch-deck-improvement-summary.md" class="demo-button">View Financials</a>
+            </div>
+            
+            <div class="demo-card">
+                <h3>🎨 Visual Assets Guide</h3>
+                <p>Professional visual guidelines, screenshots, and design assets for presentations and marketing materials.</p>
+                <a href="../pitch-deck-visual-guide.md" class="demo-button">View Visual Guide</a>
+            </div>
+            
+            <div class="demo-card">
+                <h3>💻 GitHub Repository</h3>
+                <p>Complete source code, documentation, and technical architecture for due diligence and technical review.</p>
+                <a href="https://github.com/shankarelavarasan/Rapidtechstore" class="demo-button" target="_blank">View Code</a>
+            </div>
+            
+            <div class="demo-card">
+                <h3>📋 API Documentation</h3>
+                <p>Comprehensive API documentation with endpoints, authentication, and integration examples for developers.</p>
+                <a href="../API_DOCUMENTATION.md" class="demo-button">View API Docs</a>
+            </div>
+        </div>
+        
+        <div class="contact-section">
+            <h3>📞 Ready to Invest?</h3>
+            <div class="contact-info">
+                <p><strong>Founder:</strong> Shankar Elavarasan</p>
+                <p><strong>Email:</strong> shankarelavarasan90@gmail.com</p>
+                <p><strong>Investment Ask:</strong> $2M for 20% equity</p>
+            </div>
+            
+            <div class="social-links">
+                <a href="mailto:shankarelavarasan90@gmail.com">📧 Email</a>
+                <a href="https://github.com/shankarelavarasan/Rapidtechstore">💻 GitHub</a>
+                <a href="../improved-pitch-deck.md">📊 Pitch Deck</a>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Add smooth scrolling and interactive elements
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate metrics on scroll
+            const metrics = document.querySelectorAll('.metric-value');
+            
+            const animateMetrics = () => {
+                metrics.forEach(metric => {
+                    const rect = metric.getBoundingClientRect();
+                    if (rect.top < window.innerHeight && rect.bottom > 0) {
+                        metric.style.animation = 'countUp 2s ease-out';
+                    }
+                });
+            };
+            
+            window.addEventListener('scroll', animateMetrics);
+            animateMetrics(); // Run once on load
+        });
+    </script>
+    
+    <style>
+        @keyframes countUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</body>
+</html>

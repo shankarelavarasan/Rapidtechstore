@@ -1,0 +1,26 @@
+# GitHub Repository Setup Commands
+# Run these commands after creating your GitHub repository
+
+# 1. Add GitHub remote (replace YOUR_USERNAME with your GitHub username)
+git remote add origin https://github.com/YOUR_USERNAME/rapid-tech-store-investor-pitch.git
+
+# 2. Set main branch name
+git branch -M main
+
+# 3. Push to GitHub
+git push -u origin main
+
+# Alternative: If you prefer SSH (after setting up SSH keys)
+# git remote add origin git@github.com:YOUR_USERNAME/rapid-tech-store-investor-pitch.git
+# git push -u origin main
+
+# Repository Contents:
+# - INVESTOR_PRESENTATION_GUIDE.md (Complete presentation guide)
+# - README.md (Overview and structure)
+# - financial-models/revenue-projections.md (5-year financial projections)
+# - market-research/market-analysis.md (Market analysis and competitive landscape)
+# - prototype/index.html (Interactive demo)
+# - prototype/package.json (Demo dependencies)
+# - .gitignore (Git exclusions)
+
+# Repository URL will be: https://github.com/YOUR_USERNAME/rapid-tech-store-investor-pitch

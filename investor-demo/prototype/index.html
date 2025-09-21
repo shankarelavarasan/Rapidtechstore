@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rapid Tech Store - Interactive Demo</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .demo-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .demo-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .demo-badge {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .main-content {
+            margin-top: 80px;
+            padding: 2rem;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-section {
+            text-align: center;
+            padding: 3rem 0;
+            color: white;
+        }
+
+        .hero-title {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .demo-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        .demo-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+
+        .card-description {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .demo-button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .demo-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            max-width: 90%;
+            max-height: 90%;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .marketplace-demo {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .product-card {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .product-card:hover {
+            border-color: #667eea;
+            transform: scale(1.02);
+        }
+
+        .product-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: #667eea;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .ai-demo {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .recommendation {
+            background: white;
+            border-left: 4px solid #667eea;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+            
+            .demo-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .main-content {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="demo-header">
+        <nav class="demo-nav">
+            <div class="logo">
+                <i class="fas fa-rocket"></i> Rapid Tech Store
+            </div>
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <button onclick="startGuidedTour()" 
+                        style="background: #28a745; color: white; border: none; padding: 0.5rem 1rem; 
+                               border-radius: 5px; cursor: pointer; font-size: 0.9rem;">
+                    <i class="fas fa-route"></i> Guided Tour
+                </button>
+                <div class="demo-badge">
+                    <i class="fas fa-eye"></i> INVESTOR DEMO
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="main-content">
+        <section class="hero-section">
+            <h1 class="hero-title">The Future of Digital Commerce</h1>
+            <p class="hero-subtitle">Experience the next-generation marketplace for software, SaaS, AI tools, and digital solutions</p>
+            
+            <!-- Live Platform Preview Button -->
+            <div style="margin: 2rem 0; text-align: center;">
+                <a href="http://localhost:5174" target="_blank" 
+                   style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                          color: white; padding: 1rem 2rem; border-radius: 10px; text-decoration: none; 
+                          font-weight: bold; font-size: 1.1rem; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+                          transition: transform 0.3s ease, box-shadow 0.3s ease;"
+                   onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(102, 126, 234, 0.4)'"
+                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(102, 126, 234, 0.3)'">
+                    <i class="fas fa-external-link-alt"></i> Explore Live Platform
+                </a>
+                <p style="margin-top: 0.5rem; color: white; font-size: 0.9rem; opacity: 0.9;">
+                    <i class="fas fa-info-circle"></i> Full React/TypeScript application with authentication, payments & more
+                </p>
+            </div>
+        </section>
+
+        <div class="demo-grid">
+            <div class="demo-card" onclick="openModal('marketplace-modal')">
+                <div class="card-icon">
+                    <i class="fas fa-store"></i>
+                </div>
+                <h3 class="card-title">Marketplace Experience</h3>
+                <p class="card-description">
+                    Explore our curated collection of digital products with advanced filtering, 
+                    AI-powered recommendations, and seamless purchasing experience.
+                </p>
+                <button class="demo-button">
+                    <i class="fas fa-play"></i> View Marketplace Demo
+                </button>
+            </div>
+
+            <div class="demo-card" onclick="openModal('ai-modal')">
+                <div class="card-icon">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <h3 class="card-title">AI-Powered Discovery</h3>
+                <p class="card-description">
+                    See how our intelligent recommendation engine helps users discover 
+                    the perfect tools based on their needs and preferences.
+                </p>
+                <button class="demo-button">
+                    <i class="fas fa-play"></i> Try AI Recommendations
+                </button>
+            </div>
+
+            <div class="demo-card" onclick="openModal('analytics-modal')">
+                <div class="card-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3 class="card-title">Business Analytics</h3>
+                <p class="card-description">
+                    Comprehensive dashboard showing market metrics, user engagement, 
+                    revenue projections, and growth opportunities.
+                </p>
+                <button class="demo-button">
+                    <i class="fas fa-play"></i> View Analytics Dashboard
+                </button>
+            </div>
+
+            <div class="demo-card" onclick="openModal('enterprise-modal')">
+                <div class="card-icon">
+                    <i class="fas fa-building"></i>
+                </div>
+                <h3 class="card-title">Enterprise Features</h3>
+                <p class="card-description">
+                    Advanced security, compliance tools, bulk licensing, 
+                    and enterprise-grade support for large organizations.
+                </p>
+                <button class="demo-button">
+                    <i class="fas fa-play"></i> Explore Enterprise
+                </button>
+            </div>
+
+            <div class="demo-card" onclick="openModal('developer-modal')">
+                <div class="card-icon">
+                    <i class="fas fa-code"></i>
+                </div>
+                <h3 class="card-title">Developer Ecosystem</h3>
+                <p class="card-description">
+                    APIs, SDKs, integration tools, and developer resources 
+                    for building on the Rapid Tech Store platform.
+                </p>
+                <button class="demo-button">
+                    <i class="fas fa-play"></i> Developer Tools
+                </button>
+            </div>
+
+            <div class="demo-card" onclick="openModal('mobile-modal')">
+                <div class="card-icon">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+                <h3 class="card-title">Mobile Experience</h3>
+                <p class="card-description">
+                    Native mobile applications for iOS and Android with 
+                    offline capabilities and push notifications.
+                </p>
+                <button class="demo-button">
+                    <i class="fas fa-play"></i> Mobile Preview
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Marketplace Modal -->
+    <div id="marketplace-modal" class="modal">
+        <div class="modal-content" style="max-width: 95%; max-height: 95%;">
+            <button class="close-modal" onclick="closeModal('marketplace-modal')">&times;</button>
+            <h2><i class="fas fa-store"></i> Marketplace Experience</h2>
+            
+            <!-- Search and Filter Bar -->
+            <div style="display: flex; gap: 1rem; margin: 1rem 0; flex-wrap: wrap;">
+                <input type="text" id="product-search" placeholder="Search products..." 
+                       style="flex: 1; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px;"
+                       onkeyup="filterProducts()">
+                <select id="category-filter" onchange="filterProducts()" 
+                        style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px;">
+                    <option value="">All Categories</option>
+                    <option value="ai-tools">AI Tools</option>
+                    <option value="ui-kits">UI Kits</option>
+                    <option value="databases">Databases</option>
+                    <option value="analytics">Analytics</option>
+                    <option value="ide-plugins">IDE Plugins</option>
+                    <option value="saas">SaaS Tools</option>
+                </select>
+                <select id="price-filter" onchange="filterProducts()" 
+                        style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px;">
+                    <option value="">All Prices</option>
+                    <option value="0-50">$0 - $50</option>
+                    <option value="50-100">$50 - $100</option>
+                    <option value="100+">$100+</option>
+                </select>
+            </div>
+            
+            <!-- Shopping Cart Summary -->
+            <div id="cart-summary" style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; display: none;">
+                <h4><i class="fas fa-shopping-cart"></i> Shopping Cart (<span id="cart-count">0</span> items)</h4>
+                <div id="cart-items"></div>
+                <div style="text-align: right; margin-top: 1rem;">
+                    <strong>Total: $<span id="cart-total">0.00</span></strong>
+                    <button onclick="proceedToCheckout()" style="margin-left: 1rem; background: #28a745; color: white; border: none; padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer;">
+                        Proceed to Checkout
+                    </button>
+                </div>
+            </div>
+            
+            <div class="marketplace-demo" id="products-grid">
+                <!-- Products will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Modal -->
+    <div id="ai-modal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('ai-modal')">&times;</button>
+            <h2><i class="fas fa-brain"></i> AI-Powered Discovery</h2>
+            
+            <div class="ai-demo">
+                <input type="text" class="search-box" placeholder="Describe what you're looking for..." 
+                       onkeyup="showRecommendations(this.value)">
+                <div id="recommendations"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics Modal -->
+    <div id="analytics-modal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('analytics-modal')">&times;</button>
+            <h2><i class="fas fa-chart-line"></i> Business Analytics Dashboard</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">$2.5M</div>
+                    <div class="stat-label">Monthly Revenue</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">25K</div>
+                    <div class="stat-label">Active Users</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">1,200</div>
+                    <div class="stat-label">Digital Products</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">98.5%</div>
+                    <div class="stat-label">Uptime</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enterprise Modal -->
+    <div id="enterprise-modal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('enterprise-modal')">&times;</button>
+            <h2><i class="fas fa-building"></i> Enterprise Features</h2>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                <div style="border: 1px solid #eee; padding: 1rem; border-radius: 8px;">
+                    <h4><i class="fas fa-shield-alt"></i> Security & Compliance</h4>
+                    <ul style="margin-top: 0.5rem; padding-left: 1rem;">
+                        <li>SOC 2 Type II Certified</li>
+                        <li>GDPR Compliant</li>
+                        <li>Enterprise SSO</li>
+                        <li>Advanced Threat Detection</li>
+                    </ul>
+                </div>
+                <div style="border: 1px solid #eee; padding: 1rem; border-radius: 8px;">
+                    <h4><i class="fas fa-users"></i> Team Management</h4>
+                    <ul style="margin-top: 0.5rem; padding-left: 1rem;">
+                        <li>Role-based Access Control</li>
+                        <li>Bulk License Management</li>
+                        <li>Usage Analytics</li>
+                        <li>Centralized Billing</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Developer Modal -->
+    <div id="developer-modal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('developer-modal')">&times;</button>
+            <h2><i class="fas fa-code"></i> Developer Ecosystem</h2>
+            
+            <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                <h4>REST API Example:</h4>
+                <pre style="background: #333; color: #fff; padding: 1rem; border-radius: 4px; overflow-x: auto;">
+GET /api/v1/products?category=ai-tools&limit=10
+Authorization: Bearer your-api-key
+
+{
+  "products": [
+    {
+      "id": "ai-tool-123",
+      "name": "AI Code Assistant",
+      "price": 29.99,
+      "category": "ai-tools",
+      "rating": 4.9
+    }
+  ]
+}</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Modal -->
+    <div id="mobile-modal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('mobile-modal')">&times;</button>
+            <h2><i class="fas fa-mobile-alt"></i> Mobile Experience</h2>
+            
+            <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 1rem;">
+                <div style="text-align: center;">
+                    <div style="width: 200px; height: 400px; background: linear-gradient(45deg, #667eea, #764ba2); border-radius: 20px; display: flex; align-items: center; justify-content: center; color: white;">
+                        <div>
+                            <i class="fab fa-apple" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                            <div>iOS App</div>
+                            <div style="font-size: 0.8rem; margin-top: 0.5rem;">Coming Q2 2024</div>
+                        </div>
+                    </div>
+                </div>
+                <div style="text-align: center;">
+                    <div style="width: 200px; height: 400px; background: linear-gradient(45deg, #764ba2, #667eea); border-radius: 20px; display: flex; align-items: center; justify-content: center; color: white;">
+                        <div>
+                            <i class="fab fa-android" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                            <div>Android App</div>
+                            <div style="font-size: 0.8rem; margin-top: 0.5rem;">Coming Q2 2024</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Realistic Product Data
+        const products = [
+            {
+                id: 1, name: "React UI Kit Pro", price: 49.99, category: "ui-kits", 
+                icon: "fab fa-react", rating: 4.8, reviews: 234, 
+                description: "Professional React components library with 200+ components",
+                features: ["200+ Components", "TypeScript Support", "Dark Mode", "Responsive Design"]
+            },
+            {
+                id: 2, name: "AI Code Assistant", price: 29.99, category: "ai-tools", 
+                icon: "fas fa-robot", rating: 4.9, reviews: 567, 
+                description: "Intelligent code completion and AI-powered suggestions",
+                features: ["Multi-language Support", "Real-time Suggestions", "Code Optimization", "Bug Detection"]
+            },
+            {
+                id: 3, name: "Database Manager Pro", price: 79.99, category: "databases", 
+                icon: "fas fa-database", rating: 4.7, reviews: 123, 
+                description: "Advanced database administration and monitoring tool",
+                features: ["Multi-DB Support", "Performance Monitoring", "Backup Automation", "Query Optimizer"]
+            },
+            {
+                id: 4, name: "Analytics Suite", price: 99.99, category: "analytics", 
+                icon: "fas fa-chart-bar", rating: 4.6, reviews: 89, 
+                description: "Comprehensive business analytics and reporting platform",
+                features: ["Real-time Dashboards", "Custom Reports", "Data Visualization", "API Integration"]
+            },
+            {
+                id: 5, name: "VS Code AI Extension", price: 19.99, category: "ide-plugins", 
+                icon: "fas fa-code", rating: 4.9, reviews: 892, 
+                description: "AI-powered coding assistant for Visual Studio Code",
+                features: ["Code Completion", "Error Detection", "Refactoring", "Documentation"]
+            },
+            {
+                id: 6, name: "Cloud Storage Manager", price: 39.99, category: "saas", 
+                icon: "fas fa-cloud", rating: 4.5, reviews: 156, 
+                description: "Multi-cloud storage management and synchronization",
+                features: ["Multi-Cloud Support", "Auto Sync", "Encryption", "Team Collaboration"]
+            },
+            {
+                id: 7, name: "API Testing Suite", price: 59.99, category: "saas", 
+                icon: "fas fa-cogs", rating: 4.8, reviews: 278, 
+                description: "Comprehensive API testing and monitoring platform",
+                features: ["Automated Testing", "Performance Monitoring", "Documentation", "Team Collaboration"]
+            },
+            {
+                id: 8, name: "Machine Learning Toolkit", price: 149.99, category: "ai-tools", 
+                icon: "fas fa-brain", rating: 4.7, reviews: 345, 
+                description: "Complete ML development and deployment platform",
+                features: ["Pre-trained Models", "Auto ML", "Model Deployment", "Data Preprocessing"]
+            }
+        ];
+
+        let cart = [];
+        let filteredProducts = [...products];
+
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+            document.body.style.overflow = 'hidden';
+            
+            if (modalId === 'marketplace-modal') {
+                renderProducts();
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        function renderProducts() {
+            const grid = document.getElementById('products-grid');
+            grid.innerHTML = filteredProducts.map(product => `
+                <div class="product-card" data-category="${product.category}" data-price="${product.price}">
+                    <div class="product-icon"><i class="${product.icon}"></i></div>
+                    <h4>${product.name}</h4>
+                    <p style="color: #666; font-size: 0.9rem; margin: 0.5rem 0;">${product.description}</p>
+                    <div style="margin: 0.5rem 0;">
+                        ${product.features.slice(0, 2).map(feature => 
+                            `<span style="background: #e9ecef; padding: 0.2rem 0.5rem; border-radius: 3px; font-size: 0.8rem; margin-right: 0.3rem;">${feature}</span>`
+                        ).join('')}
+                    </div>
+                    <p style="font-size: 1.2rem; font-weight: bold; color: #667eea;">$${product.price}</p>
+                    <small>⭐ ${product.rating} (${product.reviews} reviews)</small>
+                    <button onclick="addToCart(${product.id})" 
+                            style="width: 100%; margin-top: 0.5rem; background: #667eea; color: white; border: none; padding: 0.5rem; border-radius: 5px; cursor: pointer;">
+                        <i class="fas fa-cart-plus"></i> Add to Cart
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function filterProducts() {
+            const searchTerm = document.getElementById('product-search').value.toLowerCase();
+            const categoryFilter = document.getElementById('category-filter').value;
+            const priceFilter = document.getElementById('price-filter').value;
+
+            filteredProducts = products.filter(product => {
+                const matchesSearch = product.name.toLowerCase().includes(searchTerm) || 
+                                    product.description.toLowerCase().includes(searchTerm);
+                const matchesCategory = !categoryFilter || product.category === categoryFilter;
+                
+                let matchesPrice = true;
+                if (priceFilter === '0-50') matchesPrice = product.price <= 50;
+                else if (priceFilter === '50-100') matchesPrice = product.price > 50 && product.price <= 100;
+                else if (priceFilter === '100+') matchesPrice = product.price > 100;
+
+                return matchesSearch && matchesCategory && matchesPrice;
+            });
+
+            renderProducts();
+        }
+
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            const existingItem = cart.find(item => item.id === productId);
+
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({ ...product, quantity: 1 });
+            }
+
+            updateCartDisplay();
+            
+            // Show success message
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-check"></i> Added!';
+            button.style.background = '#28a745';
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.style.background = '#667eea';
+            }, 1000);
+        }
+
+        function updateCartDisplay() {
+            const cartSummary = document.getElementById('cart-summary');
+            const cartCount = document.getElementById('cart-count');
+            const cartItems = document.getElementById('cart-items');
+            const cartTotal = document.getElementById('cart-total');
+
+            if (cart.length === 0) {
+                cartSummary.style.display = 'none';
+                return;
+            }
+
+            cartSummary.style.display = 'block';
+            cartCount.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
+            
+            cartItems.innerHTML = cart.map(item => `
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #eee;">
+                    <span>${item.name} x${item.quantity}</span>
+                    <span>$${(item.price * item.quantity).toFixed(2)}</span>
+                </div>
+            `).join('');
+
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            cartTotal.textContent = total.toFixed(2);
+        }
+
+        function proceedToCheckout() {
+            alert(`Checkout Demo: Total $${cart.reduce((sum, item) => sum + (item.price * item.quantity), 0).toFixed(2)}\n\nIn the real platform:\n• Secure payment processing\n• Multiple payment methods\n• Instant digital delivery\n• License management\n• Receipt & invoicing`);
+        }
+
+        function showRecommendations(query) {
+            const recommendations = document.getElementById('recommendations');
+            
+            if (query.length < 3) {
+                recommendations.innerHTML = '';
+                return;
+            }
+
+            // Enhanced AI recommendations based on actual products
+            const relevantProducts = products.filter(product => 
+                product.name.toLowerCase().includes(query.toLowerCase()) ||
+                product.description.toLowerCase().includes(query.toLowerCase()) ||
+                product.features.some(feature => feature.toLowerCase().includes(query.toLowerCase()))
+            );
+
+            const categoryRecommendations = {
+                'react': products.filter(p => p.category === 'ui-kits' || p.category === 'ide-plugins'),
+                'ai': products.filter(p => p.category === 'ai-tools'),
+                'database': products.filter(p => p.category === 'databases'),
+                'analytics': products.filter(p => p.category === 'analytics'),
+                'api': products.filter(p => p.name.toLowerCase().includes('api') || p.description.toLowerCase().includes('api'))
+            };
+
+            let suggestions = [];
+
+            if (relevantProducts.length > 0) {
+                suggestions = relevantProducts.slice(0, 3).map(product => 
+                    `${product.name} - ${product.description} ($${product.price})`
+                );
+            } else {
+                const matchedCategory = Object.keys(categoryRecommendations).find(key => 
+                    query.toLowerCase().includes(key)
+                );
+                
+                if (matchedCategory && categoryRecommendations[matchedCategory].length > 0) {
+                    suggestions = categoryRecommendations[matchedCategory].slice(0, 3).map(product => 
+                        `${product.name} - ${product.description} ($${product.price})`
+                    );
+                } else {
+                    suggestions = [
+                        'AI-powered search is analyzing your query...',
+                        'Based on your input, we recommend exploring our most popular tools',
+                        'Try searching for: "React", "AI", "Database", or "Analytics"'
+                    ];
+                }
+            }
+
+            recommendations.innerHTML = suggestions
+                .map(suggestion => `<div class="recommendation">${suggestion}</div>`)
+                .join('');
+        }
+
+        // Guided Tour Functionality
+        let currentTourStep = 0;
+        const tourSteps = [
+            {
+                target: '.hero-section',
+                title: 'Welcome to RapidTech Store',
+                content: 'This is our digital marketplace for software, SaaS, AI tools, and digital solutions. Notice our impressive metrics: 10,000+ products, 50,000+ users, and 99.9% uptime.',
+                position: 'bottom'
+            },
+            {
+                target: '.demo-grid',
+                title: 'Interactive Demo Sections',
+                content: 'Explore 6 key areas of our platform. Each section demonstrates different capabilities and revenue streams.',
+                position: 'top'
+            },
+            {
+                target: '[onclick="openModal(\'marketplace-modal\')")',
+                title: 'Marketplace Demo',
+                content: 'Click here to see our marketplace with realistic product data, working shopping cart, and AI-powered search. This demonstrates our core revenue model.',
+                position: 'top',
+                action: () => openModal('marketplace-modal')
+            },
+            {
+                target: '[onclick="openModal(\'ai-modal\')")',
+                title: 'AI-Powered Features',
+                content: 'Our AI capabilities include intelligent search, recommendations, and automated categorization - key differentiators in the market.',
+                position: 'top'
+            },
+            {
+                target: '[onclick="openModal(\'analytics-modal\')")',
+                title: 'Business Analytics',
+                content: 'Real-time analytics and insights for both vendors and customers. This data drives our business intelligence and optimization.',
+                position: 'top'
+            },
+            {
+                target: 'a[href="http://localhost:5174"]',
+                title: 'Live Platform Access',
+                content: 'Click here to explore our full React/TypeScript application with authentication, payments, and advanced features. This shows our technical execution capability.',
+                position: 'bottom'
+            }
+        ];
+
+        function startGuidedTour() {
+            currentTourStep = 0;
+            showTourStep();
+        }
+
+        function showTourStep() {
+            // Remove existing tour overlay
+            const existingOverlay = document.getElementById('tour-overlay');
+            if (existingOverlay) {
+                existingOverlay.remove();
+            }
+
+            if (currentTourStep >= tourSteps.length) {
+                showTourComplete();
+                return;
+            }
+
+            const step = tourSteps[currentTourStep];
+            const targetElement = document.querySelector(step.target);
+            
+            if (!targetElement) {
+                currentTourStep++;
+                showTourStep();
+                return;
+            }
+
+            // Create tour overlay
+            const overlay = document.createElement('div');
+            overlay.id = 'tour-overlay';
+            overlay.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                background: rgba(0,0,0,0.7); z-index: 10000; pointer-events: none;
+            `;
+
+            // Create spotlight effect
+            const rect = targetElement.getBoundingClientRect();
+            const spotlight = document.createElement('div');
+            spotlight.style.cssText = `
+                position: absolute; 
+                top: ${rect.top - 10}px; left: ${rect.left - 10}px; 
+                width: ${rect.width + 20}px; height: ${rect.height + 20}px;
+                background: white; border-radius: 8px; opacity: 0.1;
+                box-shadow: 0 0 0 9999px rgba(0,0,0,0.7);
+            `;
+            overlay.appendChild(spotlight);
+
+            // Create tour popup
+            const popup = document.createElement('div');
+            popup.style.cssText = `
+                position: absolute; background: white; border-radius: 10px; padding: 1.5rem;
+                max-width: 300px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); pointer-events: auto;
+                z-index: 10001;
+            `;
+
+            // Position popup
+            let popupTop = rect.bottom + 20;
+            let popupLeft = rect.left;
+            
+            if (step.position === 'top') {
+                popupTop = rect.top - 200;
+            }
+            if (step.position === 'right') {
+                popupLeft = rect.right + 20;
+                popupTop = rect.top;
+            }
+            if (step.position === 'left') {
+                popupLeft = rect.left - 320;
+                popupTop = rect.top;
+            }
+
+            popup.style.top = `${popupTop}px`;
+            popup.style.left = `${popupLeft}px`;
+
+            popup.innerHTML = `
+                <h3 style="margin: 0 0 1rem 0; color: #333; font-size: 1.2rem;">
+                    ${step.title}
+                </h3>
+                <p style="margin: 0 0 1.5rem 0; color: #666; line-height: 1.5;">
+                    ${step.content}
+                </p>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: #999; font-size: 0.9rem;">
+                        ${currentTourStep + 1} of ${tourSteps.length}
+                    </span>
+                    <div>
+                        ${currentTourStep > 0 ? 
+                            '<button onclick="previousTourStep()" style="background: #6c757d; color: white; border: none; padding: 0.5rem 1rem; border-radius: 5px; margin-right: 0.5rem; cursor: pointer;">Previous</button>' : 
+                            ''
+                        }
+                        <button onclick="nextTourStep()" style="background: #667eea; color: white; border: none; padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer;">
+                            ${currentTourStep === tourSteps.length - 1 ? 'Finish' : 'Next'}
+                        </button>
+                        <button onclick="endTour()" style="background: transparent; color: #999; border: none; padding: 0.5rem; cursor: pointer; margin-left: 0.5rem;">Skip</button>
+                    </div>
+                </div>
+            `;
+
+            overlay.appendChild(popup);
+            document.body.appendChild(overlay);
+
+            // Scroll to element if needed
+            targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function nextTourStep() {
+            const step = tourSteps[currentTourStep];
+            if (step.action) {
+                step.action();
+            }
+            currentTourStep++;
+            setTimeout(showTourStep, step.action ? 500 : 0);
+        }
+
+        function previousTourStep() {
+            currentTourStep = Math.max(0, currentTourStep - 1);
+            showTourStep();
+        }
+
+        function endTour() {
+            const overlay = document.getElementById('tour-overlay');
+            if (overlay) {
+                overlay.remove();
+            }
+        }
+
+        function showTourComplete() {
+            const overlay = document.createElement('div');
+            overlay.id = 'tour-overlay';
+            overlay.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                background: rgba(0,0,0,0.8); z-index: 10000; 
+                display: flex; align-items: center; justify-content: center;
+            `;
+
+            overlay.innerHTML = `
+                <div style="background: white; border-radius: 15px; padding: 2rem; text-align: center; max-width: 400px;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🎉</div>
+                    <h2 style="margin: 0 0 1rem 0; color: #333;">Tour Complete!</h2>
+                    <p style="color: #666; margin: 0 0 1.5rem 0; line-height: 1.5;">
+                        You've explored the key features of RapidTech Store. Ready to dive deeper into our platform?
+                    </p>
+                    <div style="display: flex; gap: 1rem; justify-content: center;">
+                        <a href="http://localhost:5174" target="_blank" 
+                           style="background: #667eea; color: white; padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none; font-weight: bold;">
+                            Explore Live Platform
+                        </a>
+                        <button onclick="endTour()" 
+                                style="background: #6c757d; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; cursor: pointer;">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(overlay);
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        // Add some interactive animations
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.demo-card');
+            cards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+                card.style.animation = 'fadeInUp 0.6s ease forwards';
+            });
+        });
+
+        // Add CSS for fade in animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            
+            .demo-card {
+                opacity: 0;
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

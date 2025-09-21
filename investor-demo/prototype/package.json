@@ -1,0 +1,23 @@
+{
+  "name": "rapid-tech-store-demo",
+  "version": "1.0.0",
+  "description": "Interactive prototype demo for Rapid Tech Store investor presentations",
+  "main": "index.html",
+  "scripts": {
+    "start": "live-server --port=3001 --open=/index.html",
+    "build": "echo 'Demo build complete'",
+    "demo": "live-server --port=3001 --open=/index.html --no-browser"
+  },
+  "keywords": [
+    "demo",
+    "prototype",
+    "marketplace",
+    "tech-store",
+    "investor-demo"
+  ],
+  "author": "Shankar Elavarasan <shankarelavarasan90@gmail.com> (Rapid Tech - Complete Tech Marketplace)",
+  "license": "Proprietary",
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  }
+}

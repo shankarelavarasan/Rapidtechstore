@@ -1,0 +1,69 @@
+# GitHub Pages Configuration for Rapid Tech Store Investor Pitch Deck
+title: "Rapid Tech Store - Investor Pitch Deck"
+description: "Professional investor materials for Rapid Tech Store - A comprehensive digital tech marketplace platform"
+author: "Shankar Elavarasan"
+email: "shankarelavarasan90@gmail.com"
+
+# GitHub Pages settings
+baseurl: "/Rapidtechstore-pitch-deck"
+url: "https://shankarelavarasan.github.io"
+
+# Theme
+theme: jekyll-theme-primer
+remote_theme: pages-themes/primer@v0.6.0
+
+# Plugins
+plugins:
+  - jekyll-github-metadata
+  - jekyll-seo-tag
+  - jekyll-sitemap
+  - jekyll-feed
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+kramdown:
+  input: GFM
+  hard_wrap: false
+
+# Collections
+collections:
+  pages:
+    output: true
+    permalink: /:name/
+
+# Navigation
+navigation:
+  - title: "Home"
+    url: "/"
+  - title: "Presentation Guide"
+    url: "/presentation-guide/"
+  - title: "Financial Models"
+    url: "/financial-models/"
+  - title: "Market Research"
+    url: "/market-research/"
+  - title: "Interactive Demo"
+    url: "/demo/"
+
+# SEO
+twitter:
+  username: rapidtechstore
+  card: summary_large_image
+
+social:
+  name: Rapid Tech Store
+  links:
+    - https://github.com/shankarelavarasan/Rapidtechstore-pitch-deck
+
+# Exclude files
+exclude:
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+  - .bundle
+  - .sass-cache
+  - .jekyll-cache
+  - .jekyll-metadata
+  - github-setup.txt

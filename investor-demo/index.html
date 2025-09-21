@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rapid Tech Store - Investor Pitch Deck</title>
+    <meta name="description" content="Professional investor materials for Rapid Tech Store - A comprehensive digital tech marketplace platform">
+    <meta name="author" content="Shankar Elavarasan">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://shankarelavarasan.github.io/Rapidtechstore-pitch-deck/">
+    <meta property="og:title" content="Rapid Tech Store - Investor Pitch Deck">
+    <meta property="og:description" content="$659B market opportunity in digital tools marketplace. Revenue projection: $550K → $55M over 5 years.">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://shankarelavarasan.github.io/Rapidtechstore-pitch-deck/">
+    <meta property="twitter:title" content="Rapid Tech Store - Investor Pitch Deck">
+    <meta property="twitter:description" content="$659B market opportunity in digital tools marketplace. Revenue projection: $550K → $55M over 5 years.">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            padding: 40px 0;
+        }
+        
+        .header h1 {
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header h2 {
+            font-size: 1.5rem;
+            font-weight: 300;
+            opacity: 0.9;
+        }
+        
+        .content {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin: 30px 0;
+            text-align: center;
+        }
+        
+        .highlight-box h3 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .stat-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border-left: 4px solid #667eea;
+        }
+        
+        .stat-item h4 {
+            color: #667eea;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .materials {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+        }
+        
+        .material-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 25px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        
+        .material-card:hover {
+            border-color: #667eea;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.15);
+        }
+        
+        .material-card h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+        
+        .material-card p {
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        .material-card ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .material-card li {
+            color: #777;
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .material-card li:before {
+            content: "✓";
+            color: #28a745;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+        
+        .cta {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 40px 0;
+        }
+        
+        .cta h3 {
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+        
+        .contact-info {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .contact-info h4 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        
+        .footer {
+            text-align: center;
+            color: white;
+            padding: 30px 0;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .content {
+                padding: 25px;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .materials {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Rapid Tech Store</h1>
+            <h2>Investor Pitch Deck & Materials</h2>
+        </div>
+        
+        <div class="content">
+            <p style="text-align: center; font-size: 1.2rem; margin-bottom: 30px;">
+                Welcome to the comprehensive investor materials for <strong>Rapid Tech Store</strong> - the next-generation digital marketplace for software, SaaS, AI/AGI tools, IDE addons, plugins, and digital solutions.
+            </p>
+            
+            <div class="highlight-box">
+                <h3>📊 Investment Opportunity Overview</h3>
+                <p style="font-size: 1.1rem;">
+                    <strong>Rapid Tech Store</strong> represents a <strong>$659 billion market opportunity</strong> in the rapidly expanding digital tools and software marketplace sector.
+                </p>
+            </div>
+            
+            <div class="stats">
+                <div class="stat-item">
+                    <h4>💰 Revenue Projection</h4>
+                    <p>$550K → $55M over 5 years</p>
+                </div>
+                <div class="stat-item">
+                    <h4>🌍 Market Size</h4>
+                    <p>$659B total addressable market</p>
+                </div>
+                <div class="stat-item">
+                    <h4>📈 Growth Rate</h4>
+                    <p>2,900% projected growth</p>
+                </div>
+                <div class="stat-item">
+                    <h4>🔥 Market Position</h4>
+                    <p>First-mover advantage</p>
+                </div>
+            </div>
+            
+            <h2 style="text-align: center; color: #667eea; margin: 40px 0 30px 0;">📋 Investor Materials</h2>
+            
+            <div class="materials">
+                <a href="./INVESTOR_PRESENTATION_GUIDE.md" class="material-card">
+                    <h3>📊 Complete Presentation Guide</h3>
+                    <p><strong>45-60 minute comprehensive investor presentation</strong></p>
+                    <ul>
+                        <li>Executive summary & vision</li>
+                        <li>Market opportunity analysis</li>
+                        <li>Business model & revenue streams</li>
+                        <li>Financial projections & milestones</li>
+                        <li>Competitive landscape</li>
+                        <li>Team & execution strategy</li>
+                    </ul>
+                </a>
+                
+                <a href="./financial-models/revenue-projections.md" class="material-card">
+                    <h3>💰 Financial Models</h3>
+                    <p><strong>Detailed 5-year financial projections</strong></p>
+                    <ul>
+                        <li>Revenue growth: $550K → $55M</li>
+                        <li>Market penetration analysis</li>
+                        <li>Unit economics & profitability</li>
+                        <li>Investment requirements & ROI</li>
+                    </ul>
+                </a>
+                
+                <a href="./market-research/market-analysis.md" class="material-card">
+                    <h3>🌍 Market Research</h3>
+                    <p><strong>Comprehensive market analysis</strong></p>
+                    <ul>
+                        <li>$659B total addressable market</li>
+                        <li>Competitive landscape analysis</li>
+                        <li>Market trends & opportunities</li>
+                        <li>Customer segmentation</li>
+                    </ul>
+                </a>
+                
+                <a href="./prototype/index.html" class="material-card">
+                    <h3>🚀 Interactive Demo</h3>
+                    <p><strong>Live prototype showcase</strong></p>
+                    <ul>
+                        <li>Platform functionality</li>
+                        <li>User experience demonstration</li>
+                        <li>Technical capabilities</li>
+                        <li>Scalability features</li>
+                    </ul>
+                </a>
+            </div>
+            
+            <div class="cta">
+                <h3>🎯 Investment Thesis</h3>
+                <p style="font-size: 1.1rem; margin-bottom: 20px;">
+                    Why Rapid Tech Store represents the future of digital marketplaces
+                </p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; text-align: left;">
+                    <div>
+                        <h4>🌊 Massive Market Opportunity</h4>
+                        <p>$659B digital tools market ready for consolidation</p>
+                    </div>
+                    <div>
+                        <h4>💡 Unique Value Proposition</h4>
+                        <p>One-stop marketplace for all digital tools</p>
+                    </div>
+                    <div>
+                        <h4>📈 Proven Growth Trajectory</h4>
+                        <p>Clear path to $55M revenue</p>
+                    </div>
+                    <div>
+                        <h4>🏆 Competitive Advantage</h4>
+                        <p>First-mover in comprehensive tech marketplace</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="contact-info">
+                <h4>📞 Contact Information</h4>
+                <p><strong>Shankar Elavarasan</strong><br>
+                <em>Founder & CEO</em></p>
+                <p>📧 <a href="mailto:shankarelavarasan90@gmail.com">shankarelavarasan90@gmail.com</a><br>
+                🔗 <a href="https://github.com/shankarelavarasan/Rapidtechstore-pitch-deck">GitHub Repository</a></p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>🔒 <strong>Confidentiality Notice:</strong> This presentation contains proprietary and confidential information. All materials are protected under copyright and are intended solely for potential investors.</p>
+            <p><strong>Copyright © 2024 Rapid Tech Store - Shankar Elavarasan. All rights reserved.</strong></p>
+            <p style="margin-top: 20px;"><em>Ready to revolutionize the digital marketplace? Let's discuss the opportunity.</em></p>
+        </div>
+    </div>
+</body>
+</html>
