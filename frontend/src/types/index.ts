@@ -1,6 +1,7 @@
 // User and Authentication Types
 export interface User {
   id: string
+  name: string
   email: string
   username: string
   firstName?: string
@@ -77,6 +78,7 @@ export interface App {
   features: string[]
   requirements: SystemRequirements
   changelog?: string
+  reviews?: Review[]
 }
 
 // Review and Rating Types

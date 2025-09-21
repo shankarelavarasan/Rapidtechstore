@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { User, App, AppCategory, CartItem, Notification } from '../types'
-import { AuthService, LoginRequest, RegisterRequest } from '../services/authService'
+import { AuthService } from '../services/authService'
 
 // Auth Store
 interface AuthStore {
@@ -345,14 +345,28 @@ export const useAppsStore = create<AppsStore>((set, get) => ({
       const response = await appsService.addReview(appId, { rating, comment })
       
       if (response.success) {
+        // Create a mock review object since the API doesn't return the review data
+        const newReview = {
+          id: Date.now().toString(),
+          rating,
+          title: 'Review Title',
+          content: comment,
+          user: { id: 'current-user', username: 'Current User', avatar: '' },
+          app: { id: appId, name: '' },
+          isVerified: false,
+          helpfulCount: 0,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }
+        
         // Update the app in the apps array with the new review
         const apps = get().apps
         const updatedApps = apps.map(app => {
-          if (app.id === appId && response.data) {
+          if (app.id === appId) {
             return {
               ...app,
-              reviews: [...(app.reviews || []), response.data],
-              rating: response.data.newAverageRating || app.rating
+              reviews: [...(app.reviews || []), newReview],
+              reviewCount: (app.reviewCount || 0) + 1
             }
           }
           return app

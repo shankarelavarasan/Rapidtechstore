@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { StarIcon, HeartIcon, ShoppingCartIcon } from '@heroicons/react/24/outline'
+import { HeartIcon, ShoppingCartIcon } from '@heroicons/react/24/outline'
 import { StarIcon as StarIconSolid, HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid'
 import { App } from '../../types'
 import { formatCurrency, cn, truncateText } from '../../lib/utils'
@@ -17,20 +17,14 @@ const AppListCard: React.FC<AppListCardProps> = ({
   isFavorite = false, 
   onToggleFavorite 
 }) => {
-  const { addToCart } = useCartStore()
+  const { addItem } = useCartStore()
   const { addNotification } = useNotificationStore()
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
     
-    addToCart({
-      id: app.id,
-      name: app.name,
-      price: app.price,
-      image: app.icon,
-      developer: app.developer
-    })
+    addItem(app)
     
     addNotification({
       type: 'success',
@@ -66,7 +60,7 @@ const AppListCard: React.FC<AppListCardProps> = ({
                   {app.name}
                 </h3>
                 <p className="text-secondary-600 mb-2 line-clamp-1">
-                  by {app.developer.companyName}
+                  by {app.developer.name}
                 </p>
 
                 {/* Rating and Category */}
@@ -88,7 +82,7 @@ const AppListCard: React.FC<AppListCardProps> = ({
                     </span>
                   </div>
                   <span className="inline-block px-2 py-1 text-xs font-medium bg-secondary-100 text-secondary-700 rounded-full">
-                    {app.category}
+                    {app.category.name}
                   </span>
                 </div>
 
@@ -131,7 +125,7 @@ const AppListCard: React.FC<AppListCardProps> = ({
 
                 {/* Download Count */}
                 <div className="text-sm text-secondary-500 mt-2">
-                  {app.downloads} downloads
+                  {app.downloadCount} downloads
                 </div>
               </div>
             </div>

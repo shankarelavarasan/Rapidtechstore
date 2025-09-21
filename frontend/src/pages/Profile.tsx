@@ -1,7 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { 
   UserIcon, 
-  CogIcon, 
   ShoppingBagIcon, 
   HeartIcon,
   BellIcon,
@@ -11,20 +10,28 @@ import {
 import { useAuthStore, useNotificationStore } from '../store'
 import { cn, formatCurrency, formatDate } from '../lib/utils'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
+import type { Purchase } from '../data/mockData'
 
 const Profile: React.FC = () => {
-  const { user, updateProfile, loading } = useAuthStore()
+  const { user, updateProfile, isLoading } = useAuthStore()
   const { addNotification } = useNotificationStore()
   
   const [activeTab, setActiveTab] = useState('profile')
   const [isEditing, setIsEditing] = useState(false)
+  const [purchases, setPurchases] = useState<Purchase[]>([])
   const [formData, setFormData] = useState({
-    name: user?.name || '',
+    firstName: user?.firstName || '',
+    lastName: user?.lastName || '',
     email: user?.email || '',
-    bio: user?.bio || '',
-    company: user?.company || '',
-    website: user?.website || ''
+    username: user?.username || ''
   })
+
+  useEffect(() => {
+    // Load realistic purchase history for investor presentation
+    import('../data/mockData').then(({ mockPurchases }) => {
+      setPurchases(mockPurchases)
+    })
+  }, [])
 
   const tabs = [
     { id: 'profile', name: 'Profile', icon: UserIcon },
@@ -64,10 +71,10 @@ const Profile: React.FC = () => {
         <h2 className="text-2xl font-bold text-secondary-900">Profile Information</h2>
         <button
           onClick={() => isEditing ? handleSaveProfile() : setIsEditing(true)}
-          disabled={loading}
-          className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50"
+          disabled={isLoading}
+          className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 disabled:opacity-50"
         >
-          {loading ? <LoadingSpinner size="sm" /> : (isEditing ? 'Save Changes' : 'Edit Profile')}
+          {isLoading ? <LoadingSpinner size="sm" /> : (isEditing ? 'Save Changes' : 'Edit Profile')}
         </button>
       </div>
 
@@ -75,26 +82,68 @@ const Profile: React.FC = () => {
         <div className="flex items-center mb-6">
           <div className="w-20 h-20 bg-primary-100 rounded-full flex items-center justify-center">
             <span className="text-2xl font-bold text-primary-600">
-              {user?.name?.charAt(0) || 'U'}
+              {user?.firstName?.charAt(0) || user?.username?.charAt(0) || 'U'}
             </span>
           </div>
           <div className="ml-6">
-            <h3 className="text-xl font-semibold text-secondary-900">{user?.name}</h3>
+            <h3 className="text-xl font-semibold text-secondary-900">
+              {user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : user?.username}
+            </h3>
             <p className="text-secondary-600">{user?.email}</p>
-            <p className="text-sm text-secondary-500">Member since {formatDate(user?.createdAt)}</p>
+            <p className="text-sm text-secondary-500">Member since {user?.createdAt ? formatDate(user.createdAt) : 'Unknown'}</p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label htmlFor="profile-name" className="block text-sm font-medium text-secondary-700 mb-2">
-              Full Name
+            <label htmlFor="profile-firstName" className="block text-sm font-medium text-secondary-700 mb-2">
+              First Name
             </label>
             <input
-              id="profile-name"
+              id="profile-firstName"
               type="text"
-              name="name"
-              value={formData.name}
+              name="firstName"
+              value={formData.firstName}
+              onChange={handleInputChange}
+              disabled={!isEditing}
+              className={cn(
+                'w-full px-3 py-2 border rounded-md',
+                isEditing 
+                  ? 'border-secondary-300 focus:outline-none focus:ring-primary-500 focus:border-primary-500' 
+                  : 'border-secondary-200 bg-secondary-50'
+              )}
+            />
+          </div>
+
+          <div>
+            <label htmlFor="profile-lastName" className="block text-sm font-medium text-secondary-700 mb-2">
+              Last Name
+            </label>
+            <input
+              id="profile-lastName"
+              type="text"
+              name="lastName"
+              value={formData.lastName}
+              onChange={handleInputChange}
+              disabled={!isEditing}
+              className={cn(
+                'w-full px-3 py-2 border rounded-md',
+                isEditing 
+                  ? 'border-secondary-300 focus:outline-none focus:ring-primary-500 focus:border-primary-500' 
+                  : 'border-secondary-200 bg-secondary-50'
+              )}
+            />
+          </div>
+
+          <div>
+            <label htmlFor="profile-username" className="block text-sm font-medium text-secondary-700 mb-2">
+              Username
+            </label>
+            <input
+              id="profile-username"
+              type="text"
+              name="username"
+              value={formData.username}
               onChange={handleInputChange}
               disabled={!isEditing}
               className={cn(
@@ -125,67 +174,6 @@ const Profile: React.FC = () => {
               )}
             />
           </div>
-
-          <div>
-            <label htmlFor="profile-company" className="block text-sm font-medium text-secondary-700 mb-2">
-              Company
-            </label>
-            <input
-              id="profile-company"
-              type="text"
-              name="company"
-              value={formData.company}
-              onChange={handleInputChange}
-              disabled={!isEditing}
-              className={cn(
-                'w-full px-3 py-2 border rounded-md',
-                isEditing 
-                  ? 'border-secondary-300 focus:outline-none focus:ring-primary-500 focus:border-primary-500' 
-                  : 'border-secondary-200 bg-secondary-50'
-              )}
-            />
-          </div>
-
-          <div>
-            <label htmlFor="profile-website" className="block text-sm font-medium text-secondary-700 mb-2">
-              Website
-            </label>
-            <input
-              id="profile-website"
-              type="url"
-              name="website"
-              value={formData.website}
-              onChange={handleInputChange}
-              disabled={!isEditing}
-              className={cn(
-                'w-full px-3 py-2 border rounded-md',
-                isEditing 
-                  ? 'border-secondary-300 focus:outline-none focus:ring-primary-500 focus:border-primary-500' 
-                  : 'border-secondary-200 bg-secondary-50'
-              )}
-            />
-          </div>
-        </div>
-
-        <div className="mt-6">
-          <label htmlFor="profile-bio" className="block text-sm font-medium text-secondary-700 mb-2">
-            Bio
-          </label>
-          <textarea
-            id="profile-bio"
-            name="bio"
-            value={formData.bio}
-            onChange={handleInputChange}
-            disabled={!isEditing}
-            rows={4}
-            className={cn(
-              'w-full px-3 py-2 border rounded-md',
-              isEditing 
-                ? 'border-secondary-300 focus:outline-none focus:ring-primary-500 focus:border-primary-500' 
-                : 'border-secondary-200 bg-secondary-50'
-            )}
-            placeholder="Tell us about yourself..."
-          />
         </div>
       </div>
     </div>
@@ -210,39 +198,13 @@ const Profile: React.FC = () => {
         </div>
 
         <div className="divide-y divide-secondary-200">
-          {/* Sample purchase items */}
-          {[
-            {
-              id: '1',
-              name: 'Productivity Suite Pro',
-              developer: 'TechCorp',
-              price: 49.99,
-              purchaseDate: '2024-01-15',
-              status: 'completed'
-            },
-            {
-              id: '2',
-              name: 'Design Studio',
-              developer: 'CreativeTools',
-              price: 29.99,
-              purchaseDate: '2024-01-10',
-              status: 'completed'
-            },
-            {
-              id: '3',
-              name: 'Code Editor Plus',
-              developer: 'DevTools Inc',
-              price: 19.99,
-              purchaseDate: '2024-01-05',
-              status: 'completed'
-            }
-          ].map((purchase) => (
+          {purchases.map((purchase) => (
             <div key={purchase.id} className="p-6 flex items-center justify-between">
               <div className="flex items-center">
                 <div className="w-12 h-12 bg-secondary-100 rounded-lg mr-4"></div>
                 <div>
-                  <h4 className="font-medium text-secondary-900">{purchase.name}</h4>
-                  <p className="text-sm text-secondary-600">by {purchase.developer.companyName}</p>
+                  <h4 className="font-medium text-secondary-900">{purchase.appName}</h4>
+                  <p className="text-sm text-secondary-600">by {purchase.developer}</p>
                   <p className="text-sm text-secondary-500">{formatDate(purchase.purchaseDate)}</p>
                 </div>
               </div>

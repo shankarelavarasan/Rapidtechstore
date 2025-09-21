@@ -1,19 +1,23 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { 
-  StarIcon, 
   ArrowRightIcon,
   PlayIcon,
   ShoppingCartIcon,
   TrophyIcon,
   FireIcon,
-  SparklesIcon
+  SparklesIcon,
+  KeyIcon
 } from '@heroicons/react/24/outline'
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid'
 import { useAppsStore, useCartStore } from '../store'
 import { formatCurrency, cn } from '../lib/utils'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
-import type { App } from '../types'
+import InteractiveTour from '../components/demo/InteractiveTour'
+import CredentialsModal from '../components/demo/CredentialsModal'
+import MobilePreview from '../components/demo/MobilePreview'
+import DemoReport from '../components/demo/DemoReport'
+import { App } from '../types'
 
 const Home: React.FC = () => {
   const { apps, loading: isLoading, setApps, setLoading } = useAppsStore()
@@ -21,54 +25,22 @@ const Home: React.FC = () => {
   const [featuredApps, setFeaturedApps] = useState<App[]>([])
   const [popularApps, setPopularApps] = useState<App[]>([])
   const [newApps, setNewApps] = useState<App[]>([])
+  const [showTour, setShowTour] = useState(false)
+  const [showCredentials, setShowCredentials] = useState(false)
 
   useEffect(() => {
-    // Mock data for demonstration
+    // Load realistic demo data for investor presentation
     setLoading(true)
     setTimeout(() => {
-      const mockApps: App[] = [
-        {
-          id: '1',
-          name: 'PhotoEditor Pro',
-          category: 'photography',
-          price: 29.99,
-          rating: 4.8,
-          downloads: 150000,
-          description: 'Professional photo editing software',
-          developer: {
-            userId: 'dev1',
-            companyName: 'Creative Studios',
-            verified: true
-          },
-          requirements: {
-            os: 'Windows 10+',
-            ram: '8GB',
-            storage: '2GB'
-          }
-        },
-        {
-          id: '2',
-          name: 'Code Assistant',
-          category: 'development',
-          price: 0,
-          rating: 4.9,
-          downloads: 500000,
-          description: 'AI-powered coding assistant',
-          developer: {
-            userId: 'dev2',
-            companyName: 'DevTools Inc',
-            verified: true
-          },
-          requirements: {
-            os: 'Windows 10+',
-            ram: '4GB',
-            storage: '1GB'
-          }
-        }
-      ]
-      setApps(mockApps)
-      setLoading(false)
-    }, 1000)
+      // Import realistic data from our comprehensive mock data file
+      import('../data/mockData').then(({ mockApps, featuredApps, popularApps, newApps }) => {
+        setApps(mockApps)
+        setFeaturedApps(featuredApps)
+        setPopularApps(popularApps)
+        setNewApps(newApps)
+        setLoading(false)
+      })
+    }, 800)
   }, [])
 
   useEffect(() => {
@@ -157,7 +129,7 @@ const Home: React.FC = () => {
             <h3 className="font-semibold text-secondary-900 group-hover:text-primary-600 transition-colors">
               {app.name}
             </h3>
-            <p className="text-sm text-secondary-600">{app.developer.companyName}</p>
+            <p className="text-sm text-secondary-600">{app.developer.name}</p>
           </div>
           <div className="text-right">
             <p className="font-bold text-secondary-900">
@@ -181,13 +153,13 @@ const Home: React.FC = () => {
           <div className="flex items-center space-x-2">
             <Link
               to={`/apps/${app.id}`}
-              className="btn-ghost px-3 py-1 text-sm hover-lift"
+              className="btn-ghost btn-animated px-3 py-1 text-sm"
             >
               View
             </Link>
             <button
               onClick={() => handleAddToCart(app)}
-              className="btn-primary px-3 py-1 text-sm flex items-center space-x-1 hover-lift"
+              className="btn-primary btn-glow px-3 py-1 text-sm flex items-center space-x-1"
             >
               <ShoppingCartIcon className="h-4 w-4" />
               <span>Add</span>
@@ -221,12 +193,26 @@ const Home: React.FC = () => {
               Download, deploy, and transform your digital experience.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center max-w-md sm:max-w-none mx-auto">
-              <Link to="/apps" className="btn-secondary px-6 sm:px-8 py-2.5 sm:py-3 text-base sm:text-lg w-full sm:w-auto">
+              <Link to="/apps" className="btn-secondary btn-animated px-6 sm:px-8 py-2.5 sm:py-3 text-base sm:text-lg w-full sm:w-auto">
                 Browse All Apps
               </Link>
-              <Link to="/categories" className="btn-outline-white px-6 sm:px-8 py-2.5 sm:py-3 text-base sm:text-lg w-full sm:w-auto">
+              <Link to="/categories" className="btn-outline-white btn-glow px-6 sm:px-8 py-2.5 sm:py-3 text-base sm:text-lg w-full sm:w-auto">
                 Explore Categories
               </Link>
+              <button 
+                onClick={() => setShowTour(true)}
+                className="btn-accent btn-animated px-6 sm:px-8 py-2.5 sm:py-3 text-base sm:text-lg w-full sm:w-auto flex items-center gap-2"
+              >
+                <PlayIcon className="h-5 w-5" />
+                Start Tour
+              </button>
+              <button 
+                onClick={() => setShowCredentials(true)}
+                className="btn-primary btn-glow px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base w-full sm:w-auto flex items-center gap-2"
+              >
+                <KeyIcon className="h-4 w-4" />
+                Demo Access
+              </button>
             </div>
           </div>
         </div>
@@ -256,11 +242,205 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* Categories Section */}
+      {/* Competitive Comparison Section */}
+      <section className="py-16 bg-gradient-to-br from-secondary-50 to-primary-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-secondary-900 mb-4">
+              Why Choose Rapid Tech Store?
+            </h2>
+            <p className="text-lg text-secondary-600 max-w-3xl mx-auto">
+              Experience the next generation of app distribution with features that go beyond traditional app stores
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+            {/* Rapid Tech Store */}
+            <div className="bg-white rounded-xl p-8 shadow-lg border-2 border-primary-200 relative">
+              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                <span className="bg-primary-600 text-white px-4 py-2 rounded-full text-sm font-semibold">
+                  Rapid Tech Store
+                </span>
+              </div>
+              <div className="mt-4">
+                <div className="text-center mb-6">
+                  <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <TrophyIcon className="h-8 w-8 text-primary-600" />
+                  </div>
+                  <h3 className="text-xl font-bold text-secondary-900">Our Platform</h3>
+                </div>
+                <ul className="space-y-3">
+                  <li className="flex items-center text-sm">
+                    <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
+                    <span>Instant deployment & scaling</span>
+                  </li>
+                  <li className="flex items-center text-sm">
+                    <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
+                    <span>AI-powered app discovery</span>
+                  </li>
+                  <li className="flex items-center text-sm">
+                    <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
+                    <span>Developer-friendly revenue share (85%)</span>
+                  </li>
+                  <li className="flex items-center text-sm">
+                    <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
+                    <span>Real-time analytics & insights</span>
+                  </li>
+                  <li className="flex items-center text-sm">
+                    <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
+                    <span>Cross-platform compatibility</span>
+                  </li>
+                  <li className="flex items-center text-sm">
+                    <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
+                    <span>24/7 developer support</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Traditional App Stores */}
+            <div className="bg-white rounded-xl p-8 shadow-md border border-secondary-200">
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-secondary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl">📱</span>
+                </div>
+                <h3 className="text-xl font-bold text-secondary-900">Traditional Stores</h3>
+                <p className="text-sm text-secondary-500 mt-1">Play Store, App Store</p>
+              </div>
+              <ul className="space-y-3">
+                <li className="flex items-center text-sm">
+                  <span className="w-2 h-2 bg-red-500 rounded-full mr-3"></span>
+                  <span>Complex approval process (weeks)</span>
+                </li>
+                <li className="flex items-center text-sm">
+                  <span className="w-2 h-2 bg-yellow-500 rounded-full mr-3"></span>
+                  <span>Basic search functionality</span>
+                </li>
+                <li className="flex items-center text-sm">
+                  <span className="w-2 h-2 bg-red-500 rounded-full mr-3"></span>
+                  <span>High commission fees (30%)</span>
+                </li>
+                <li className="flex items-center text-sm">
+                  <span className="w-2 h-2 bg-yellow-500 rounded-full mr-3"></span>
+                  <span>Limited analytics</span>
+                </li>
+                <li className="flex items-center text-sm">
+                  <span className="w-2 h-2 bg-yellow-500 rounded-full mr-3"></span>
+                  <span>Platform restrictions</span>
+                </li>
+                <li className="flex items-center text-sm">
+                  <span className="w-2 h-2 bg-red-500 rounded-full mr-3"></span>
+                  <span>Limited support channels</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* No-Code Platforms */}
+            <div className="bg-white rounded-xl p-8 shadow-md border border-secondary-200">
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-secondary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl">🔧</span>
+                </div>
+                <h3 className="text-xl font-bold text-secondary-900">No-Code Platforms</h3>
+                <p className="text-sm text-secondary-500 mt-1">Bubble, Adalo, etc.</p>
+              </div>
+              <ul className="space-y-3">
+                <li className="flex items-center text-sm">
+                  <span className="w-2 h-2 bg-red-500 rounded-full mr-3"></span>
+                  <span>Limited customization</span>
+                </li>
+                <li className="flex items-center text-sm">
+                  <span className="w-2 h-2 bg-red-500 rounded-full mr-3"></span>
+                  <span>No marketplace distribution</span>
+                </li>
+                <li className="flex items-center text-sm">
+                  <span className="w-2 h-2 bg-yellow-500 rounded-full mr-3"></span>
+                  <span>Template-based limitations</span>
+                </li>
+                <li className="flex items-center text-sm">
+                  <span className="w-2 h-2 bg-red-500 rounded-full mr-3"></span>
+                  <span>Basic performance metrics</span>
+                </li>
+                <li className="flex items-center text-sm">
+                  <span className="w-2 h-2 bg-red-500 rounded-full mr-3"></span>
+                  <span>Vendor lock-in</span>
+                </li>
+                <li className="flex items-center text-sm">
+                  <span className="w-2 h-2 bg-yellow-500 rounded-full mr-3"></span>
+                  <span>Community-based support</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Key Advantages */}
+          <div className="bg-white rounded-xl p-8 shadow-lg border border-primary-200">
+            <h3 className="text-2xl font-bold text-center text-secondary-900 mb-8">
+              Our Competitive Advantages
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="text-center">
+                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <span className="text-green-600 font-bold text-lg">85%</span>
+                </div>
+                <h4 className="font-semibold text-secondary-900 mb-2">Revenue Share</h4>
+                <p className="text-sm text-secondary-600">vs 70% on traditional stores</p>
+              </div>
+              <div className="text-center">
+                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <span className="text-blue-600 font-bold text-lg">24h</span>
+                </div>
+                <h4 className="font-semibold text-secondary-900 mb-2">Deployment</h4>
+                <p className="text-sm text-secondary-600">vs weeks for approval</p>
+              </div>
+              <div className="text-center">
+                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <span className="text-purple-600 font-bold text-lg">AI</span>
+                </div>
+                <h4 className="font-semibold text-secondary-900 mb-2">Smart Discovery</h4>
+                <p className="text-sm text-secondary-600">Intelligent app matching</p>
+              </div>
+              <div className="text-center">
+                <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <span className="text-orange-600 font-bold text-lg">∞</span>
+                </div>
+                <h4 className="font-semibold text-secondary-900 mb-2">Scalability</h4>
+                <p className="text-sm text-secondary-600">Auto-scaling infrastructure</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Mobile Preview Section */}
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <MobilePreview />
+        </div>
+      </section>
+
+      {/* Demo Report Section */}
       <section className="py-16 bg-secondary-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-secondary-900 mb-4">
+              Investment Analytics
+            </h2>
+            <p className="text-lg text-secondary-600">
+              Download comprehensive reports for stakeholders and investors
+            </p>
+          </div>
+          <div className="max-w-2xl mx-auto">
+            <DemoReport />
+          </div>
+        </div>
+      </section>
+
+      {/* Categories Section */}
+      <section className="py-16 bg-secondary-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-secondary-900 mb-4" data-tour="categories">
               Browse by Category
             </h2>
             <p className="text-lg text-secondary-600">
@@ -301,8 +481,8 @@ const Home: React.FC = () => {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center space-x-3">
-                <TrophyIcon className="h-8 w-8 text-accent-500" />
-                <h2 className="text-3xl font-bold text-secondary-900">
+                <TrophyIcon className="h-8 w-8 text-yellow-500" />
+                <h2 className="text-3xl font-bold text-secondary-900" data-tour="featured">
                   Featured Apps
                 </h2>
               </div>
@@ -393,12 +573,24 @@ const Home: React.FC = () => {
           </p>
           <Link
             to="/developer"
-            className="btn-secondary px-8 py-3 text-lg hover-lift"
+            className="btn-secondary btn-animated btn-pulse px-8 py-3 text-lg"
           >
             Become a Developer
           </Link>
         </div>
       </section>
+
+      {/* Interactive Tour */}
+      <InteractiveTour
+        isVisible={showTour}
+        onClose={() => setShowTour(false)}
+      />
+
+      {/* Credentials Modal */}
+      <CredentialsModal
+        isOpen={showCredentials}
+        onClose={() => setShowCredentials(false)}
+      />
     </div>
   )
 }

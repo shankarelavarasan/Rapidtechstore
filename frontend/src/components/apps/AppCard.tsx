@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { StarIcon, HeartIcon, ShoppingCartIcon } from '@heroicons/react/24/outline'
+import { HeartIcon, ShoppingCartIcon } from '@heroicons/react/24/outline'
 import { StarIcon as StarIconSolid, HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid'
 import { App } from '../../types'
 import { formatCurrency, cn } from '../../lib/utils'
@@ -19,20 +19,14 @@ const AppCard: React.FC<AppCardProps> = ({
   onToggleFavorite,
   className 
 }) => {
-  const { addToCart } = useCartStore()
+  const { addItem } = useCartStore()
   const { addNotification } = useNotificationStore()
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
     
-    addToCart({
-      id: app.id,
-      name: app.name,
-      price: app.price,
-      image: app.icon,
-      developer: app.developer
-    })
+    addItem(app)
     
     addNotification({
       type: 'success',
@@ -70,7 +64,7 @@ const AppCard: React.FC<AppCardProps> = ({
           {app.name}
         </h3>
         <p className="text-sm text-secondary-600 mt-1 line-clamp-1">
-          {app.developer.companyName}
+          {app.developer.name}
         </p>
 
         {/* Rating */}
@@ -94,7 +88,7 @@ const AppCard: React.FC<AppCardProps> = ({
         {/* Category */}
         <div className="mt-2">
           <span className="inline-block px-2 py-1 text-xs font-medium bg-secondary-100 text-secondary-700 rounded-full">
-            {app.category}
+            {app.category.name}
           </span>
         </div>
 
@@ -131,7 +125,7 @@ const AppCard: React.FC<AppCardProps> = ({
 
         {/* Download Count */}
         <div className="text-xs text-secondary-500 mt-2">
-          {app.downloads} downloads
+          {app.downloadCount} downloads
         </div>
       </div>
     </Link>

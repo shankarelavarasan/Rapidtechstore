@@ -4,23 +4,38 @@ import {
   CreditCardIcon, 
   LockClosedIcon, 
   ShieldCheckIcon,
-  TrashIcon 
+  TrashIcon,
+  InformationCircleIcon,
+  PlayIcon
 } from '@heroicons/react/24/outline'
 import { useCartStore, useAuthStore, useNotificationStore } from '../store'
-import { formatCurrency, cn } from '../lib/utils'
+import { formatCurrency } from '../lib/utils'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
 import StripeCheckout from '../components/StripeCheckout'
+import RazorpayCheckout from '../components/RazorpayCheckout'
+import PaymentDemo from '../components/demo/PaymentDemo'
+import PaymentSuccess from '../components/demo/PaymentSuccess'
 import { PaymentService } from '../services/paymentService'
 
 const Checkout: React.FC = () => {
   const navigate = useNavigate()
-  const { items, total, removeFromCart, clearCart } = useCartStore()
+  const { items, total, removeItem, clearCart } = useCartStore()
   const { user } = useAuthStore()
   const { addNotification } = useNotificationStore()
 
   const [loading, setLoading] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState('stripe')
-  const [useStripe, setUseStripe] = useState(true)
+  // const [useStripe, setUseStripe] = useState(true)
+  const [showPaymentDemo, setShowPaymentDemo] = useState(false)
+  // Payment gateway selection (currently using stripe by default)
+  // const [selectedGateway, setSelectedGateway] = useState<'stripe' | 'razorpay'>('stripe')
+  const [showPaymentSuccess, setShowPaymentSuccess] = useState(false)
+  const [paymentDetails, setPaymentDetails] = useState<{
+    amount: number;
+    currency: string;
+    method: string;
+    paymentId: string;
+  } | null>(null)
   const [billingInfo, setBillingInfo] = useState({
     email: user?.email || '',
     firstName: '',
@@ -130,19 +145,58 @@ const Checkout: React.FC = () => {
   }
 
   const handleStripeSuccess = (paymentIntentId: string) => {
-    // Clear cart and show success
+    // Set payment details for success animation
+    setPaymentDetails({
+      amount: finalTotal,
+      currency: 'USD',
+      method: 'Stripe',
+      paymentId: paymentIntentId
+    })
+    
+    // Show success animation
+    setShowPaymentSuccess(true)
+    
+    // Clear cart
     clearCart()
     
     addNotification({
       type: 'success',
       title: 'Payment successful!',
-      message: 'Your apps have been purchased successfully.'
+      message: `Your payment has been processed successfully. Payment ID: ${paymentIntentId}`
     })
-
-    navigate('/profile/purchases')
   }
 
   const handleStripeError = (error: string) => {
+    addNotification({
+      type: 'error',
+      title: 'Payment failed',
+      message: error
+    })
+  }
+
+  const handleRazorpaySuccess = (paymentId: string) => {
+    // Set payment details for success animation
+    setPaymentDetails({
+      amount: finalTotal * 75, // INR amount
+      currency: 'INR',
+      method: 'Razorpay',
+      paymentId
+    })
+    
+    // Show success animation
+    setShowPaymentSuccess(true)
+    
+    // Clear cart
+    clearCart()
+    
+    addNotification({
+      type: 'success',
+      title: 'Payment successful!',
+      message: `Your payment has been processed successfully. Payment ID: ${paymentId}`
+    })
+  }
+
+  const handleRazorpayError = (error: string) => {
     addNotification({
       type: 'error',
       title: 'Payment failed',
@@ -155,8 +209,8 @@ const Checkout: React.FC = () => {
     
     if (!validateForm()) return
 
-    // For Stripe payments, the StripeCheckout component handles the submission
-    if (paymentMethod === 'stripe') {
+    // For Stripe and Razorpay payments, their respective components handle the submission
+    if (paymentMethod === 'stripe' || paymentMethod === 'razorpay') {
       return
     }
 
@@ -221,9 +275,38 @@ const Checkout: React.FC = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-secondary-900 mb-8">Checkout</h1>
+    <div className="min-h-screen bg-secondary-50 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-secondary-900">Checkout</h1>
+          <p className="text-secondary-600 mt-2">Complete your purchase securely</p>
+          
+          {/* Demo Banner */}
+          <div className="mt-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <InformationCircleIcon className="h-5 w-5 text-blue-600 mr-2" />
+                <div>
+                  <p className="text-sm font-medium text-blue-900">
+                    Investor Demo Mode
+                  </p>
+                  <p className="text-xs text-blue-700">
+                    Test different payment scenarios with demo cards
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowPaymentDemo(true)}
+                className="flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <PlayIcon className="h-4 w-4 mr-1" />
+                Payment Demo
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="max-w-4xl mx-auto">
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Order Summary */}
@@ -241,14 +324,14 @@ const Checkout: React.FC = () => {
                     />
                     <div className="flex-1">
                       <h3 className="font-medium text-secondary-900">{item.app.name}</h3>
-                      <p className="text-sm text-secondary-600">by {item.app.developer.companyName}</p>
+                      <p className="text-sm text-secondary-600">by {item.app.developer.name}</p>
                     </div>
                     <div className="text-right">
                       <div className="font-medium text-secondary-900">
                         {formatCurrency(item.app.price)}
                       </div>
                       <button
-                        onClick={() => removeFromCart(item.app.id)}
+                        onClick={() => removeItem(item.app.id)}
                         className="text-red-500 hover:text-red-700 text-sm"
                       >
                         <TrashIcon className="h-4 w-4" />
@@ -411,6 +494,22 @@ const Checkout: React.FC = () => {
 
                   <div className="flex items-center">
                     <input
+                      id="razorpay"
+                      name="paymentMethod"
+                      type="radio"
+                      value="razorpay"
+                      checked={paymentMethod === 'razorpay'}
+                      onChange={(e) => setPaymentMethod(e.target.value)}
+                      className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-secondary-300"
+                    />
+                    <label htmlFor="razorpay" className="ml-3 flex items-center">
+                      <CreditCardIcon className="h-5 w-5 text-secondary-400 mr-2" />
+                      Razorpay (India) - UPI, Cards, Net Banking
+                    </label>
+                  </div>
+
+                  <div className="flex items-center">
+                    <input
                       id="card"
                       name="paymentMethod"
                       type="radio"
@@ -434,6 +533,19 @@ const Checkout: React.FC = () => {
                         currency="usd"
                         onSuccess={handleStripeSuccess}
                         onError={handleStripeError}
+                      />
+                    </div>
+                  )}
+
+                  {paymentMethod === 'razorpay' && (
+                    <div className="ml-7 mt-4">
+                      <RazorpayCheckout
+                        appId={items[0]?.app.id || ''}
+                        appName={items.length === 1 ? items[0].app.name : `${items.length} apps`}
+                        amount={finalTotal * 75} // Convert USD to INR (approximate)
+                        currency="INR"
+                        onSuccess={handleRazorpaySuccess}
+                        onError={handleRazorpayError}
                       />
                     </div>
                   )}
@@ -519,8 +631,8 @@ const Checkout: React.FC = () => {
                 </div>
               </div>
 
-              {/* Submit Button - Only show for non-Stripe payments */}
-              {paymentMethod !== 'stripe' && (
+              {/* Submit Button - Only show for legacy card payments */}
+              {paymentMethod !== 'stripe' && paymentMethod !== 'razorpay' && (
                 <button
                   type="submit"
                   disabled={loading}
@@ -538,7 +650,30 @@ const Checkout: React.FC = () => {
               )}
             </form>
           </div>
+          </div>
         </div>
+        
+        {/* Payment Demo Modal */}
+        <PaymentDemo 
+          isOpen={showPaymentDemo} 
+          onClose={() => setShowPaymentDemo(false)} 
+        />
+
+        {/* Payment Success Modal */}
+        {paymentDetails && (
+          <PaymentSuccess
+            isVisible={showPaymentSuccess}
+            amount={paymentDetails.amount}
+            currency={paymentDetails.currency}
+            paymentMethod={paymentDetails.method}
+            paymentId={paymentDetails.paymentId}
+            onClose={() => {
+              setShowPaymentSuccess(false)
+              setPaymentDetails(null)
+              navigate('/profile/purchases')
+            }}
+          />
+        )}
       </div>
     </div>
   )

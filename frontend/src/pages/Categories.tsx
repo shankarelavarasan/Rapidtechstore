@@ -24,30 +24,14 @@ import LoadingSpinner from '../components/ui/LoadingSpinner'
 import AppCard from '../components/apps/AppCard'
 
 const Categories: React.FC = () => {
-  const { apps, categories, isLoading, setApps, setCategories, setLoading } = useAppsStore()
+  const { apps, categories, loading, setCategories } = useAppsStore()
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
 
   useEffect(() => {
-    // Mock data for demonstration
-    setLoading(true)
-    setTimeout(() => {
-      const mockCategories = [
-        { id: 'ide', name: 'IDE', description: 'Integrated Development Environments' },
-        { id: 'saas', name: 'SaaS', description: 'Software as a Service solutions' },
-        { id: 'plugin', name: 'Plugin', description: 'Extensions and plugins for existing software' },
-        { id: 'addon', name: 'Addon', description: 'Add-ons and extensions' },
-        { id: 'app', name: 'App', description: 'Mobile and desktop applications' },
-        { id: 'software', name: 'Software', description: 'General software solutions' },
-        { id: 'business', name: 'Business', description: 'Business and productivity apps' },
-        { id: 'design', name: 'Design', description: 'Creative design tools' },
-        { id: 'development', name: 'Development', description: 'Developer tools and IDEs' },
-        { id: 'photography', name: 'Photography', description: 'Photo editing and management' },
-        { id: 'music', name: 'Music', description: 'Audio and music production' },
-        { id: 'games', name: 'Games', description: 'Entertainment and gaming' }
-      ]
+    // Load realistic category data for investor presentation
+    import('../data/mockData').then(({ mockCategories }) => {
       setCategories(mockCategories)
-      setLoading(false)
-    }, 800)
+    })
   }, [])
 
   const categoryIcons: Record<string, React.ComponentType<any>> = {
@@ -77,11 +61,11 @@ const Categories: React.FC = () => {
   }
 
   const filteredApps = selectedCategory 
-    ? apps.filter(app => app.category === selectedCategory)
+    ? apps.filter(app => app.category.id === selectedCategory)
     : apps
 
   const getCategoryStats = (categoryId: string) => {
-    const categoryApps = apps.filter(app => app.category === categoryId)
+    const categoryApps = apps.filter(app => app.category.id === categoryId)
     return {
       count: categoryApps.length,
       avgRating: categoryApps.length > 0 
@@ -90,7 +74,7 @@ const Categories: React.FC = () => {
     }
   }
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="flex justify-center items-center min-h-96">
         <LoadingSpinner size="lg" text="Loading categories..." />
@@ -267,7 +251,7 @@ const Categories: React.FC = () => {
                     
                     <div className="grid grid-cols-2 gap-4">
                       {apps
-                        .filter(app => app.category === category.id)
+                        .filter(app => app.category.id === category.id)
                         .slice(0, 4)
                         .map((app) => (
                           <Link
@@ -318,7 +302,7 @@ const Categories: React.FC = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {apps
-              .filter(app => app.featured)
+              .filter(app => app.rating >= 4.5)
               .slice(0, 8)
               .map((app) => (
                 <AppCard key={app.id} app={app} />

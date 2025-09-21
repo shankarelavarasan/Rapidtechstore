@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { StarIcon, HeartIcon, ShoppingCartIcon } from '@heroicons/react/24/outline'
+import { HeartIcon, ShoppingCartIcon } from '@heroicons/react/24/outline'
 import { StarIcon as StarIconSolid, HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid'
 import { App } from '../../types'
 import { formatCurrency, cn } from '../../lib/utils'
@@ -17,20 +17,14 @@ const AppGridCard: React.FC<AppGridCardProps> = ({
   isFavorite = false, 
   onToggleFavorite 
 }) => {
-  const { addToCart } = useCartStore()
+  const { addItem } = useCartStore()
   const { addNotification } = useNotificationStore()
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
     
-    addToCart({
-      id: app.id,
-      name: app.name,
-      price: app.price,
-      image: app.icon,
-      developer: app.developer
-    })
+    addItem(app)
     
     addNotification({
       type: 'success',
@@ -63,7 +57,7 @@ const AppGridCard: React.FC<AppGridCardProps> = ({
             {app.name}
           </h3>
           <p className="text-secondary-600 mb-3 line-clamp-1">
-            {app.developer.companyName}
+            {app.developer.name}
           </p>
 
           {/* Rating */}
@@ -87,7 +81,7 @@ const AppGridCard: React.FC<AppGridCardProps> = ({
           {/* Category */}
           <div className="mb-4">
             <span className="inline-block px-3 py-1 text-sm font-medium bg-secondary-100 text-secondary-700 rounded-full">
-              {app.category}
+              {app.category.name}
             </span>
           </div>
 
@@ -133,7 +127,7 @@ const AppGridCard: React.FC<AppGridCardProps> = ({
 
         {/* Download Count */}
         <div className="text-sm text-secondary-500 mt-2">
-          {app.downloads} downloads
+          {app.downloadCount} downloads
         </div>
       </div>
     </div>

@@ -29,19 +29,20 @@ export class AuthService {
   static async login(credentials: LoginRequest): Promise<AuthResponse> {
     try {
       const response = await authApi.login(credentials);
+      const apiResponse = response.data as any;
       
-      if (response.data.success) {
+      if (apiResponse?.success) {
         return {
           success: true,
-          message: response.data.message,
-          user: response.data.user,
-          token: response.data.token,
+          message: apiResponse.message || 'Login successful',
+          user: apiResponse.user,
+          token: apiResponse.token,
         };
       } else {
         return {
           success: false,
-          message: response.data.message || 'Login failed',
-          error: response.data.error,
+          message: apiResponse?.message || 'Login failed',
+          error: apiResponse?.error,
         };
       }
     } catch (error: any) {
@@ -59,19 +60,20 @@ export class AuthService {
   static async register(userData: RegisterRequest): Promise<AuthResponse> {
     try {
       const response = await authApi.register(userData);
+      const apiResponse = response.data as any;
       
-      if (response.data.success) {
+      if (apiResponse?.success) {
         return {
           success: true,
-          message: response.data.message,
-          user: response.data.user,
-          token: response.data.token,
+          message: apiResponse.message || 'Registration successful',
+          user: apiResponse.user,
+          token: apiResponse.token,
         };
       } else {
         return {
           success: false,
-          message: response.data.message || 'Registration failed',
-          error: response.data.error,
+          message: apiResponse?.message || 'Registration failed',
+          error: apiResponse?.error,
         };
       }
     } catch (error: any) {
@@ -104,19 +106,20 @@ export class AuthService {
    */
   static async refreshToken(): Promise<AuthResponse> {
     try {
-      const response = await authApi.refresh();
+      const response = await authApi.refreshToken();
+      const apiResponse = response.data as any;
       
-      if (response.data.success) {
+      if (apiResponse?.success) {
         return {
           success: true,
           message: 'Token refreshed',
-          token: response.data.token,
+          token: apiResponse.token,
         };
       } else {
         return {
           success: false,
           message: 'Token refresh failed',
-          error: response.data.error,
+          error: apiResponse?.error,
         };
       }
     } catch (error: any) {
@@ -134,11 +137,12 @@ export class AuthService {
   static async forgotPassword(email: string): Promise<AuthResponse> {
     try {
       const response = await authApi.forgotPassword(email);
+      const apiResponse = response.data as any;
       
       return {
-        success: response.data.success,
-        message: response.data.message,
-        error: response.data.error,
+        success: apiResponse?.success || false,
+        message: apiResponse?.message || 'Password reset email sent',
+        error: apiResponse?.error,
       };
     } catch (error: any) {
       return {
@@ -155,11 +159,12 @@ export class AuthService {
   static async resetPassword(token: string, password: string): Promise<AuthResponse> {
     try {
       const response = await authApi.resetPassword(token, password);
+      const apiResponse = response.data as any;
       
       return {
-        success: response.data.success,
-        message: response.data.message,
-        error: response.data.error,
+        success: apiResponse.success || false,
+        message: apiResponse.message || 'Password reset successful',
+        error: apiResponse.error,
       };
     } catch (error: any) {
       return {
@@ -176,11 +181,12 @@ export class AuthService {
   static async verifyEmail(token: string): Promise<AuthResponse> {
     try {
       const response = await authApi.verifyEmail(token);
+      const apiResponse = response.data as any;
       
       return {
-        success: response.data.success,
-        message: response.data.message,
-        error: response.data.error,
+        success: apiResponse.success || false,
+        message: apiResponse.message || 'Email verified successfully',
+        error: apiResponse.error,
       };
     } catch (error: any) {
       return {
@@ -197,18 +203,19 @@ export class AuthService {
   static async getProfile(): Promise<AuthResponse> {
     try {
       const response = await authApi.getProfile();
+      const apiResponse = response.data as any;
       
-      if (response.data.success) {
+      if (apiResponse.success) {
         return {
           success: true,
           message: 'Profile retrieved',
-          user: response.data.user,
+          user: apiResponse.data || apiResponse.user,
         };
       } else {
         return {
           success: false,
           message: 'Failed to get profile',
-          error: response.data.error,
+          error: apiResponse.error || apiResponse.message,
         };
       }
     } catch (error: any) {
@@ -227,17 +234,18 @@ export class AuthService {
     try {
       const response = await authApi.updateProfile(data);
       
-      if (response.data.success) {
+      const apiResponse = response.data as any;
+      if (apiResponse.success) {
         return {
           success: true,
-          message: response.data.message,
-          user: response.data.user,
+          message: apiResponse.message || 'Profile updated successfully',
+          user: apiResponse.data || apiResponse.user,
         };
       } else {
         return {
           success: false,
           message: 'Profile update failed',
-          error: response.data.error,
+          error: apiResponse.error || apiResponse.message,
         };
       }
     } catch (error: any) {

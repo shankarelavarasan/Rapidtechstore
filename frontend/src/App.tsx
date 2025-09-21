@@ -10,13 +10,14 @@
  * For licensing inquiries: shankarelavarasan90@gmail.com
  */
 
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Layout from './components/layout/Layout'
 import Home from './pages/Home'
 import Apps from './pages/Apps'
 import AppDetail from './pages/AppDetail'
 import Categories from './pages/Categories'
+import AISearch from './pages/AISearch'
 
 import Login from './pages/auth/Login'
 import Register from './pages/auth/Register'
@@ -44,6 +45,7 @@ function App() {
           <Route path="apps/:id" element={<AppDetail />} />
           <Route path="categories" element={<Categories />} />
           <Route path="categories/:category" element={<Apps />} />
+          <Route path="search" element={<AISearch />} />
 
           <Route path="login" element={
             <ProtectedRoute requireAuth={false}>

@@ -8,12 +8,12 @@ import {
   MinusIcon,
   TrashIcon
 } from '@heroicons/react/24/outline'
-import { useCartStore, useUIStore } from '../../store'
+import { useCartStore } from '../../store'
 import { formatCurrency } from '../../lib/utils'
 
 const Cart: React.FC = () => {
-  const { isCartOpen, toggleCart } = useUIStore()
-  const { items, updateQuantity, removeItem, clearCart, getTotal } = useCartStore()
+  const { isOpen: isCartOpen, toggleCart } = useCartStore()
+  const { items, updateQuantity, removeItem, clearCart, total } = useCartStore()
 
   const handleQuantityChange = (id: string, newQuantity: number) => {
     if (newQuantity <= 0) {
@@ -23,7 +23,6 @@ const Cart: React.FC = () => {
     }
   }
 
-  const total = getTotal()
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0)
 
   return (

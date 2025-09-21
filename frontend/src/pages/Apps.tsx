@@ -4,7 +4,6 @@ import {
   FunnelIcon,
   Squares2X2Icon,
   ListBulletIcon,
-  StarIcon,
   ShoppingCartIcon,
   AdjustmentsHorizontalIcon
 } from '@heroicons/react/24/outline'
@@ -16,7 +15,7 @@ import SearchBar from '../components/apps/SearchBar'
 import type { App } from '../types'
 
 const Apps: React.FC = () => {
-  const [searchParams, setSearchParams] = useSearchParams()
+  const [searchParams] = useSearchParams()
   const { apps, loading, fetchApps } = useAppsStore()
   const { addItem } = useCartStore()
   
@@ -24,7 +23,7 @@ const Apps: React.FC = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [sortBy, setSortBy] = useState('name')
   const [filterCategory, setFilterCategory] = useState('all')
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000])
+  const [priceRange] = useState<[number, number]>([0, 1000])
   const [showFilters, setShowFilters] = useState(false)
 
   const categories = ['all', 'ide', 'saas', 'plugin', 'addon', 'app', 'software', 'productivity', 'games', 'design', 'development', 'business', 'education']
@@ -48,7 +47,7 @@ const Apps: React.FC = () => {
     // Apply category filter
     if (filterCategory !== 'all') {
       filtered = filtered.filter(app => 
-        app.category?.toLowerCase() === filterCategory.toLowerCase()
+        app.category?.name.toLowerCase() === filterCategory.toLowerCase()
       )
     }
 
@@ -150,7 +149,7 @@ const Apps: React.FC = () => {
             <h3 className="font-semibold text-secondary-900 group-hover:text-primary-600 transition-colors">
               {app.name}
             </h3>
-            <p className="text-sm text-secondary-600">{app.developer.companyName}</p>
+            <p className="text-sm text-secondary-600">{app.developer.name}</p>
           </div>
           <div className="text-right">
             <p className="font-bold text-secondary-900">
@@ -214,7 +213,7 @@ const Apps: React.FC = () => {
               <h3 className="text-lg font-semibold text-secondary-900 hover:text-primary-600 transition-colors">
                 {app.name}
               </h3>
-              <p className="text-secondary-600">{app.developer.companyName}</p>
+              <p className="text-secondary-600">{app.developer.name}</p>
               <p className="text-sm text-secondary-600 mt-1 line-clamp-2">
                 {app.description}
               </p>
@@ -228,7 +227,7 @@ const Apps: React.FC = () => {
                 </div>
                 {app.category && (
                   <span className="text-xs bg-secondary-100 text-secondary-700 px-2 py-1 rounded-full">
-                    {app.category}
+                    {app.category.name}
                   </span>
                 )}
               </div>

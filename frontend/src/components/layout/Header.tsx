@@ -48,7 +48,7 @@ const Header: React.FC = () => {
               <Bars3Icon className="h-6 w-6" />
             </button>
             
-            <Link to="/" className="flex items-center space-x-2 ml-2 md:ml-0">
+            <Link to="/" className="flex items-center space-x-2 ml-2 md:ml-0" data-tour="header-logo">
               <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-accent-500 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">RT</span>
               </div>
@@ -59,7 +59,7 @@ const Header: React.FC = () => {
           </div>
 
           {/* Search Bar */}
-          <div className="flex-1 max-w-lg mx-4">
+          <div className="flex-1 max-w-lg mx-4" data-tour="search-bar">
             <form onSubmit={handleSearch} className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <MagnifyingGlassIcon className="h-5 w-5 text-secondary-400" />
@@ -68,7 +68,7 @@ const Header: React.FC = () => {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search apps, games, and more..."
+                placeholder="Ask AI to find apps for you..."
                 className="block w-full pl-10 pr-4 py-2.5 border border-secondary-300 rounded-lg leading-5 bg-white placeholder-secondary-500 focus:outline-none focus:placeholder-secondary-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 shadow-sm hover:shadow-md"
               />
               <button
@@ -86,6 +86,7 @@ const Header: React.FC = () => {
             <button
               onClick={toggleCart}
               className="relative p-2 text-secondary-600 hover:text-secondary-900 hover:bg-secondary-100 rounded-lg transition-colors"
+              data-tour="cart"
             >
               <ShoppingCartIcon className="h-6 w-6" />
               {cartItemCount > 0 && (
@@ -97,7 +98,7 @@ const Header: React.FC = () => {
 
             {/* User Menu */}
             {isAuthenticated ? (
-              <Menu as="div" className="relative">
+              <Menu as="div" className="relative" data-tour="user-menu">
                 <Menu.Button className="flex items-center space-x-2 p-2 rounded-lg hover:bg-secondary-100 transition-colors">
                   {user?.avatar ? (
                     <img

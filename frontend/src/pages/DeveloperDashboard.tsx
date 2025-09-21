@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
 import {
   PlusIcon,
   EyeIcon,
@@ -7,15 +6,16 @@ import {
   TrashIcon,
   ChartBarIcon,
   CurrencyDollarIcon,
-  UserGroupIcon,
-  StarIcon,
   ArrowUpIcon,
-  ArrowDownIcon
+  UserGroupIcon,
+  StarIcon
 } from '@heroicons/react/24/outline'
-import { useAuthStore, useAppsStore, useNotificationStore } from '../store'
-import { cn, formatCurrency, formatDate } from '../lib/utils'
+import { useAuthStore, useNotificationStore } from '../store'
+import { cn, formatCurrency } from '../lib/utils'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
 import Modal from '../components/ui/Modal'
+import AnalyticsDashboard from '../components/demo/AnalyticsDashboard'
+import RevenueDashboard from '../components/demo/RevenueDashboard'
 
 interface DeveloperApp {
   id: string
@@ -42,51 +42,40 @@ const DeveloperDashboard: React.FC = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
 
   useEffect(() => {
-    // Simulate fetching developer apps
-    setTimeout(() => {
-      setApps([
+    // Load realistic developer data for investor presentation
+    import('../data/mockData').then(() => {
+      // Create mock apps data for developer dashboard
+      const mockApps: DeveloperApp[] = [
         {
           id: '1',
-          name: 'Productivity Suite Pro',
-          description: 'Complete productivity solution for teams',
-          price: 49.99,
-          category: 'Productivity',
-          rating: 4.8,
-          downloads: 1250,
-          revenue: 62475,
+          name: 'IntelliCode Pro',
+          description: 'AI-powered code completion tool',
+          price: 89.99,
+          category: 'Development',
+          rating: 4.9,
+          downloads: 125000,
+          revenue: 11248.75,
           status: 'published',
-          createdAt: '2024-01-01',
-          updatedAt: '2024-01-15'
-        },
-        {
-          id: '2',
-          name: 'Design Studio',
-          description: 'Professional design tools for creatives',
-          price: 29.99,
-          category: 'Design',
-          rating: 4.6,
-          downloads: 890,
-          revenue: 26691,
-          status: 'published',
-          createdAt: '2024-01-10',
+          createdAt: '2023-06-15',
           updatedAt: '2024-01-20'
         },
         {
-          id: '3',
-          name: 'Code Editor Plus',
-          description: 'Advanced code editor with AI assistance',
-          price: 19.99,
-          category: 'Development',
-          rating: 4.9,
-          downloads: 2100,
-          revenue: 41979,
+          id: '2',
+          name: 'DesignFlow Studio',
+          description: 'Professional UI/UX design suite',
+          price: 49.99,
+          category: 'Design',
+          rating: 4.8,
+          downloads: 89000,
+          revenue: 4449.11,
           status: 'published',
-          createdAt: '2024-01-05',
+          createdAt: '2023-03-20',
           updatedAt: '2024-01-18'
         }
-      ])
+      ]
+      setApps(mockApps)
       setLoading(false)
-    }, 1000)
+    })
   }, [])
 
   const tabs = [
@@ -325,35 +314,11 @@ const DeveloperDashboard: React.FC = () => {
   )
 
   const renderAnalyticsTab = () => (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-secondary-900">Analytics</h2>
-      
-      <div className="bg-white rounded-lg border border-secondary-200 p-6">
-        <div className="text-center py-12">
-          <ChartBarIcon className="h-12 w-12 text-secondary-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-secondary-900 mb-2">Analytics Dashboard</h3>
-          <p className="text-secondary-600">
-            Detailed analytics and insights for your apps will be displayed here.
-          </p>
-        </div>
-      </div>
-    </div>
+    <AnalyticsDashboard />
   )
 
   const renderRevenueTab = () => (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-secondary-900">Revenue</h2>
-      
-      <div className="bg-white rounded-lg border border-secondary-200 p-6">
-        <div className="text-center py-12">
-          <CurrencyDollarIcon className="h-12 w-12 text-secondary-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-secondary-900 mb-2">Revenue Dashboard</h3>
-          <p className="text-secondary-600">
-            Detailed revenue analytics and payout information will be displayed here.
-          </p>
-        </div>
-      </div>
-    </div>
+    <RevenueDashboard />
   )
 
   const renderTabContent = () => {

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { 
-  StarIcon, 
   HeartIcon, 
   ShareIcon, 
   ShieldCheckIcon,
@@ -21,7 +20,7 @@ const AppDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { apps, loading, fetchAppById, addReview } = useAppsStore()
-  const { addToCart } = useCartStore()
+  const { addItem } = useCartStore()
   const { user } = useAuthStore()
   const { addNotification } = useNotificationStore()
 
@@ -48,13 +47,7 @@ const AppDetail: React.FC = () => {
   const handleAddToCart = () => {
     if (!app) return
     
-    addToCart({
-      id: app.id,
-      name: app.name,
-      price: app.price,
-      image: app.icon,
-      developer: app.developer
-    })
+    addItem(app)
     
     addNotification({
       type: 'success',
@@ -142,7 +135,7 @@ const AppDetail: React.FC = () => {
                 {app.name}
               </h1>
               <p className="text-lg text-secondary-600 mb-2">
-                by {app.developer.companyName}
+                by {app.developer.name}
               </p>
               <div className="flex items-center gap-4 mb-4">
                 <div className="flex items-center">

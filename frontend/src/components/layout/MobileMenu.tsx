@@ -13,10 +13,10 @@ import {
   BellIcon
 } from '@heroicons/react/24/outline'
 import { useUIStore, useAuthStore } from '../../store'
-import { cn } from '../../lib/utils'
+
 
 const MobileMenu: React.FC = () => {
-  const { isMobileMenuOpen, toggleMobileMenu } = useUIStore()
+  const { mobileMenuOpen, toggleMobileMenu } = useUIStore()
   const { user, isAuthenticated, logout } = useAuthStore()
 
   const navigationItems = [
@@ -44,7 +44,7 @@ const MobileMenu: React.FC = () => {
   }
 
   return (
-    <Transition show={isMobileMenuOpen} as={React.Fragment}>
+    <Transition show={mobileMenuOpen} as={React.Fragment}>
       <Dialog as="div" className="relative z-50" onClose={toggleMobileMenu}>
         <Transition.Child
           as={React.Fragment}
