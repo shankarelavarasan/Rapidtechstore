@@ -284,10 +284,11 @@ const Checkout: React.FC = () => {
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-secondary-700 mb-1">
+                    <label htmlFor="billing-firstName" className="block text-sm font-medium text-secondary-700 mb-1">
                       First Name
                     </label>
                     <input
+                      id="billing-firstName"
                       type="text"
                       name="firstName"
                       value={billingInfo.firstName}
@@ -297,10 +298,11 @@ const Checkout: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-secondary-700 mb-1">
+                    <label htmlFor="billing-lastName" className="block text-sm font-medium text-secondary-700 mb-1">
                       Last Name
                     </label>
                     <input
+                      id="billing-lastName"
                       type="text"
                       name="lastName"
                       value={billingInfo.lastName}
@@ -312,10 +314,11 @@ const Checkout: React.FC = () => {
                 </div>
 
                 <div className="mt-4">
-                  <label className="block text-sm font-medium text-secondary-700 mb-1">
+                  <label htmlFor="billing-email" className="block text-sm font-medium text-secondary-700 mb-1">
                     Email
                   </label>
                   <input
+                    id="billing-email"
                     type="email"
                     name="email"
                     value={billingInfo.email}
@@ -326,10 +329,11 @@ const Checkout: React.FC = () => {
                 </div>
 
                 <div className="mt-4">
-                  <label className="block text-sm font-medium text-secondary-700 mb-1">
+                  <label htmlFor="billing-address" className="block text-sm font-medium text-secondary-700 mb-1">
                     Address
                   </label>
                   <input
+                    id="billing-address"
                     type="text"
                     name="address"
                     value={billingInfo.address}
@@ -341,10 +345,11 @@ const Checkout: React.FC = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                   <div>
-                    <label className="block text-sm font-medium text-secondary-700 mb-1">
+                    <label htmlFor="billing-city" className="block text-sm font-medium text-secondary-700 mb-1">
                       City
                     </label>
                     <input
+                      id="billing-city"
                       type="text"
                       name="city"
                       value={billingInfo.city}
@@ -354,10 +359,11 @@ const Checkout: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-secondary-700 mb-1">
+                    <label htmlFor="billing-state" className="block text-sm font-medium text-secondary-700 mb-1">
                       State
                     </label>
                     <input
+                      id="billing-state"
                       type="text"
                       name="state"
                       value={billingInfo.state}
@@ -366,10 +372,11 @@ const Checkout: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-secondary-700 mb-1">
+                    <label htmlFor="billing-zipCode" className="block text-sm font-medium text-secondary-700 mb-1">
                       ZIP Code
                     </label>
                     <input
+                      id="billing-zipCode"
                       type="text"
                       name="zipCode"
                       value={billingInfo.zipCode}
@@ -434,10 +441,11 @@ const Checkout: React.FC = () => {
                   {paymentMethod === 'card' && (
                     <div className="ml-7 space-y-4 border-l-2 border-secondary-200 pl-4">
                       <div>
-                        <label className="block text-sm font-medium text-secondary-700 mb-1">
+                        <label htmlFor="card-number" className="block text-sm font-medium text-secondary-700 mb-1">
                           Card Number
                         </label>
                         <input
+                          id="card-number"
                           type="text"
                           value={cardInfo.number}
                           onChange={handleCardNumberChange}
@@ -450,10 +458,11 @@ const Checkout: React.FC = () => {
 
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-sm font-medium text-secondary-700 mb-1">
+                          <label htmlFor="card-expiry" className="block text-sm font-medium text-secondary-700 mb-1">
                             Expiry Date
                           </label>
                           <input
+                            id="card-expiry"
                             type="text"
                             value={cardInfo.expiry}
                             onChange={handleExpiryChange}
@@ -464,10 +473,11 @@ const Checkout: React.FC = () => {
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-secondary-700 mb-1">
+                          <label htmlFor="card-cvc" className="block text-sm font-medium text-secondary-700 mb-1">
                             CVC
                           </label>
                           <input
+                            id="card-cvc"
                             type="text"
                             name="cvc"
                             value={cardInfo.cvc}
@@ -481,10 +491,11 @@ const Checkout: React.FC = () => {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-secondary-700 mb-1">
+                        <label htmlFor="card-name" className="block text-sm font-medium text-secondary-700 mb-1">
                           Cardholder Name
                         </label>
                         <input
+                          id="card-name"
                           type="text"
                           name="name"
                           value={cardInfo.name}

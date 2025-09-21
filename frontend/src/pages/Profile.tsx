@@ -87,10 +87,11 @@ const Profile: React.FC = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-secondary-700 mb-2">
+            <label htmlFor="profile-name" className="block text-sm font-medium text-secondary-700 mb-2">
               Full Name
             </label>
             <input
+              id="profile-name"
               type="text"
               name="name"
               value={formData.name}
@@ -106,10 +107,11 @@ const Profile: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-secondary-700 mb-2">
+            <label htmlFor="profile-email" className="block text-sm font-medium text-secondary-700 mb-2">
               Email
             </label>
             <input
+              id="profile-email"
               type="email"
               name="email"
               value={formData.email}
@@ -125,10 +127,11 @@ const Profile: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-secondary-700 mb-2">
+            <label htmlFor="profile-company" className="block text-sm font-medium text-secondary-700 mb-2">
               Company
             </label>
             <input
+              id="profile-company"
               type="text"
               name="company"
               value={formData.company}
@@ -144,10 +147,11 @@ const Profile: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-secondary-700 mb-2">
+            <label htmlFor="profile-website" className="block text-sm font-medium text-secondary-700 mb-2">
               Website
             </label>
             <input
+              id="profile-website"
               type="url"
               name="website"
               value={formData.website}
@@ -164,10 +168,11 @@ const Profile: React.FC = () => {
         </div>
 
         <div className="mt-6">
-          <label className="block text-sm font-medium text-secondary-700 mb-2">
+          <label htmlFor="profile-bio" className="block text-sm font-medium text-secondary-700 mb-2">
             Bio
           </label>
           <textarea
+            id="profile-bio"
             name="bio"
             value={formData.bio}
             onChange={handleInputChange}

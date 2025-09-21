@@ -16,7 +16,7 @@ import LoadingSpinner from '../components/ui/LoadingSpinner'
 import type { App } from '../types'
 
 const Home: React.FC = () => {
-  const { apps, isLoading, setApps, setLoading } = useAppsStore()
+  const { apps, loading: isLoading, setApps, setLoading } = useAppsStore()
   const { addItem } = useCartStore()
   const [featuredApps, setFeaturedApps] = useState<App[]>([])
   const [popularApps, setPopularApps] = useState<App[]>([])

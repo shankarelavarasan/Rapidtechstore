@@ -412,10 +412,11 @@ const AppDetail: React.FC = () => {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-secondary-700 mb-2">
+            <label htmlFor="review-comment" className="block text-sm font-medium text-secondary-700 mb-2">
               Comment
             </label>
             <textarea
+              id="review-comment"
               value={reviewForm.comment}
               onChange={(e) => setReviewForm(prev => ({ ...prev, comment: e.target.value }))}
               rows={4}
