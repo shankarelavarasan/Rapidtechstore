@@ -130,6 +130,8 @@ const AISearchBar: React.FC<AISearchBarProps> = ({
           </div>
           
           <input
+            id="ai-search"
+            name="aiSearch"
             ref={inputRef}
             type="text"
             value={query}

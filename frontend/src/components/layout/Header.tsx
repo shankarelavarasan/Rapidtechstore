@@ -65,6 +65,8 @@ const Header: React.FC = () => {
                 <MagnifyingGlassIcon className="h-5 w-5 text-secondary-400" />
               </div>
               <input
+                id="header-search"
+                name="search"
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}

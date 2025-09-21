@@ -55,6 +55,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
         </div>
         
         <input
+          id="search-bar"
+          name="search"
           type="text"
           value={localQuery}
           onChange={(e) => setLocalQuery(e.target.value)}

@@ -558,6 +558,7 @@ const Checkout: React.FC = () => {
                         </label>
                         <input
                           id="card-number"
+                          name="cardNumber"
                           type="text"
                           value={cardInfo.number}
                           onChange={handleCardNumberChange}
@@ -575,6 +576,7 @@ const Checkout: React.FC = () => {
                           </label>
                           <input
                             id="card-expiry"
+                            name="cardExpiry"
                             type="text"
                             value={cardInfo.expiry}
                             onChange={handleExpiryChange}
