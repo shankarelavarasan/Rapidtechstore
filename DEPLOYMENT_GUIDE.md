@@ -1,3 +1,10 @@
+---
+layout: default
+title: "Deployment Guide"
+description: "Comprehensive production deployment guide for Rapid Tech Store platform including cloud infrastructure, CI/CD, and monitoring."
+permalink: /deployment-guide.html
+---
+
 # 🚀 Rapid Tech Store - Production Deployment Guide
 
 ## 📋 Overview

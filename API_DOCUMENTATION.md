@@ -1,3 +1,10 @@
+---
+layout: default
+title: "API Documentation"
+description: "Comprehensive API documentation for Rapid Tech Store platform including endpoints, authentication, and integration guides."
+permalink: /api-documentation.html
+---
+
 # Rapid Tech Store API Documentation
 
 ## Overview

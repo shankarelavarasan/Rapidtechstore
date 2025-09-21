@@ -1,3 +1,10 @@
+---
+layout: default
+title: "Investor Demo Guide"
+description: "Comprehensive guide for presenting Rapid Tech Store to investors including demo walkthrough and key talking points."
+permalink: /investor-demo-guide.html
+---
+
 # 🎯 Rapid Tech Store - Investor Demo Guide
 
 ## 📋 Table of Contents
