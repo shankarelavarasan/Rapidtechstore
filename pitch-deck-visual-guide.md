@@ -1,3 +1,10 @@
+---
+layout: default
+title: "Visual Guide & Assets"
+description: "Visual guide and design assets for Rapid Tech Store pitch deck presentation and marketing materials."
+permalink: /pitch-deck-visual-guide.html
+---
+
 # Rapid Tech Store - Pitch Deck Visual Guide
 
 ## Visual Assets Required for Enhanced Pitch Deck

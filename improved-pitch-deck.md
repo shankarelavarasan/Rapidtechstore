@@ -1,3 +1,10 @@
+---
+layout: default
+title: "Complete Pitch Deck"
+description: "Comprehensive investor pitch deck for Rapid Tech Store - AI-powered digital marketplace platform seeking $2M seed funding for 20% equity."
+permalink: /improved-pitch-deck.html
+---
+
 # Rapid Tech Store - Improved Pitch Deck
 
 ## Slide 1: Title / Cover Slide ✨

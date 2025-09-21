@@ -1,0 +1,121 @@
+# Jekyll Configuration for Rapid Tech Store GitHub Pages
+title: "🚀 Rapid Tech Store"
+description: "AI-powered digital marketplace platform revolutionizing software discovery. $2M seed round for 20% equity in $87B+ market opportunity."
+url: "https://shankarelavarasan.github.io"
+baseurl: "/Rapidtechstore"
+
+# Site settings
+author: "Shankar Elavarasan"
+email: "shankarelavarasan90@gmail.com"
+company: "Rapid Tech"
+copyright: "© 2024 Rapid Tech - Shankar Elavarasan. All Rights Reserved."
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+theme: minima
+
+# Plugins
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+  - jekyll-seo-tag
+
+# Exclude files from processing
+exclude:
+  - node_modules/
+  - backend/
+  - frontend/
+  - scripts/
+  - terraform/
+  - k8s/
+  - tests/
+  - .env*
+  - docker-compose*.yml
+  - Dockerfile
+  - package*.json
+  - tsconfig*.json
+  - jest.config.js
+  - tailwind.config.js
+  - postcss.config.js
+  - eslint.config.js
+  - vite.config.ts
+
+# Include files that start with underscore
+include:
+  - _pages
+
+# Collections for better organization
+collections:
+  investor_materials:
+    output: true
+    permalink: /:collection/:name/
+
+# Default layouts
+defaults:
+  - scope:
+      path: ""
+      type: "posts"
+    values:
+      layout: "post"
+  - scope:
+      path: ""
+      type: "pages"
+    values:
+      layout: "page"
+  - scope:
+      path: ""
+      type: "investor_materials"
+    values:
+      layout: "page"
+
+# SEO and social media
+twitter:
+  username: rapidtechstore
+  card: summary_large_image
+
+facebook:
+  app_id: 
+  publisher: 
+
+social:
+  name: Rapid Tech Store
+  links:
+    - https://github.com/shankarelavarasan/Rapidtechstore
+
+# Google Analytics (add your tracking ID)
+google_analytics: 
+
+# Sass configuration
+sass:
+  sass_dir: _sass
+  style: compressed
+
+# Kramdown configuration
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    css_class: 'highlight'
+    span:
+      line_numbers: false
+    block:
+      line_numbers: false
+
+# Custom variables for the site
+investment:
+  funding_round: "Seed Round"
+  amount: "$2M"
+  equity: "20%"
+  valuation: "$10M pre-money"
+  
+market:
+  tam: "$87B+"
+  sam: "$12B"
+  som: "$240M"
+  
+metrics:
+  discovery_improvement: "70%"
+  cost_reduction: "30%"
+  commission_rate: "15%"
+  projected_arr: "$5M"

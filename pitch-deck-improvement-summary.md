@@ -1,3 +1,10 @@
+---
+layout: default
+title: "Financial Projections & Improvements"
+description: "Detailed financial projections, market analysis, and pitch deck improvements for Rapid Tech Store investment opportunity."
+permalink: /pitch-deck-improvement-summary.html
+---
+
 # Rapid Tech Store - Pitch Deck Improvement Summary
 
 ## உங்கள் Feedback-ன் அடிப்படையில் செய்யப்பட்ட மேம்பாடுகள்
