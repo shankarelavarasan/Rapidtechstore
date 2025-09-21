@@ -151,6 +151,205 @@
             line-height: 1.5;
         }
         
+        .live-demo-showcase {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 40px;
+            border-radius: 20px;
+            margin: 40px 0;
+        }
+        
+        .demo-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .demo-info h3 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: white;
+        }
+        
+        .demo-features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 30px 0;
+        }
+        
+        .feature {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255,255,255,0.1);
+            padding: 12px;
+            border-radius: 10px;
+        }
+        
+        .feature-icon {
+            font-size: 1.2rem;
+        }
+        
+        .demo-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .btn-large {
+            padding: 18px 36px;
+            font-size: 1.1rem;
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid white;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: white;
+            color: #667eea;
+        }
+        
+        .demo-preview {
+            display: flex;
+            justify-content: center;
+        }
+        
+        .browser-mockup {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            overflow: hidden;
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .browser-header {
+            background: #f1f3f4;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .browser-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .browser-buttons span {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .btn-close { background: #ff5f57; }
+        .btn-minimize { background: #ffbd2e; }
+        .btn-maximize { background: #28ca42; }
+        
+        .browser-url {
+            background: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            color: #666;
+            flex: 1;
+        }
+        
+        .browser-content {
+            padding: 30px 20px;
+            text-align: center;
+            color: #333;
+        }
+        
+        .demo-placeholder h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .demo-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 20px;
+        }
+        
+        .demo-stats span {
+            background: #f8f9fa;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .materials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+        
+        .material-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid #e9ecef;
+        }
+        
+        .material-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        
+        .material-card.featured {
+            border: 2px solid #667eea;
+            background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+        }
+        
+        .material-card h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+        
+        .material-card p {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        .card-stats {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .card-stats span {
+            background: #f1f3f4;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            color: #666;
+        }
+        
+        .btn-external {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-external:hover {
+            background: #218838;
+        }
+        
         .demo-section {
             background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
             color: white;
@@ -175,6 +374,25 @@
         .demo-button:hover {
             transform: scale(1.05);
             box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        @media (max-width: 768px) {
+            .demo-container {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+            
+            .demo-features {
+                grid-template-columns: 1fr;
+            }
+            
+            .demo-actions {
+                flex-direction: column;
+            }
+            
+            .materials-grid {
+                grid-template-columns: 1fr;
+            }
         }
         
         .footer {
@@ -220,9 +438,14 @@
         
         <main class="main-content">
             <div class="investment-highlight">
-                <h2>💰 Investment Opportunity</h2>
-                <p><strong>Seed Round: $2M for 20% equity</strong> | $10M pre-money valuation</p>
-                <p>Revolutionizing the $87B+ global software market with AI-powered discovery</p>
+                <h2>💰 Investment Opportunity Overview</h2>
+                <p class="opportunity-desc">Rapid Tech Store represents a <strong>$659 billion market opportunity</strong> in the rapidly expanding digital tools and software marketplace sector.</p>
+                
+                <div style="margin: 20px 0;">
+                    <h3 style="margin-bottom: 15px;">🎯 Current Funding Round</h3>
+                    <p><strong>Seed Round: $2M for 20% equity</strong> | $10M pre-money valuation</p>
+                    <p>Projected Revenue: $550K → $55M (5 years) | 2,900% Growth Potential</p>
+                </div>
             </div>
             
             <div class="metrics-grid">
@@ -244,7 +467,21 @@
                 </div>
             </div>
             
-            <h2 style="text-align: center; margin: 40px 0; color: #333;">📊 Investor Materials</h2>
+            <div class="demo-section">
+                <h2>🚀 Live Application Demo</h2>
+                <p>Experience the platform in action with our fully functional demo</p>
+                <a href="http://localhost:5174/" class="demo-button">🚀 Launch Demo</a>
+                <a href="./investor-demo/INVESTOR_DEMO_GUIDE.md" class="demo-button">📖 Demo Guide</a>
+                
+                <div style="margin-top: 30px;">
+                    <h3>Demo Credentials</h3>
+                    <p><strong>Admin:</strong> admin@rapidtech.com / admin123</p>
+                    <p><strong>Developer:</strong> dev@example.com / dev123</p>
+                    <p><strong>User:</strong> user@example.com / user123</p>
+                </div>
+            </div>
+
+            <h2 style="text-align: center; margin: 40px 0; color: #333;">📊 Comprehensive Investor Materials</h2>
             
             <div class="navigation-grid">
                 <a href="./improved-pitch-deck.md" class="nav-card">
@@ -276,21 +513,14 @@
                     <h3>📚 API Documentation</h3>
                     <p>Complete technical documentation and API reference for developers</p>
                 </a>
+                
+                <a href="https://shankarelavarasan.github.io/Rapidtechstore-pitch-deck/" class="nav-card">
+                    <h3>📈 Investment Thesis</h3>
+                    <p>Why Rapid Tech Store represents the future of digital marketplaces and a compelling investment opportunity</p>
+                </a>
             </div>
             
-            <div class="demo-section">
-                <h2>🌟 Live Application Demo</h2>
-                <p>Experience the platform in action with our fully functional demo</p>
-                <a href="http://localhost:5174/" class="demo-button">🚀 Launch Demo</a>
-                <a href="./investor-demo/INVESTOR_DEMO_GUIDE.md" class="demo-button">📖 Demo Guide</a>
-                
-                <div style="margin-top: 30px;">
-                    <h3>Demo Credentials</h3>
-                    <p><strong>Admin:</strong> admin@rapidtech.com / admin123</p>
-                    <p><strong>Developer:</strong> dev@example.com / dev123</p>
-                    <p><strong>User:</strong> user@example.com / user123</p>
-                </div>
-            </div>
+
             
             <div style="background: #f8f9fa; padding: 30px; border-radius: 15px; margin: 40px 0;">
                 <h2 style="text-align: center; color: #333; margin-bottom: 20px;">🎯 Executive Summary</h2>
