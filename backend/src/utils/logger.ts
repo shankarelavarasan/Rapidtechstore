@@ -27,27 +27,28 @@ export const logger = winston.createLogger({
     new winston.transports.Console({
       format: process.env.NODE_ENV === 'production' ? logFormat : consoleFormat,
     }),
-
-    // File transport for errors
-    new DailyRotateFile({
-      filename: 'logs/error-%DATE%.log',
-      datePattern: 'YYYY-MM-DD',
-      level: 'error',
-      maxSize: '20m',
-      maxFiles: '14d',
-      format: logFormat,
-    }),
-
-    // File transport for all logs
-    new DailyRotateFile({
-      filename: 'logs/combined-%DATE%.log',
-      datePattern: 'YYYY-MM-DD',
-      maxSize: '20m',
-      maxFiles: '14d',
-      format: logFormat,
-    }),
   ],
 });
+
+// Add file transports only if LOG_FILE_ENABLED is true
+if (process.env.LOG_FILE_ENABLED === 'true') {
+  logger.add(new DailyRotateFile({
+    filename: 'logs/error-%DATE%.log',
+    datePattern: 'YYYY-MM-DD',
+    level: 'error',
+    maxSize: '20m',
+    maxFiles: '14d',
+    format: logFormat,
+  }));
+
+  logger.add(new DailyRotateFile({
+    filename: 'logs/combined-%DATE%.log',
+    datePattern: 'YYYY-MM-DD',
+    maxSize: '20m',
+    maxFiles: '14d',
+    format: logFormat,
+  }));
+}
 
 // Handle uncaught exceptions and unhandled rejections
 logger.exceptions.handle(
