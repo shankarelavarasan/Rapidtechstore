@@ -144,13 +144,19 @@ const AISearchBar: React.FC<AISearchBarProps> = ({
                        placeholder-secondary-400 text-secondary-900 bg-white shadow-sm
                        hover:shadow-md transition-all duration-200 text-lg
                        disabled:opacity-50 disabled:cursor-not-allowed"
+            aria-label="AI-powered app search"
+            aria-describedby="ai-search-instructions"
+            aria-expanded={showDropdown}
+            aria-haspopup="listbox"
+            role="combobox"
           />
           
           {query && (
             <button
               type="button"
               onClick={handleClear}
-              className="absolute inset-y-0 right-0 pr-4 flex items-center hover:text-secondary-600 text-secondary-400 transition-colors"
+              className="absolute inset-y-0 right-0 pr-4 flex items-center hover:text-secondary-600 text-secondary-400 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded-md min-w-[44px] min-h-[44px] justify-center"
+              aria-label="Clear AI search"
             >
               <XMarkIcon className="h-5 w-5" />
             </button>
@@ -162,9 +168,18 @@ const AISearchBar: React.FC<AISearchBarProps> = ({
         </button>
       </form>
 
+      {/* Screen reader instructions */}
+      <div id="ai-search-instructions" className="sr-only">
+        Use AI to search for apps. Type your request and press Enter to search. Use arrow keys to navigate suggestions when dropdown is open.
+      </div>
+
       {/* Search Dropdown */}
       {showDropdown && showSuggestions && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-lg border border-secondary-200 z-50 max-h-96 overflow-y-auto">
+        <div 
+          className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-lg border border-secondary-200 z-50 max-h-96 overflow-y-auto"
+          role="listbox"
+          aria-label="Search suggestions"
+        >
           {/* Search History */}
           {searchHistory.length > 0 && (
             <div className="p-4 border-b border-secondary-100">

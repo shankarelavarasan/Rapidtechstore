@@ -21,7 +21,7 @@ const AISearch: React.FC = () => {
   const [searchResults, setSearchResults] = useState<AISearchResult | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [showFilters, setShowFilters] = useState(false)
-  const { addItem } = useCartStore()
+  const { addItem, isItemLoading } = useCartStore()
 
   const initialQuery = searchParams.get('q') || ''
 
@@ -52,8 +52,8 @@ const AISearch: React.FC = () => {
     setSearchResults(results)
   }
 
-  const handleAddToCart = (app: App) => {
-    addItem(app)
+  const handleAddToCart = async (app: App) => {
+    await addItem(app)
   }
 
   const renderStars = (rating: number) => {
@@ -203,10 +203,18 @@ const AISearch: React.FC = () => {
                           </Link>
                           <button
                             onClick={() => handleAddToCart(app)}
-                            className="flex items-center gap-1 px-3 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-medium transition-colors"
+                            disabled={isItemLoading(app.id)}
+                            className="flex items-center gap-1 px-3 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           >
-                            <ShoppingCartIcon className="h-4 w-4" />
-                            {app.price === 0 ? 'Get' : 'Buy'}
+                            {isItemLoading(app.id) ? (
+                              <LoadingSpinner size="sm" />
+                            ) : (
+                              <ShoppingCartIcon className="h-4 w-4" />
+                            )}
+                            {isItemLoading(app.id) 
+                              ? 'Adding...' 
+                              : (app.price === 0 ? 'Get' : 'Buy')
+                            }
                           </button>
                         </div>
                       </div>
@@ -221,7 +229,8 @@ const AISearch: React.FC = () => {
                 <p className="text-secondary-600 mb-4">Try adjusting your search query or browse our categories</p>
                 <Link
                   to="/apps"
-                  className="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium transition-colors"
+                  className="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 min-w-[44px] min-h-[44px]"
+                  aria-label="Browse all available apps in the marketplace"
                 >
                   Browse All Apps
                 </Link>
@@ -252,10 +261,11 @@ const AISearch: React.FC = () => {
                 <button
                   key={index}
                   onClick={() => performSearch(example)}
-                  className="p-4 bg-white border border-secondary-200 rounded-lg hover:border-primary-300 hover:shadow-md transition-all text-left"
+                  className="p-4 bg-white border border-secondary-200 rounded-lg hover:border-primary-300 hover:shadow-md transition-all text-left focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 min-w-[44px] min-h-[44px]"
+                  aria-label={`Search for: ${example}`}
                 >
                   <div className="flex items-center gap-2 text-primary-600 mb-2">
-                    <SparklesIcon className="h-4 w-4" />
+                    <SparklesIcon className="h-4 w-4" aria-hidden="true" />
                     <span className="text-sm font-medium">Try this</span>
                   </div>
                   <p className="text-secondary-700">{example}</p>

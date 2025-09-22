@@ -386,6 +386,8 @@ interface CartStore {
   total: number
   currency: string
   isOpen: boolean
+  isLoading: boolean
+  loadingItems: Set<string>
   
   // Actions
   addItem: (app: App) => void
@@ -395,6 +397,13 @@ interface CartStore {
   toggleCart: () => void
   setCartOpen: (open: boolean) => void
   calculateTotal: () => void
+  setLoading: (loading: boolean) => void
+  setItemLoading: (appId: string, loading: boolean) => void
+  isItemLoading: (appId: string) => boolean
+  
+  // Alias methods for compatibility
+  addToCart: (app: App) => void
+  getTotal: () => number
 }
 
 export const useCartStore = create<CartStore>()(
@@ -404,46 +413,94 @@ export const useCartStore = create<CartStore>()(
       total: 0,
       currency: 'USD',
       isOpen: false,
+      isLoading: false,
+      loadingItems: new Set<string>(),
 
-      addItem: (app) => {
-        const items = get().items
-        const existingItem = items.find(item => item.app.id === app.id)
+      addItem: async (app) => {
+        const appId = app.id
+        get().setItemLoading(appId, true)
         
-        if (existingItem) {
-          set({
-            items: items.map(item =>
-              item.app.id === app.id
-                ? { ...item, quantity: item.quantity + 1 }
-                : item
-            )
-          })
-        } else {
-          set({ items: [...items, { app, quantity: 1 }] })
+        try {
+          // Simulate async operation (could be API call in real app)
+          await new Promise(resolve => setTimeout(resolve, 300))
+          
+          const items = get().items
+          const existingItem = items.find(item => item.app.id === app.id)
+          
+          if (existingItem) {
+            set({
+              items: items.map(item =>
+                item.app.id === app.id
+                  ? { ...item, quantity: item.quantity + 1 }
+                  : item
+              )
+            })
+          } else {
+            set({ items: [...items, { app, quantity: 1 }] })
+          }
+          
+          get().calculateTotal()
+        } catch (error) {
+          console.error('Failed to add item to cart:', error)
+        } finally {
+          get().setItemLoading(appId, false)
         }
+      },
+
+      removeItem: async (appId) => {
+        get().setItemLoading(appId, true)
         
-        get().calculateTotal()
+        try {
+          // Simulate async operation
+          await new Promise(resolve => setTimeout(resolve, 200))
+          
+          set({ items: get().items.filter(item => item.app.id !== appId) })
+          get().calculateTotal()
+        } catch (error) {
+          console.error('Failed to remove item from cart:', error)
+        } finally {
+          get().setItemLoading(appId, false)
+        }
       },
 
-      removeItem: (appId) => {
-        set({ items: get().items.filter(item => item.app.id !== appId) })
-        get().calculateTotal()
-      },
-
-      updateQuantity: (appId, quantity) => {
+      updateQuantity: async (appId, quantity) => {
         if (quantity <= 0) {
-          get().removeItem(appId)
+          await get().removeItem(appId)
           return
         }
         
-        set({
-          items: get().items.map(item =>
-            item.app.id === appId ? { ...item, quantity } : item
-          )
-        })
-        get().calculateTotal()
+        get().setItemLoading(appId, true)
+        
+        try {
+          // Simulate async operation
+          await new Promise(resolve => setTimeout(resolve, 200))
+          
+          set({
+            items: get().items.map(item =>
+              item.app.id === appId ? { ...item, quantity } : item
+            )
+          })
+          get().calculateTotal()
+        } catch (error) {
+          console.error('Failed to update quantity:', error)
+        } finally {
+          get().setItemLoading(appId, false)
+        }
       },
 
-      clearCart: () => set({ items: [], total: 0 }),
+      clearCart: async () => {
+        get().setLoading(true)
+        
+        try {
+          // Simulate async operation
+          await new Promise(resolve => setTimeout(resolve, 300))
+          set({ items: [], total: 0 })
+        } catch (error) {
+          console.error('Failed to clear cart:', error)
+        } finally {
+          get().setLoading(false)
+        }
+      },
 
       toggleCart: () => set({ isOpen: !get().isOpen }),
 
@@ -456,6 +513,24 @@ export const useCartStore = create<CartStore>()(
         )
         set({ total })
       },
+
+      setLoading: (isLoading) => set({ isLoading }),
+
+      setItemLoading: (appId, loading) => {
+        const loadingItems = new Set(get().loadingItems)
+        if (loading) {
+          loadingItems.add(appId)
+        } else {
+          loadingItems.delete(appId)
+        }
+        set({ loadingItems })
+      },
+
+      isItemLoading: (appId) => get().loadingItems.has(appId),
+
+      // Alias methods for compatibility
+      addToCart: (app) => get().addItem(app),
+      getTotal: () => get().total,
     }),
     {
       name: 'cart-storage',

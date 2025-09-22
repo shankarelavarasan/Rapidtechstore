@@ -37,16 +37,18 @@ const NotFound: React.FC = () => {
           <div className="space-y-4 sm:space-y-0 sm:space-x-4 sm:flex sm:justify-center">
             <Link
               to="/"
-              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
+              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors min-w-[44px] min-h-[44px]"
+              aria-label="Return to homepage"
             >
-              <HomeIcon className="h-5 w-5 mr-2" />
+              <HomeIcon className="h-5 w-5 mr-2" aria-hidden="true" />
               Go Home
             </Link>
             <Link
               to="/apps"
-              className="inline-flex items-center px-6 py-3 border border-secondary-300 text-base font-medium rounded-md text-secondary-700 bg-white hover:bg-secondary-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
+              className="inline-flex items-center px-6 py-3 border border-secondary-300 text-base font-medium rounded-md text-secondary-700 bg-white hover:bg-secondary-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors min-w-[44px] min-h-[44px]"
+              aria-label="Browse all available apps"
             >
-              <MagnifyingGlassIcon className="h-5 w-5 mr-2" />
+              <MagnifyingGlassIcon className="h-5 w-5 mr-2" aria-hidden="true" />
               Browse Apps
             </Link>
           </div>

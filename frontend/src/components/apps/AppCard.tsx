@@ -5,6 +5,7 @@ import { StarIcon as StarIconSolid, HeartIcon as HeartIconSolid } from '@heroico
 import { App } from '../../types'
 import { formatCurrency, cn } from '../../lib/utils'
 import { useCartStore, useNotificationStore } from '../../store'
+import LoadingSpinner from '../ui/LoadingSpinner'
 
 interface AppCardProps {
   app: App
@@ -19,14 +20,14 @@ const AppCard: React.FC<AppCardProps> = ({
   onToggleFavorite,
   className 
 }) => {
-  const { addItem } = useCartStore()
+  const { addItem, isItemLoading } = useCartStore()
   const { addNotification } = useNotificationStore()
 
-  const handleAddToCart = (e: React.MouseEvent) => {
+  const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
     
-    addItem(app)
+    await addItem(app)
     
     addNotification({
       type: 'success',
@@ -102,8 +103,10 @@ const AppCard: React.FC<AppCardProps> = ({
             {/* Favorite Button */}
             <button
               onClick={handleToggleFavorite}
-              className="p-1.5 rounded-lg hover:bg-secondary-100 transition-colors"
+              className="p-1.5 rounded-lg hover:bg-secondary-100 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
               title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+              aria-label={isFavorite ? `Remove ${app.name} from favorites` : `Add ${app.name} to favorites`}
+              aria-pressed={isFavorite}
             >
               {isFavorite ? (
                 <HeartIconSolid className="h-4 w-4 text-red-500" />
@@ -115,10 +118,16 @@ const AppCard: React.FC<AppCardProps> = ({
             {/* Add to Cart Button */}
             <button
               onClick={handleAddToCart}
-              className="p-1.5 rounded-lg bg-primary-600 text-white hover:bg-primary-700 transition-colors"
+              disabled={isItemLoading(app.id)}
+              className="p-1.5 rounded-lg bg-primary-600 text-white hover:bg-primary-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
               title="Add to cart"
+              aria-label={`Add ${app.name} to cart for ${app.price === 0 ? 'free' : formatCurrency(app.price)}`}
             >
-              <ShoppingCartIcon className="h-4 w-4" />
+              {isItemLoading(app.id) ? (
+                <LoadingSpinner size="sm" />
+              ) : (
+                <ShoppingCartIcon className="h-4 w-4" />
+              )}
             </button>
           </div>
         </div>

@@ -274,7 +274,8 @@ const Categories: React.FC = () => {
                     
                     <button
                       onClick={() => setSelectedCategory(category.id)}
-                      className="w-full mt-4 px-4 py-2 text-sm text-primary-600 border border-primary-600 rounded-lg hover:bg-primary-50 transition-colors"
+                      className="w-full mt-4 px-4 py-2 text-sm text-primary-600 border border-primary-600 rounded-lg hover:bg-primary-50 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 min-w-[44px] min-h-[44px]"
+                      aria-label={`Browse all apps in ${category.name} category`}
                     >
                       Browse All
                     </button>

@@ -5,6 +5,7 @@ import { StarIcon as StarIconSolid, HeartIcon as HeartIconSolid } from '@heroico
 import { App } from '../../types'
 import { formatCurrency, cn, truncateText } from '../../lib/utils'
 import { useCartStore, useNotificationStore } from '../../store'
+import LoadingSpinner from '../ui/LoadingSpinner'
 
 interface AppListCardProps {
   app: App
@@ -17,14 +18,14 @@ const AppListCard: React.FC<AppListCardProps> = ({
   isFavorite = false, 
   onToggleFavorite 
 }) => {
-  const { addItem } = useCartStore()
+  const { addItem, isItemLoading } = useCartStore()
   const { addNotification } = useNotificationStore()
 
-  const handleAddToCart = (e: React.MouseEvent) => {
+  const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
     
-    addItem(app)
+    await addItem(app)
     
     addNotification({
       type: 'success',
@@ -102,8 +103,10 @@ const AppListCard: React.FC<AppListCardProps> = ({
                   {/* Favorite Button */}
                   <button
                     onClick={handleToggleFavorite}
-                    className="p-2 rounded-lg hover:bg-secondary-100 transition-colors"
+                    className="p-2 rounded-lg hover:bg-secondary-100 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
                     title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                    aria-label={isFavorite ? `Remove ${app.name} from favorites` : `Add ${app.name} to favorites`}
+                    aria-pressed={isFavorite}
                   >
                     {isFavorite ? (
                       <HeartIconSolid className="h-5 w-5 text-red-500" />
@@ -115,11 +118,19 @@ const AppListCard: React.FC<AppListCardProps> = ({
                   {/* Add to Cart Button */}
                   <button
                     onClick={handleAddToCart}
-                    className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors flex items-center gap-2"
+                    disabled={isItemLoading(app.id)}
+                    className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     title="Add to cart"
+                    aria-label={`Add ${app.name} to cart for ${app.price === 0 ? 'free' : formatCurrency(app.price)}`}
                   >
-                    <ShoppingCartIcon className="h-4 w-4" />
-                    <span className="text-sm font-medium">Add to Cart</span>
+                    {isItemLoading(app.id) ? (
+                      <LoadingSpinner size="sm" />
+                    ) : (
+                      <ShoppingCartIcon className="h-4 w-4" />
+                    )}
+                    <span className="text-sm font-medium">
+                      {isItemLoading(app.id) ? 'Adding...' : 'Add to Cart'}
+                    </span>
                   </button>
                 </div>
 

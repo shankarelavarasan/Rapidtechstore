@@ -20,7 +20,7 @@ const AppDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { apps, loading, fetchAppById, addReview } = useAppsStore()
-  const { addItem } = useCartStore()
+  const { addItem, isItemLoading } = useCartStore()
   const { user } = useAuthStore()
   const { addNotification } = useNotificationStore()
 
@@ -44,10 +44,10 @@ const AppDetail: React.FC = () => {
     }
   }, [id, apps, fetchAppById])
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (!app) return
     
-    addItem(app)
+    await addItem(app)
     
     addNotification({
       type: 'success',
@@ -56,8 +56,8 @@ const AppDetail: React.FC = () => {
     })
   }
 
-  const handleBuyNow = () => {
-    handleAddToCart()
+  const handleBuyNow = async () => {
+    await handleAddToCart()
     navigate('/checkout')
   }
 
@@ -200,15 +200,24 @@ const AppDetail: React.FC = () => {
             <div className="flex gap-3">
               <button
                 onClick={handleAddToCart}
-                className="px-6 py-2 border border-primary-600 text-primary-600 rounded-lg hover:bg-primary-50 transition-colors"
+                disabled={isItemLoading(app.id)}
+                className="px-6 py-2 border border-primary-600 text-primary-600 rounded-lg hover:bg-primary-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 min-w-[44px] min-h-[44px]"
+                aria-label={`Add ${app.name} to cart`}
               >
-                Add to Cart
+                {isItemLoading(app.id) && <LoadingSpinner size="sm" />}
+                {isItemLoading(app.id) ? 'Adding...' : 'Add to Cart'}
               </button>
               <button
                 onClick={handleBuyNow}
-                className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                disabled={isItemLoading(app.id)}
+                className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 min-w-[44px] min-h-[44px]"
+                aria-label={`${app.price === 0 ? 'Install' : 'Buy'} ${app.name} now`}
               >
-                {app.price === 0 ? 'Install Now' : 'Buy Now'}
+                {isItemLoading(app.id) && <LoadingSpinner size="sm" />}
+                {isItemLoading(app.id) 
+                  ? 'Processing...' 
+                  : (app.price === 0 ? 'Install Now' : 'Buy Now')
+                }
               </button>
             </div>
           </div>

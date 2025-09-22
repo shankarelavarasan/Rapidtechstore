@@ -17,7 +17,7 @@ import type { App } from '../types'
 const Apps: React.FC = () => {
   const [searchParams] = useSearchParams()
   const { apps, loading, fetchApps } = useAppsStore()
-  const { addItem } = useCartStore()
+  const { addItem, isItemLoading } = useCartStore()
   
   const [filteredApps, setFilteredApps] = useState<App[]>([])
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
@@ -90,8 +90,8 @@ const Apps: React.FC = () => {
     if (sort) setSortBy(sort)
   }, [searchParams])
 
-  const handleAddToCart = (app: App) => {
-    addItem(app)
+  const handleAddToCart = async (app: App) => {
+    await addItem(app)
   }
 
   const renderStars = (rating: number) => {
@@ -179,10 +179,15 @@ const Apps: React.FC = () => {
             </Link>
             <button
               onClick={() => handleAddToCart(app)}
-              className="btn-primary px-3 py-1 text-sm flex items-center space-x-1"
+              disabled={isItemLoading(app.id)}
+              className="btn-primary px-3 py-1 text-sm flex items-center space-x-1 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <ShoppingCartIcon className="h-4 w-4" />
-              <span>Add</span>
+              {isItemLoading(app.id) ? (
+                <LoadingSpinner size="sm" />
+              ) : (
+                <ShoppingCartIcon className="h-4 w-4" />
+              )}
+              <span>{isItemLoading(app.id) ? 'Adding...' : 'Add'}</span>
             </button>
           </div>
         </div>
@@ -240,15 +245,17 @@ const Apps: React.FC = () => {
               <div className="flex items-center space-x-2">
                 <Link
                   to={`/apps/${app.id}`}
-                  className="btn-ghost px-4 py-2"
+                  className="btn-ghost px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 min-w-[44px] min-h-[44px]"
+                  aria-label={`View details for ${app.name}`}
                 >
                   View Details
                 </Link>
                 <button
                   onClick={() => handleAddToCart(app)}
-                  className="btn-primary px-4 py-2 flex items-center space-x-2"
+                  className="btn-primary px-4 py-2 flex items-center space-x-2 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 min-w-[44px] min-h-[44px]"
+                  aria-label={`Add ${app.name} to cart for ${app.price === 0 ? 'free' : formatCurrency(app.price)}`}
                 >
-                  <ShoppingCartIcon className="h-4 w-4" />
+                  <ShoppingCartIcon className="h-4 w-4" aria-hidden="true" />
                   <span>Add to Cart</span>
                 </button>
               </div>

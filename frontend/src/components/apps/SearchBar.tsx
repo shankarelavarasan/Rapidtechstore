@@ -65,17 +65,26 @@ const SearchBar: React.FC<SearchBarProps> = ({
           className="block w-full pl-10 pr-10 py-2 border border-secondary-300 rounded-lg 
                      focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500
                      placeholder-secondary-400 text-secondary-900 bg-white"
+          aria-label="Search for apps"
+          aria-describedby="search-instructions"
         />
         
         {localQuery && (
           <button
             type="button"
             onClick={handleClear}
-            className="absolute inset-y-0 right-0 pr-3 flex items-center hover:text-secondary-600 text-secondary-400"
+            className="absolute inset-y-0 right-0 pr-3 flex items-center hover:text-secondary-600 text-secondary-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded-md min-w-[44px] min-h-[44px] justify-center"
+            aria-label="Clear search"
           >
             <XMarkIcon className="h-5 w-5" />
           </button>
         )}
+      </div>
+      
+      {/* Screen reader instructions */}
+      <div id="search-instructions" className="sr-only">
+        Press Enter to search, or Escape to clear the search field
+      </div>
       </div>
       
       {/* Hidden submit button for form submission */}

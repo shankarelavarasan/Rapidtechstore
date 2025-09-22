@@ -72,10 +72,12 @@ const Header: React.FC = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Ask AI to find apps for you..."
                 className="block w-full pl-10 pr-4 py-2.5 border border-secondary-300 rounded-lg leading-5 bg-white placeholder-secondary-500 focus:outline-none focus:placeholder-secondary-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 shadow-sm hover:shadow-md"
+                aria-label="Search for apps using AI"
               />
               <button
                 type="submit"
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-secondary-400 hover:text-primary-500 transition-colors"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-secondary-400 hover:text-primary-500 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded-md min-w-[44px] min-h-[44px] justify-center"
+                aria-label="Submit search"
               >
                 <span className="sr-only">Search</span>
               </button>
@@ -87,12 +89,13 @@ const Header: React.FC = () => {
             {/* Cart */}
             <button
               onClick={toggleCart}
-              className="relative p-2 text-secondary-600 hover:text-secondary-900 hover:bg-secondary-100 rounded-lg transition-colors"
+              className="relative p-2 text-secondary-600 hover:text-secondary-900 hover:bg-secondary-100 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 min-w-[44px] min-h-[44px] flex items-center justify-center"
               data-tour="cart"
+              aria-label={`Open shopping cart${cartItemCount > 0 ? ` (${cartItemCount} items)` : ' (empty)'}`}
             >
               <ShoppingCartIcon className="h-6 w-6" />
               {cartItemCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-primary-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 bg-primary-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center" aria-hidden="true">
                   {cartItemCount}
                 </span>
               )}

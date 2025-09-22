@@ -10,10 +10,11 @@ import {
 } from '@heroicons/react/24/outline'
 import { useCartStore } from '../../store'
 import { formatCurrency } from '../../lib/utils'
+import LoadingSpinner from '../ui/LoadingSpinner'
 
 const Cart: React.FC = () => {
   const { isOpen: isCartOpen, toggleCart } = useCartStore()
-  const { items, updateQuantity, removeItem, clearCart, total } = useCartStore()
+  const { items, updateQuantity, removeItem, clearCart, total, isLoading, isItemLoading } = useCartStore()
 
   const handleQuantityChange = (id: string, newQuantity: number) => {
     if (newQuantity <= 0) {
@@ -66,6 +67,7 @@ const Cart: React.FC = () => {
                         type="button"
                         className="rounded-md text-secondary-400 hover:text-secondary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
                         onClick={toggleCart}
+                        aria-label="Close shopping cart"
                       >
                         <XMarkIcon className="h-6 w-6" />
                       </button>
@@ -99,8 +101,11 @@ const Cart: React.FC = () => {
                             <div className="flex justify-end">
                               <button
                                 onClick={clearCart}
-                                className="text-sm text-red-600 hover:text-red-700 font-medium"
+                                disabled={isLoading}
+                                className="text-sm text-red-600 hover:text-red-700 font-medium focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 rounded-md px-2 py-1 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                aria-label={`Clear all ${items.length} items from cart`}
                               >
+                                {isLoading && <LoadingSpinner size="sm" />}
                                 Clear Cart
                               </button>
                             </div>
@@ -140,18 +145,30 @@ const Cart: React.FC = () => {
                                   <div className="flex items-center space-x-2 mt-2">
                                     <button
                                       onClick={() => handleQuantityChange(item.app.id, item.quantity - 1)}
-                                      className="p-1 rounded-md text-secondary-400 hover:text-secondary-600 hover:bg-secondary-200"
+                                      className="p-1 rounded-md text-secondary-400 hover:text-secondary-600 hover:bg-secondary-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 min-w-[44px] min-h-[44px] flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                                      aria-label={`Decrease quantity of ${item.app.name}`}
+                                      disabled={item.quantity <= 1 || isItemLoading(item.app.id)}
                                     >
-                                      <MinusIcon className="h-4 w-4" />
+                                      {isItemLoading(item.app.id) ? (
+                                        <LoadingSpinner size="sm" />
+                                      ) : (
+                                        <MinusIcon className="h-4 w-4" />
+                                      )}
                                     </button>
-                                    <span className="text-sm font-medium text-secondary-900 min-w-[2rem] text-center">
+                                    <span className="text-sm font-medium text-secondary-900 min-w-[2rem] text-center" aria-label={`Quantity: ${item.quantity}`}>
                                       {item.quantity}
                                     </span>
                                     <button
                                       onClick={() => handleQuantityChange(item.app.id, item.quantity + 1)}
-                                      className="p-1 rounded-md text-secondary-400 hover:text-secondary-600 hover:bg-secondary-200"
+                                      className="p-1 rounded-md text-secondary-400 hover:text-secondary-600 hover:bg-secondary-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 min-w-[44px] min-h-[44px] flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                                      aria-label={`Increase quantity of ${item.app.name}`}
+                                      disabled={isItemLoading(item.app.id)}
                                     >
-                                      <PlusIcon className="h-4 w-4" />
+                                      {isItemLoading(item.app.id) ? (
+                                        <LoadingSpinner size="sm" />
+                                      ) : (
+                                        <PlusIcon className="h-4 w-4" />
+                                      )}
                                     </button>
                                   </div>
                                 </div>
@@ -160,9 +177,15 @@ const Cart: React.FC = () => {
                                 <div className="flex flex-col items-end space-y-2">
                                   <button
                                     onClick={() => removeItem(item.app.id)}
-                                    className="p-1 rounded-md text-red-400 hover:text-red-600 hover:bg-red-50"
+                                    className="p-1 rounded-md text-red-400 hover:text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 min-w-[44px] min-h-[44px] flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                                    aria-label={`Remove ${item.app.name} from cart`}
+                                    disabled={isItemLoading(item.app.id)}
                                   >
-                                    <TrashIcon className="h-4 w-4" />
+                                    {isItemLoading(item.app.id) ? (
+                                      <LoadingSpinner size="sm" />
+                                    ) : (
+                                      <TrashIcon className="h-4 w-4" />
+                                    )}
                                   </button>
                                   <p className="text-sm font-medium text-secondary-900">
                                     {formatCurrency(item.app.price * item.quantity)}
@@ -201,6 +224,7 @@ const Cart: React.FC = () => {
                         <button
                           onClick={toggleCart}
                           className="w-full mt-3 btn-ghost text-center"
+                          aria-label="Continue shopping and close cart"
                         >
                           Continue Shopping
                         </button>

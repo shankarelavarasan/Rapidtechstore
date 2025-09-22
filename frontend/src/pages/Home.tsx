@@ -21,7 +21,7 @@ import { App } from '../types'
 
 const Home: React.FC = () => {
   const { apps, loading: isLoading, setApps, setLoading } = useAppsStore()
-  const { addItem } = useCartStore()
+  const { addItem, isItemLoading } = useCartStore()
   const [featuredApps, setFeaturedApps] = useState<App[]>([])
   const [popularApps, setPopularApps] = useState<App[]>([])
   const [newApps, setNewApps] = useState<App[]>([])
@@ -63,8 +63,8 @@ const Home: React.FC = () => {
     { name: 'Development', icon: '💻', count: 89, color: 'bg-green-500' },
   ]
 
-  const handleAddToCart = (app: App) => {
-    addItem(app)
+  const handleAddToCart = async (app: App) => {
+    await addItem(app)
   }
 
   const renderStars = (rating: number) => {
@@ -153,16 +153,23 @@ const Home: React.FC = () => {
           <div className="flex items-center space-x-2">
             <Link
               to={`/apps/${app.id}`}
-              className="btn-ghost btn-animated px-3 py-1 text-sm"
+              className="btn-ghost btn-animated px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 min-w-[44px] min-h-[44px]"
+              aria-label={`View details for ${app.name}`}
             >
               View
             </Link>
             <button
               onClick={() => handleAddToCart(app)}
-              className="btn-primary btn-glow px-3 py-1 text-sm flex items-center space-x-1"
+              disabled={isItemLoading(app.id)}
+              className="btn-primary btn-glow px-3 py-1 text-sm flex items-center space-x-1 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 min-w-[44px] min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-label={`Add ${app.name} to cart for ${formatCurrency(app.price)}`}
             >
-              <ShoppingCartIcon className="h-4 w-4" />
-              <span>Add</span>
+              {isItemLoading(app.id) ? (
+                <LoadingSpinner size="sm" />
+              ) : (
+                <ShoppingCartIcon className="h-4 w-4" aria-hidden="true" />
+              )}
+              <span>{isItemLoading(app.id) ? 'Adding...' : 'Add'}</span>
             </button>
           </div>
         </div>
@@ -193,24 +200,34 @@ const Home: React.FC = () => {
               Download, deploy, and transform your digital experience.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center max-w-md sm:max-w-none mx-auto">
-              <Link to="/apps" className="btn-secondary btn-animated px-6 sm:px-8 py-2.5 sm:py-3 text-base sm:text-lg w-full sm:w-auto">
+              <Link 
+                to="/apps" 
+                className="btn-secondary btn-animated px-6 sm:px-8 py-2.5 sm:py-3 text-base sm:text-lg w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary-600 min-w-[44px] min-h-[44px]"
+                aria-label="Browse all available apps in our marketplace"
+              >
                 Browse All Apps
               </Link>
-              <Link to="/categories" className="btn-outline-white btn-glow px-6 sm:px-8 py-2.5 sm:py-3 text-base sm:text-lg w-full sm:w-auto">
+              <Link 
+                to="/categories" 
+                className="btn-outline-white btn-glow px-6 sm:px-8 py-2.5 sm:py-3 text-base sm:text-lg w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary-600 min-w-[44px] min-h-[44px]"
+                aria-label="Explore apps organized by categories"
+              >
                 Explore Categories
               </Link>
               <button 
                 onClick={() => setShowTour(true)}
-                className="btn-accent btn-animated px-6 sm:px-8 py-2.5 sm:py-3 text-base sm:text-lg w-full sm:w-auto flex items-center gap-2"
+                className="btn-accent btn-animated px-6 sm:px-8 py-2.5 sm:py-3 text-base sm:text-lg w-full sm:w-auto flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary-600 min-w-[44px] min-h-[44px]"
+                aria-label="Start interactive tour of the platform"
               >
-                <PlayIcon className="h-5 w-5" />
+                <PlayIcon className="h-5 w-5" aria-hidden="true" />
                 Start Tour
               </button>
               <button 
                 onClick={() => setShowCredentials(true)}
-                className="btn-primary btn-glow px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base w-full sm:w-auto flex items-center gap-2"
+                className="btn-primary btn-glow px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base w-full sm:w-auto flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary-600 min-w-[44px] min-h-[44px]"
+                aria-label="Access demo credentials for testing"
               >
-                <KeyIcon className="h-4 w-4" />
+                <KeyIcon className="h-4 w-4" aria-hidden="true" />
                 Demo Access
               </button>
             </div>
