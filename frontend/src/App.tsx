@@ -27,6 +27,7 @@ import DeveloperDashboard from './pages/DeveloperDashboard'
 import NotFound from './pages/NotFound'
 import ProtectedRoute from './components/auth/ProtectedRoute'
 import { useAuthStore } from './store'
+import { ChatBotProvider } from './components/ai'
 
 function App() {
   const { validateToken } = useAuthStore()
@@ -37,45 +38,47 @@ function App() {
   }, [validateToken])
 
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Home />} />
-          <Route path="apps" element={<Apps />} />
-          <Route path="apps/:id" element={<AppDetail />} />
-          <Route path="categories" element={<Categories />} />
-          <Route path="categories/:category" element={<Apps />} />
-          <Route path="search" element={<AISearch />} />
+    <ChatBotProvider position="bottom-right" theme="light">
+      <Router>
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Home />} />
+            <Route path="apps" element={<Apps />} />
+            <Route path="apps/:id" element={<AppDetail />} />
+            <Route path="categories" element={<Categories />} />
+            <Route path="categories/:category" element={<Apps />} />
+            <Route path="search" element={<AISearch />} />
 
-          <Route path="login" element={
-            <ProtectedRoute requireAuth={false}>
-              <Login />
-            </ProtectedRoute>
-          } />
-          <Route path="register" element={
-            <ProtectedRoute requireAuth={false}>
-              <Register />
-            </ProtectedRoute>
-          } />
-          <Route path="profile" element={
-            <ProtectedRoute>
-              <Profile />
-            </ProtectedRoute>
-          } />
-          <Route path="checkout" element={
-            <ProtectedRoute>
-              <Checkout />
-            </ProtectedRoute>
-          } />
-          <Route path="developer/*" element={
-            <ProtectedRoute>
-              <DeveloperDashboard />
-            </ProtectedRoute>
-          } />
-          <Route path="*" element={<NotFound />} />
-        </Route>
-      </Routes>
-    </Router>
+            <Route path="login" element={
+              <ProtectedRoute requireAuth={false}>
+                <Login />
+              </ProtectedRoute>
+            } />
+            <Route path="register" element={
+              <ProtectedRoute requireAuth={false}>
+                <Register />
+              </ProtectedRoute>
+            } />
+            <Route path="profile" element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            } />
+            <Route path="checkout" element={
+              <ProtectedRoute>
+                <Checkout />
+              </ProtectedRoute>
+            } />
+            <Route path="developer/*" element={
+              <ProtectedRoute>
+                <DeveloperDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="*" element={<NotFound />} />
+          </Route>
+        </Routes>
+      </Router>
+    </ChatBotProvider>
   )
 }
 
