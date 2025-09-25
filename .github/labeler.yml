@@ -1,0 +1,76 @@
+# GitHub Labeler Configuration for Rapid Tech Store
+# Automatically assigns labels based on file paths in pull requests
+
+# Backend related files
+backend:
+  - 'backend/**/*'
+  - 'Dockerfile'
+  - 'docker-compose*.yml'
+  - 'cloudbuild.yaml'
+
+# Frontend related files
+frontend:
+  - 'frontend/**/*'
+  - 'frontend/src/**/*'
+
+# AI Agent related files
+ai-agent:
+  - 'backend/simple-ai-server.js'
+  - 'backend/test-ai-chat.js'
+  - 'backend/test-chatbot-integration.js'
+  - 'frontend/src/components/ai/**/*'
+  - 'backend/src/services/*ai*'
+
+# Database related files
+database:
+  - 'backend/prisma/**/*'
+  - 'backend/src/models/**/*'
+  - '**/*migration*'
+  - '**/*schema*'
+
+# Payment related files
+payment:
+  - 'backend/src/services/payment*'
+  - 'backend/src/controllers/payment*'
+  - 'frontend/src/components/payment/**/*'
+  - 'frontend/src/services/payment*'
+
+# Deployment related files
+deployment:
+  - 'Dockerfile'
+  - 'docker-compose*.yml'
+  - 'k8s/**/*'
+  - 'terraform/**/*'
+  - 'scripts/deploy*'
+  - '.github/workflows/**/*'
+  - 'cloudbuild.yaml'
+
+# Testing related files
+testing:
+  - 'backend/tests/**/*'
+  - 'backend/test-*'
+  - 'frontend/src/**/*.test.*'
+  - 'frontend/src/**/*.spec.*'
+  - '**/*test*'
+  - '**/*spec*'
+  - 'jest.config.js'
+
+# Documentation related files
+documentation:
+  - '*.md'
+  - 'docs/**/*'
+  - 'README*'
+  - 'CHANGELOG*'
+  - 'API_DOCUMENTATION.md'
+  - 'DEPLOYMENT_GUIDE.md'
+  - 'investor-demo/**/*'
+
+# Configuration files
+configuration:
+  - '*.json'
+  - '*.yml'
+  - '*.yaml'
+  - '*.config.*'
+  - '.env*'
+  - 'tsconfig*'
+  - 'package*.json'
