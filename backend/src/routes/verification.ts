@@ -90,4 +90,71 @@ router.get(
   verificationController.getPendingApplications
 );
 
+// New comprehensive verification routes using VerificationProof model
+
+// Initiate comprehensive verification (DNS, meta tag, or file upload)
+router.post(
+  '/comprehensive/initiate',
+  authenticateDeveloper,
+  [
+    body('appId')
+      .isUUID()
+      .withMessage('Valid app ID is required'),
+    body('domain')
+      .isFQDN()
+      .withMessage('Valid domain is required'),
+    body('verificationType')
+      .isIn(['DNS', 'META_TAG', 'FILE_UPLOAD'])
+      .withMessage('Verification type must be DNS, META_TAG, or FILE_UPLOAD'),
+  ],
+  validateRequest,
+  verificationController.initiateComprehensiveVerification
+);
+
+// Verify comprehensive ownership
+router.post(
+  '/comprehensive/verify',
+  authenticateDeveloper,
+  [
+    body('verificationId')
+      .isUUID()
+      .withMessage('Valid verification ID is required'),
+  ],
+  validateRequest,
+  verificationController.verifyComprehensiveOwnership
+);
+
+// Get comprehensive verification status
+router.get(
+  '/comprehensive/status/:verificationId',
+  authenticateDeveloper,
+  [
+    param('verificationId')
+      .isUUID()
+      .withMessage('Valid verification ID is required'),
+  ],
+  validateRequest,
+  verificationController.getComprehensiveVerificationStatus
+);
+
+// List all comprehensive verifications for developer
+router.get(
+  '/comprehensive/list',
+  authenticateDeveloper,
+  verificationController.listComprehensiveVerifications
+);
+
+// Delete comprehensive verification
+router.delete(
+  '/comprehensive/:verificationId',
+  authenticateDeveloper,
+  [
+    param('verificationId')
+      .isUUID()
+      .withMessage('Valid verification ID is required'),
+  ],
+  validateRequest,
+  verificationController.deleteComprehensiveVerification
+);
+
 export default router;

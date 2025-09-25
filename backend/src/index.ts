@@ -33,6 +33,7 @@ import verificationRoutes from './routes/verification';
 import conversionRoutes from './routes/conversion';
 import webhookRoutes from './routes/webhooks';
 import currencyRoutes from './routes/currency';
+import aiRoutes from './routes/ai';
 
 // Import middleware
 import { errorHandler } from './middleware/errorHandler';
@@ -169,6 +170,7 @@ app.use('/api/verification', verificationRoutes);
 app.use('/api/conversion', conversionRoutes);
 app.use('/api/webhooks', webhookRoutes);
 app.use('/api/currency', currencyRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Error handling middleware
 app.use(notFound);

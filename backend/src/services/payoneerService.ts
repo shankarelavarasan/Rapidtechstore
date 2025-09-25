@@ -55,8 +55,13 @@ export class PayoneerService {
       if (!this.isCurrencySupported(request.currency)) {
         return {
           success: false,
+          transactionId: '',
+          gateway: 'payoneer' as const,
+          status: 'failed' as const,
+          amount: request.amount,
+          currency: request.currency,
+          region: request.region || 'DEFAULT',
           error: `Currency ${request.currency} not supported by Payoneer`,
-          errorCode: 'UNSUPPORTED_CURRENCY',
         };
       }
 
@@ -65,8 +70,13 @@ export class PayoneerService {
       if (request.amount < limits.min || request.amount > limits.max) {
         return {
           success: false,
+          transactionId: '',
+          gateway: 'payoneer' as const,
+          status: 'failed' as const,
+          amount: request.amount,
+          currency: request.currency,
+          region: request.region || 'DEFAULT',
           error: `Amount must be between ${limits.min} and ${limits.max} ${request.currency}`,
-          errorCode: 'INVALID_AMOUNT',
         };
       }
 
@@ -76,19 +86,13 @@ export class PayoneerService {
       return {
         success: true,
         transactionId: paymentId,
-        orderId: paymentId,
+        gateway: 'payoneer' as const,
+        status: 'pending' as const,
         amount: request.amount,
         currency: request.currency,
-        status: 'PENDING',
-        gatewayResponse: JSON.stringify({
-          paymentId,
-          status: 'pending',
-          amount: request.amount,
-          currency: request.currency,
-          description: request.description,
-          redirectUrl: `${this.config.apiUrl}/checkout/${paymentId}`,
-        }),
+        region: request.region || 'DEFAULT',
         clientSecret: paymentId,
+        paymentUrl: `${this.config.apiUrl}/checkout/${paymentId}`,
         metadata: {
           payoneerPaymentId: paymentId,
           gateway: 'payoneer',
@@ -100,9 +104,13 @@ export class PayoneerService {
       console.error('Payoneer payment creation failed:', error);
       return {
         success: false,
+        transactionId: '',
+        gateway: 'payoneer' as const,
+        status: 'failed' as const,
+        amount: request.amount,
+        currency: request.currency,
+        region: request.region || 'DEFAULT',
         error: error.message || 'Payment creation failed',
-        errorCode: 'PAYONEER_ERROR',
-        gatewayResponse: JSON.stringify(error),
       };
     }
   }
@@ -122,17 +130,27 @@ export class PayoneerService {
       if (!this.isCurrencySupported(request.currency)) {
         return {
           success: false,
+          payoutId: '',
+          gateway: 'payoneer' as const,
+          status: 'failed' as const,
+          amount: request.amount,
+          currency: request.currency,
+          region: request.region || 'DEFAULT',
           error: `Currency ${request.currency} not supported by Payoneer`,
-          errorCode: 'UNSUPPORTED_CURRENCY',
         };
       }
 
       // Validate required fields for payouts
-      if (!request.recipientEmail && !request.bankAccount) {
+      if (!request.paypalEmail && !request.bankAccount) {
         return {
           success: false,
+          payoutId: '',
+          gateway: 'payoneer' as const,
+          status: 'failed' as const,
+          amount: request.amount,
+          currency: request.currency,
+          region: request.region || 'DEFAULT',
           error: 'Recipient email or bank account required for Payoneer payouts',
-          errorCode: 'MISSING_RECIPIENT_INFO',
         };
       }
 
@@ -141,16 +159,20 @@ export class PayoneerService {
       
       return {
         success: true,
-        transactionId: payoutId,
+        payoutId: payoutId,
+        gatewayPayoutId: payoutId,
+        gateway: 'payoneer' as const,
+        status: 'processing' as const,
         amount: request.amount,
         currency: request.currency,
-        status: 'processing',
+        region: request.region || 'DEFAULT',
+        estimatedArrival: '2-5 business days',
+        transactionId: payoutId,
         gatewayResponse: JSON.stringify({
           payoutId,
           status: 'processing',
           amount: request.amount,
           currency: request.currency,
-          recipientId: request.recipientId,
           estimatedArrival: '2-5 business days',
         }),
         metadata: {
@@ -165,9 +187,14 @@ export class PayoneerService {
       console.error('Payoneer payout creation failed:', error);
       return {
         success: false,
+        payoutId: '',
+        gateway: 'payoneer' as const,
+        status: 'failed' as const,
+        amount: request.amount,
+        currency: request.currency,
+        region: request.region || 'DEFAULT',
         error: error.message || 'Payout creation failed',
         errorCode: 'PAYONEER_PAYOUT_ERROR',
-        gatewayResponse: JSON.stringify(error),
       };
     }
   }

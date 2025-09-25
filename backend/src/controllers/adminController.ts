@@ -4,7 +4,7 @@ import { PrismaClient } from '@prisma/client';
 import { generateToken } from '../middleware/auth';
 import { createAppError } from '../middleware/errorHandler';
 import { sendEmail } from '../services/emailService';
-import logger from '../utils/logger';
+import { logger } from '../utils/logger';
 
 const prisma = new PrismaClient();
 

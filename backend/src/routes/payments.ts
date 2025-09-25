@@ -1,9 +1,11 @@
-import express, { Request, Response } from 'express';
+import * as express from 'express';
+import { Request, Response } from 'express';
 import { body, param, validationResult } from 'express-validator';
 import { StripeService } from '../services/stripeService';
 import { PrismaClient } from '@prisma/client';
 import { createAppError } from '../middleware/errorHandler';
-import logger from '../utils/logger';
+import { logger } from '../utils/logger';
+import { authenticateUser, authenticateDeveloper } from '../middleware/auth';
 import { 
   PaymentOrchestratorController,
   validatePaymentCreation,
@@ -23,12 +25,12 @@ interface AuthenticatedRequest extends Request {
 }
 
 // New orchestrator-based routes
-router.post('/create', validatePaymentCreation, PaymentOrchestratorController.createPayment);
-router.post('/payout', validatePayoutCreation, PaymentOrchestratorController.createPayout);
-router.get('/status/:transactionId', PaymentOrchestratorController.getPaymentStatus);
+router.post('/create', authenticateUser, validatePaymentCreation, PaymentOrchestratorController.createPayment);
+router.post('/payout', authenticateDeveloper, validatePayoutCreation, PaymentOrchestratorController.createPayout);
+router.get('/status/:transactionId', authenticateUser, PaymentOrchestratorController.getPaymentStatus);
 router.get('/methods/:region', PaymentOrchestratorController.getSupportedMethods);
-router.post('/convert-currency', validateCurrencyConversion, PaymentOrchestratorController.convertCurrency);
-router.get('/analytics', PaymentOrchestratorController.getPaymentAnalytics);
+router.post('/convert-currency', authenticateUser, validateCurrencyConversion, PaymentOrchestratorController.convertCurrency);
+router.get('/analytics', authenticateUser, PaymentOrchestratorController.getPaymentAnalytics);
 
 // POST /api/payments/create-intent
 router.post('/create-intent', [

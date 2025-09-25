@@ -1,4 +1,4 @@
-import express from 'express';
+const express = require('express');
 import { body, query, param } from 'express-validator';
 import { validateRequest } from '../middleware/validateRequest';
 import { authenticateToken, authenticateDeveloper, authenticateAdmin } from '../middleware/auth';

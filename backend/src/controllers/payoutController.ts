@@ -1,10 +1,10 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { payoutService } from '../services/payoutService';
-import logger from '../utils/logger';
+import { logger } from '../utils/logger';
 import { createAppError } from '../middleware/errorHandler';
 import { AuthenticatedRequest } from '../middleware/auth';
-import crypto from 'crypto';
+import * as crypto from 'crypto';
 
 const prisma = new PrismaClient();
 
@@ -170,8 +170,8 @@ export const getPayoutAccountDetails = async (req: AuthenticatedRequest, res: Re
     const developer = await prisma.developer.findUnique({
       where: { id: developerId },
       select: {
-        preferredPayoutMethod: true,
-        payoutAccountDetails: true,
+        payoutMethod: true,
+        bankDetails: true,
       },
     });
 
@@ -185,8 +185,8 @@ export const getPayoutAccountDetails = async (req: AuthenticatedRequest, res: Re
     res.json({
       success: true,
       data: {
-        method: developer.preferredPayoutMethod,
-        accountDetails: developer.payoutAccountDetails,
+        method: developer.payoutMethod,
+        accountDetails: developer.bankDetails,
       },
     });
   } catch (error) {
@@ -200,30 +200,16 @@ export const getPayoutAccountDetails = async (req: AuthenticatedRequest, res: Re
 
 export const getAutoPayoutSettings = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const developerId = req.user!.id;
-
-    const developer = await prisma.developer.findUnique({
-      where: { id: developerId },
-      select: {
-        autoPayoutEnabled: true,
-        autoPayoutThreshold: true,
-        autoPayoutInterval: true,
-      },
-    });
-
-    if (!developer) {
-      return res.status(404).json({
-        success: false,
-        message: 'Developer not found',
-      });
-    }
-
+    // Auto payout functionality is disabled until schema is updated with required fields
+    logger.info('Auto payout settings requested but feature is disabled');
+    
     res.json({
       success: true,
       data: {
-        enabled: developer.autoPayoutEnabled || false,
-        threshold: developer.autoPayoutThreshold || 50,
-        interval: developer.autoPayoutInterval || 7,
+        enabled: false,
+        threshold: 50,
+        interval: 7,
+        message: 'Auto payout feature is currently disabled',
       },
     });
   } catch (error) {
@@ -337,7 +323,7 @@ export const getPayoutDetails = async (req: Request, res: Response) => {
             id: true,
             companyName: true,
             email: true,
-            phone: true,
+            phoneNumber: true,
           },
         },
       },
@@ -391,9 +377,6 @@ export const approvePayout = async (req: Request, res: Response) => {
       where: { id: payoutId },
       data: {
         status: 'PROCESSING',
-        adminNotes: notes,
-        approvedAt: new Date(),
-        approvedBy: req.user?.id,
       },
     });
 
@@ -403,7 +386,7 @@ export const approvePayout = async (req: Request, res: Response) => {
       amount: payout.amount,
       currency: payout.currency,
       method: payout.method as any,
-      accountDetails: payout.accountDetails,
+      accountDetails: payout.bankDetails,
     });
 
     res.json({
@@ -411,6 +394,7 @@ export const approvePayout = async (req: Request, res: Response) => {
       message: 'Payout approved and processing',
       data: { payoutId: result },
     });
+    return;
   } catch (error) {
     logger.error('Failed to approve payout:', error);
     res.status(500).json({
@@ -447,10 +431,7 @@ export const rejectPayout = async (req: Request, res: Response) => {
       where: { id: payoutId },
       data: {
         status: 'FAILED',
-        error: reason,
-        adminNotes: notes,
-        rejectedAt: new Date(),
-        rejectedBy: req.user?.id,
+        failureReason: reason,
       },
     });
 
@@ -481,7 +462,7 @@ export const bulkProcessPayouts = async (req: Request, res: Response) => {
           await rejectPayout({ ...req, params: { payoutId }, body: { reason, notes } } as any, res);
         }
         results.push({ payoutId, success: true });
-      } catch (error) {
+      } catch (error: any) {
         results.push({ payoutId, success: false, error: error.message });
       }
     }
@@ -491,6 +472,7 @@ export const bulkProcessPayouts = async (req: Request, res: Response) => {
       message: 'Bulk processing completed',
       data: results,
     });
+    return;
   } catch (error) {
     logger.error('Failed to bulk process payouts:', error);
     res.status(500).json({
@@ -523,13 +505,11 @@ export const createManualPayout = async (req: Request, res: Response) => {
         amount,
         currency,
         method,
-        accountDetails: developer.payoutAccountDetails || {},
+        bankDetails: JSON.stringify({}),
         status: 'PENDING',
-        requestedAt: new Date(),
-        isManual: true,
-        manualReason: reason,
-        adminNotes: notes,
-        createdBy: req.user?.id,
+        period: new Date().toISOString().slice(0, 7), // YYYY-MM format
+        transactionIds: '',
+        netAmount: amount,
       },
     });
 
@@ -557,7 +537,7 @@ export const getPendingApprovals = async (req: Request, res: Response) => {
         where: { status: 'PENDING' },
         skip,
         take: parseInt(limit as string),
-        orderBy: { requestedAt: 'asc' },
+        orderBy: { createdAt: 'asc' },
         include: {
           developer: {
             select: {
@@ -602,7 +582,7 @@ export const getFailedPayouts = async (req: Request, res: Response) => {
         where: { status: 'FAILED' },
         skip,
         take: parseInt(limit as string),
-        orderBy: { requestedAt: 'desc' },
+        orderBy: { createdAt: 'desc' },
         include: {
           developer: {
             select: {
@@ -659,8 +639,7 @@ export const retryFailedPayouts = async (req: Request, res: Response) => {
           where: { id: payoutId },
           data: {
             status: 'PENDING',
-            error: null,
-            retryCount: (payout.retryCount || 0) + 1,
+            failureReason: null,
           },
         });
 
@@ -786,7 +765,7 @@ export const getRevenueSummary = async (req: Request, res: Response) => {
       prisma.payout.aggregate({
         where: {
           status: 'COMPLETED',
-          completedAt: { gte: startDate, lte: endDate },
+          processedAt: { gte: startDate, lte: endDate },
         },
         _sum: { amount: true },
       }),
@@ -809,7 +788,7 @@ export const getRevenueSummary = async (req: Request, res: Response) => {
       success: true,
       data: {
         totalRevenue: totalRevenue._sum.amount || 0,
-        totalPayouts: totalPayouts._sum.amount || 0,
+        totalPayouts: totalPayouts._sum?.amount || 0,
         pendingPayouts: pendingPayouts._sum.amount || 0,
         platformRevenue: platformRevenue._sum.platformFee || 0,
         timeframe,
@@ -847,10 +826,11 @@ export const getTopEarners = async (req: Request, res: Response) => {
     }
 
     const topEarners = await prisma.transaction.groupBy({
-      by: ['app'],
+      by: ['appId'],
       where: {
         status: 'COMPLETED',
         createdAt: { gte: startDate, lte: endDate },
+        appId: { not: null },
       },
       _sum: { amount: true },
       orderBy: { _sum: { amount: 'desc' } },
@@ -860,8 +840,8 @@ export const getTopEarners = async (req: Request, res: Response) => {
     // Get app and developer details
     const enrichedEarners = await Promise.all(
       topEarners.map(async (earner) => {
-        const app = await prisma.app.findUnique({
-          where: { id: earner.app },
+        const app = earner.appId ? await prisma.app.findUnique({
+          where: { id: earner.appId },
           include: {
             developer: {
               select: {
@@ -871,12 +851,12 @@ export const getTopEarners = async (req: Request, res: Response) => {
               },
             },
           },
-        });
+        }) : null;
 
         return {
           app: app,
-          earnings: earner._sum.amount || 0,
-          developerEarnings: (earner._sum.amount || 0) * 0.8, // After 20% platform fee
+          earnings: earner._sum?.amount || 0,
+          developerEarnings: (earner._sum?.amount || 0) * 0.8, // After 20% platform fee
         };
       })
     );
@@ -922,7 +902,7 @@ export const exportPayoutData = async (req: Request, res: Response) => {
 
     // Build query based on filters
     const where: any = {
-      requestedAt: {
+      createdAt: {
         gte: new Date(startDate),
         lte: new Date(endDate),
       },
@@ -944,7 +924,7 @@ export const exportPayoutData = async (req: Request, res: Response) => {
           },
         },
       },
-      orderBy: { requestedAt: 'desc' },
+      orderBy: { createdAt: 'desc' },
     });
 
     let exportData: string;
@@ -969,6 +949,7 @@ export const exportPayoutData = async (req: Request, res: Response) => {
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     res.setHeader('Content-Type', contentType);
     res.send(exportData);
+    return;
   } catch (error) {
     logger.error('Failed to export payout data:', error);
     res.status(500).json({
@@ -1005,8 +986,8 @@ export const handleRazorpayWebhook = async (req: Request, res: Response) => {
         where: { id: payoutId },
         data: {
           status,
-          completedAt: status === 'COMPLETED' ? new Date() : null,
-          error: status === 'FAILED' ? payload.payout.entity.failure_reason : null,
+          processedAt: status === 'COMPLETED' ? new Date() : null,
+          gatewayResponse: status === 'FAILED' ? payload.payout.entity.failure_reason : null,
         },
       });
 
@@ -1014,6 +995,7 @@ export const handleRazorpayWebhook = async (req: Request, res: Response) => {
     }
 
     res.json({ success: true });
+    return;
   } catch (error) {
     logger.error('Failed to handle Razorpay webhook:', error);
     res.status(500).json({ error: 'Webhook processing failed' });
@@ -1031,7 +1013,7 @@ export const handlePayoneerWebhook = async (req: Request, res: Response) => {
       where: { id: payment_id },
       data: {
         status: payoutStatus,
-        completedAt: payoutStatus === 'COMPLETED' ? new Date() : null,
+        processedAt: payoutStatus === 'COMPLETED' ? new Date() : null,
       },
     });
 
@@ -1067,7 +1049,7 @@ export const syncPayoutStatuses = async (req: Request, res: Response) => {
     const processingPayouts = await prisma.payout.findMany({
       where: {
         status: 'PROCESSING',
-        transactionId: { not: null },
+        transactionIds: { not: '' },
       },
     });
 
@@ -1078,7 +1060,7 @@ export const syncPayoutStatuses = async (req: Request, res: Response) => {
         const updatedStatus = await payoutService.getPayoutStatus(payout.id);
         results.push({ payoutId: payout.id, status: updatedStatus.status });
       } catch (error) {
-        results.push({ payoutId: payout.id, error: error.message });
+        results.push({ payoutId: payout.id, error: (error as Error).message });
       }
     }
 
@@ -1087,6 +1069,7 @@ export const syncPayoutStatuses = async (req: Request, res: Response) => {
       message: 'Payout statuses synced successfully',
       data: results,
     });
+    return;
   } catch (error) {
     logger.error('Failed to sync payout statuses:', error);
     res.status(500).json({
@@ -1106,9 +1089,9 @@ function generateCSV(payouts: any[]): string {
     'Currency',
     'Method',
     'Status',
-    'Requested At',
-    'Completed At',
-    'Transaction ID',
+    'Created At',
+    'Processed At',
+    'Transaction IDs',
   ];
 
   const rows = payouts.map(payout => [
@@ -1118,9 +1101,9 @@ function generateCSV(payouts: any[]): string {
     payout.currency,
     payout.method,
     payout.status,
-    payout.requestedAt.toISOString(),
-    payout.completedAt?.toISOString() || '',
-    payout.transactionId || '',
+    payout.createdAt.toISOString(),
+    payout.processedAt?.toISOString() || '',
+    payout.transactionIds || '',
   ]);
 
   return [headers, ...rows]

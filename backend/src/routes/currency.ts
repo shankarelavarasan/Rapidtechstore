@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import { body, query, validationResult } from 'express-validator';
 import { createCurrencyService } from '../services/currencyService';
-import logger from '../utils/logger';
+import { logger } from '../utils/logger';
 
 const router = express.Router();
 const currencyService = createCurrencyService();

@@ -1,5 +1,5 @@
-import winston from 'winston';
-import DailyRotateFile from 'winston-daily-rotate-file';
+const winston = require('winston');
+const DailyRotateFile = require('winston-daily-rotate-file');
 
 const logFormat = winston.format.combine(
   winston.format.timestamp(),
@@ -10,7 +10,7 @@ const logFormat = winston.format.combine(
 const consoleFormat = winston.format.combine(
   winston.format.colorize(),
   winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-  winston.format.printf(({ timestamp, level, message, ...meta }) => {
+  winston.format.printf(({ timestamp, level, message, ...meta }: { timestamp: string; level: string; message: string; [key: string]: any }) => {
     return `${timestamp} [${level}]: ${message} ${
       Object.keys(meta).length ? JSON.stringify(meta, null, 2) : ''
     }`;
