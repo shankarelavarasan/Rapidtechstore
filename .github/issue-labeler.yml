@@ -1,0 +1,109 @@
+# GitHub Issue Labeler Configuration for Rapid Tech Store
+# Automatically assigns labels based on issue content
+
+# Component Labels
+backend:
+  - "backend"
+  - "api"
+  - "server"
+  - "database"
+  - "prisma"
+
+frontend:
+  - "frontend"
+  - "ui"
+  - "react"
+  - "component"
+  - "styling"
+
+ai-agent:
+  - "ai"
+  - "chatbot"
+  - "machine learning"
+  - "artificial intelligence"
+  - "gemini"
+
+# Priority Labels
+priority-high:
+  - "urgent"
+  - "critical"
+  - "high priority"
+  - "blocker"
+
+priority-medium:
+  - "medium priority"
+  - "important"
+
+priority-low:
+  - "low priority"
+  - "nice to have"
+  - "enhancement"
+
+# Type Labels
+bug:
+  - "bug"
+  - "error"
+  - "issue"
+  - "problem"
+  - "broken"
+  - "not working"
+
+feature:
+  - "feature"
+  - "new feature"
+  - "enhancement"
+  - "improvement"
+
+documentation:
+  - "documentation"
+  - "docs"
+  - "readme"
+  - "guide"
+
+# Status Labels
+needs-review:
+  - "review"
+  - "feedback"
+  - "opinion"
+
+help-wanted:
+  - "help"
+  - "assistance"
+  - "support"
+
+good-first-issue:
+  - "beginner"
+  - "easy"
+  - "starter"
+  - "first time"
+
+# Deployment Labels
+deployment:
+  - "deploy"
+  - "deployment"
+  - "docker"
+  - "kubernetes"
+  - "cloud"
+
+testing:
+  - "test"
+  - "testing"
+  - "jest"
+  - "unit test"
+  - "integration test"
+
+# Payment Labels
+payment:
+  - "payment"
+  - "stripe"
+  - "billing"
+  - "subscription"
+  - "transaction"
+
+# Database Labels
+database:
+  - "database"
+  - "migration"
+  - "schema"
+  - "sql"
+  - "prisma"
