@@ -1,76 +1,122 @@
 # GitHub Labeler Configuration for Rapid Tech Store
 # Automatically assigns labels based on file paths in pull requests
+# Format for actions/labeler@v5
 
 # Backend related files
 backend:
-  - 'backend/**/*'
-  - 'Dockerfile'
-  - 'docker-compose*.yml'
-  - 'cloudbuild.yaml'
+  - changed-files:
+    - any-glob-to-any-file: 'backend/**/*'
+  - changed-files:
+    - any-glob-to-any-file: 'Dockerfile'
+  - changed-files:
+    - any-glob-to-any-file: 'docker-compose*.yml'
+  - changed-files:
+    - any-glob-to-any-file: 'cloudbuild.yaml'
 
 # Frontend related files
 frontend:
-  - 'frontend/**/*'
-  - 'frontend/src/**/*'
+  - changed-files:
+    - any-glob-to-any-file: 'frontend/**/*'
 
 # AI Agent related files
 ai-agent:
-  - 'backend/simple-ai-server.js'
-  - 'backend/test-ai-chat.js'
-  - 'backend/test-chatbot-integration.js'
-  - 'frontend/src/components/ai/**/*'
-  - 'backend/src/services/*ai*'
+  - changed-files:
+    - any-glob-to-any-file: 'backend/simple-ai-server.js'
+  - changed-files:
+    - any-glob-to-any-file: 'backend/test-ai-chat.js'
+  - changed-files:
+    - any-glob-to-any-file: 'backend/test-chatbot-integration.js'
+  - changed-files:
+    - any-glob-to-any-file: 'frontend/src/components/ai/**/*'
+  - changed-files:
+    - any-glob-to-any-file: 'backend/src/services/*ai*'
 
 # Database related files
 database:
-  - 'backend/prisma/**/*'
-  - 'backend/src/models/**/*'
-  - '**/*migration*'
-  - '**/*schema*'
+  - changed-files:
+    - any-glob-to-any-file: 'backend/prisma/**/*'
+  - changed-files:
+    - any-glob-to-any-file: 'backend/src/models/**/*'
+  - changed-files:
+    - any-glob-to-any-file: '**/*migration*'
+  - changed-files:
+    - any-glob-to-any-file: '**/*schema*'
 
 # Payment related files
 payment:
-  - 'backend/src/services/payment*'
-  - 'backend/src/controllers/payment*'
-  - 'frontend/src/components/payment/**/*'
-  - 'frontend/src/services/payment*'
+  - changed-files:
+    - any-glob-to-any-file: 'backend/src/services/payment*'
+  - changed-files:
+    - any-glob-to-any-file: 'backend/src/controllers/payment*'
+  - changed-files:
+    - any-glob-to-any-file: 'frontend/src/components/payment/**/*'
+  - changed-files:
+    - any-glob-to-any-file: 'frontend/src/services/payment*'
 
 # Deployment related files
 deployment:
-  - 'Dockerfile'
-  - 'docker-compose*.yml'
-  - 'k8s/**/*'
-  - 'terraform/**/*'
-  - 'scripts/deploy*'
-  - '.github/workflows/**/*'
-  - 'cloudbuild.yaml'
+  - changed-files:
+    - any-glob-to-any-file: 'Dockerfile'
+  - changed-files:
+    - any-glob-to-any-file: 'docker-compose*.yml'
+  - changed-files:
+    - any-glob-to-any-file: 'k8s/**/*'
+  - changed-files:
+    - any-glob-to-any-file: 'terraform/**/*'
+  - changed-files:
+    - any-glob-to-any-file: 'scripts/deploy*'
+  - changed-files:
+    - any-glob-to-any-file: '.github/workflows/**/*'
+  - changed-files:
+    - any-glob-to-any-file: 'cloudbuild.yaml'
 
 # Testing related files
 testing:
-  - 'backend/tests/**/*'
-  - 'backend/test-*'
-  - 'frontend/src/**/*.test.*'
-  - 'frontend/src/**/*.spec.*'
-  - '**/*test*'
-  - '**/*spec*'
-  - 'jest.config.js'
+  - changed-files:
+    - any-glob-to-any-file: 'backend/tests/**/*'
+  - changed-files:
+    - any-glob-to-any-file: 'backend/test-*'
+  - changed-files:
+    - any-glob-to-any-file: 'frontend/src/**/*.test.*'
+  - changed-files:
+    - any-glob-to-any-file: 'frontend/src/**/*.spec.*'
+  - changed-files:
+    - any-glob-to-any-file: '**/*test*'
+  - changed-files:
+    - any-glob-to-any-file: '**/*spec*'
+  - changed-files:
+    - any-glob-to-any-file: 'jest.config.js'
 
 # Documentation related files
 documentation:
-  - '*.md'
-  - 'docs/**/*'
-  - 'README*'
-  - 'CHANGELOG*'
-  - 'API_DOCUMENTATION.md'
-  - 'DEPLOYMENT_GUIDE.md'
-  - 'investor-demo/**/*'
+  - changed-files:
+    - any-glob-to-any-file: '*.md'
+  - changed-files:
+    - any-glob-to-any-file: 'docs/**/*'
+  - changed-files:
+    - any-glob-to-any-file: 'README*'
+  - changed-files:
+    - any-glob-to-any-file: 'CHANGELOG*'
+  - changed-files:
+    - any-glob-to-any-file: 'API_DOCUMENTATION.md'
+  - changed-files:
+    - any-glob-to-any-file: 'DEPLOYMENT_GUIDE.md'
+  - changed-files:
+    - any-glob-to-any-file: 'investor-demo/**/*'
 
 # Configuration files
 configuration:
-  - '*.json'
-  - '*.yml'
-  - '*.yaml'
-  - '*.config.*'
-  - '.env*'
-  - 'tsconfig*'
-  - 'package*.json'
+  - changed-files:
+    - any-glob-to-any-file: '*.json'
+  - changed-files:
+    - any-glob-to-any-file: '*.yml'
+  - changed-files:
+    - any-glob-to-any-file: '*.yaml'
+  - changed-files:
+    - any-glob-to-any-file: '*.config.*'
+  - changed-files:
+    - any-glob-to-any-file: '.env*'
+  - changed-files:
+    - any-glob-to-any-file: 'tsconfig*'
+  - changed-files:
+    - any-glob-to-any-file: 'package*.json'
