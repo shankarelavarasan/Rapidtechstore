@@ -33,6 +33,7 @@ import verificationRoutes from './routes/verification';
 import conversionRoutes from './routes/conversion';
 import webhookRoutes from './routes/webhooks';
 import currencyRoutes from './routes/currency';
+import aiRoutes from './routes/ai';
 
 // Import middleware
 import { errorHandler } from './middleware/errorHandler';
@@ -47,7 +48,25 @@ const PORT = process.env.PORT || 3000;
 
 // Initialize database and Redis
 export const prisma = new PrismaClient();
-export const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+
+// Initialize Redis with error handling for development
+let redis: Redis | null = null;
+try {
+  if (process.env.REDIS_URL) {
+    redis = new Redis(process.env.REDIS_URL);
+    redis.on('error', (err) => {
+      logger.warn('Redis connection error:', err.message);
+      redis = null;
+    });
+  } else {
+    logger.info('Redis URL not provided, running without Redis cache');
+  }
+} catch (error) {
+  logger.warn('Failed to initialize Redis:', error);
+  redis = null;
+}
+
+export { redis };
 
 // Security middleware
 app.use(helmet({
@@ -105,8 +124,17 @@ app.get('/health', async (req, res) => {
     // Check database connection
     await prisma.$queryRaw`SELECT 1`;
     
-    // Check Redis connection
-    await redis.ping();
+    // Check Redis connection if available
+    let redisStatus = 'not_configured';
+    if (redis) {
+      try {
+        await redis.ping();
+        redisStatus = 'connected';
+      } catch (redisError) {
+        redisStatus = 'disconnected';
+        logger.warn('Redis ping failed:', redisError);
+      }
+    }
     
     res.status(200).json({
       status: 'healthy',
@@ -114,6 +142,10 @@ app.get('/health', async (req, res) => {
       uptime: process.uptime(),
       environment: process.env.NODE_ENV,
       version: process.env.npm_package_version || '1.0.0',
+      services: {
+        database: 'connected',
+        redis: redisStatus
+      }
     });
   } catch (error) {
     logger.error('Health check failed:', error);
@@ -138,6 +170,7 @@ app.use('/api/verification', verificationRoutes);
 app.use('/api/conversion', conversionRoutes);
 app.use('/api/webhooks', webhookRoutes);
 app.use('/api/currency', currencyRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Error handling middleware
 app.use(notFound);
@@ -150,8 +183,10 @@ process.on('SIGTERM', async () => {
   // Close database connections
   await prisma.$disconnect();
   
-  // Close Redis connection
-  redis.disconnect();
+  // Close Redis connection if available
+  if (redis) {
+    redis.disconnect();
+  }
   
   process.exit(0);
 });
@@ -162,8 +197,10 @@ process.on('SIGINT', async () => {
   // Close database connections
   await prisma.$disconnect();
   
-  // Close Redis connection
-  redis.disconnect();
+  // Close Redis connection if available
+  if (redis) {
+    redis.disconnect();
+  }
   
   process.exit(0);
 });

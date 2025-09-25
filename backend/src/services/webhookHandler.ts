@@ -59,6 +59,12 @@ export class WebhookHandler {
         return;
       }
 
+      if (!stripe) {
+        logger.error('Stripe not initialized');
+        res.status(500).send('Stripe not initialized');
+        return;
+      }
+
       // Verify webhook signature
       const event = stripe.webhooks.constructEvent(
         req.body,
@@ -443,7 +449,7 @@ export class WebhookHandler {
     const data = event.data;
     return {
       payoutId: data.id,
-      status: this.mapStripeStatus(data.status),
+      status: this.mapStripePayoutStatus(data.status),
       amount: data.amount / 100,
       currency: data.currency.toUpperCase(),
       metadata: data.metadata,
@@ -455,7 +461,7 @@ export class WebhookHandler {
     const data = event.data.payout;
     return {
       payoutId: data.id,
-      status: this.mapRazorpayStatus(data.status),
+      status: this.mapRazorpayPayoutStatus(data.status),
       amount: data.amount / 100,
       currency: data.currency,
       metadata: data.notes,
@@ -467,7 +473,7 @@ export class WebhookHandler {
     const data = event.data;
     return {
       payoutId: data.id || data.payout_id,
-      status: this.mapPayoneerStatus(data.status),
+      status: this.mapPayoneerPayoutStatus(data.status),
       amount: data.amount,
       currency: data.currency,
       metadata: data.metadata,
@@ -479,7 +485,7 @@ export class WebhookHandler {
     const data = event.data.resource;
     return {
       payoutId: data.id,
-      status: this.mapWiseStatus(data.status),
+      status: this.mapWisePayoutStatus(data.status),
       amount: data.source_value,
       currency: data.source_currency,
       metadata: { reference: data.reference },
@@ -499,12 +505,33 @@ export class WebhookHandler {
     return statusMap[status] || 'pending';
   }
 
+  private mapStripePayoutStatus(status: string): PayoutWebhookData['status'] {
+    const statusMap: Record<string, PayoutWebhookData['status']> = {
+      'succeeded': 'completed',
+      'pending': 'pending',
+      'failed': 'failed',
+      'canceled': 'cancelled',
+      'refunded': 'failed', // Map refunded to failed for payouts
+    };
+    return statusMap[status] || 'pending';
+  }
+
   private mapRazorpayStatus(status: string): PaymentWebhookData['status'] {
     const statusMap: Record<string, PaymentWebhookData['status']> = {
       'captured': 'completed',
       'authorized': 'pending',
       'failed': 'failed',
       'refunded': 'refunded',
+    };
+    return statusMap[status] || 'pending';
+  }
+
+  private mapRazorpayPayoutStatus(status: string): PayoutWebhookData['status'] {
+    const statusMap: Record<string, PayoutWebhookData['status']> = {
+      'captured': 'completed',
+      'authorized': 'pending',
+      'failed': 'failed',
+      'refunded': 'failed', // Map refunded to failed for payouts
     };
     return statusMap[status] || 'pending';
   }
@@ -519,12 +546,32 @@ export class WebhookHandler {
     return statusMap[status] || 'pending';
   }
 
+  private mapPayoneerPayoutStatus(status: string): PayoutWebhookData['status'] {
+    const statusMap: Record<string, PayoutWebhookData['status']> = {
+      'completed': 'completed',
+      'pending': 'pending',
+      'failed': 'failed',
+      'cancelled': 'cancelled',
+    };
+    return statusMap[status] || 'pending';
+  }
+
   private mapWiseStatus(status: string): PaymentWebhookData['status'] {
     const statusMap: Record<string, PaymentWebhookData['status']> = {
       'outgoing_payment_sent': 'completed',
       'processing': 'pending',
       'cancelled': 'cancelled',
       'funds_refunded': 'refunded',
+    };
+    return statusMap[status] || 'pending';
+  }
+
+  private mapWisePayoutStatus(status: string): PayoutWebhookData['status'] {
+    const statusMap: Record<string, PayoutWebhookData['status']> = {
+      'outgoing_payment_sent': 'completed',
+      'processing': 'pending',
+      'cancelled': 'cancelled',
+      'funds_refunded': 'failed', // Map refunded to failed since PayoutWebhookData doesn't support refunded
     };
     return statusMap[status] || 'pending';
   }

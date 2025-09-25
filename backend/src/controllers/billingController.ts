@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { billingService } from '../services/billingService';
 import { createAppError } from '../middleware/errorHandler';
-import logger from '../utils/logger';
+import { logger } from '../utils/logger';
 import crypto from 'crypto';
 
 const prisma = new PrismaClient();

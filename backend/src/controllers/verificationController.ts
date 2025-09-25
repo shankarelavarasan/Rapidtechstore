@@ -1,12 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
 import { PrismaClient } from '@prisma/client';
-import crypto from 'crypto';
-import dns from 'dns';
+import * as crypto from 'crypto';
+import * as dns from 'dns';
 import axios from 'axios';
-import cheerio from 'cheerio';
+import * as cheerio from 'cheerio';
 import { logger } from '../utils/logger';
 import { sendEmail } from '../services/emailService';
 import { createAppError } from '../middleware/errorHandler';
+import { ownerVerificationService, VerificationRequest } from '../services/ownerVerificationService';
 
 const prisma = new PrismaClient();
 
@@ -457,3 +458,249 @@ async function sendRejectionEmail(email: string, companyName: string, reason: st
     `,
   });
 }
+
+// ===== NEW COMPREHENSIVE VERIFICATION METHODS =====
+
+/**
+ * Initiate comprehensive domain verification
+ * POST /api/verification/v2/initiate
+ */
+export const initiateComprehensiveVerification = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { domain, verificationType, appId } = req.body;
+    const developerId = req.developer?.id;
+
+    if (!developerId) {
+      return next(createAppError('Developer not authenticated', 401));
+    }
+
+    // Validate domain format
+    const domainRegex = /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/;
+    if (!domainRegex.test(domain)) {
+      return next(createAppError('Invalid domain format', 400));
+    }
+
+    // Validate verification type
+    const validTypes = ['DNS_TXT', 'META_TAG', 'FILE_UPLOAD', 'MANUAL_REVIEW'];
+    if (!validTypes.includes(verificationType)) {
+      return next(createAppError('Invalid verification type', 400));
+    }
+
+    const verificationRequest: VerificationRequest = {
+      developerId,
+      domain,
+      verificationType,
+      appId
+    };
+
+    const result = await ownerVerificationService.initiateVerification(verificationRequest);
+
+    if (result.success) {
+      res.status(200).json({
+        success: true,
+        message: result.message,
+        data: {
+          verificationId: result.verificationId,
+          token: result.token,
+          expiresAt: result.expiresAt,
+          instructions: result.instructions
+        }
+      });
+    } else {
+      return next(createAppError(result.message, 400));
+    }
+
+  } catch (error) {
+    logger.error('Error in initiateComprehensiveVerification:', error);
+    return next(createAppError('Internal server error', 500));
+  }
+};
+
+/**
+ * Verify domain ownership using comprehensive verification
+ * POST /api/verification/v2/verify
+ */
+export const verifyComprehensiveOwnership = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { verificationId } = req.body;
+    const developerId = req.developer?.id;
+
+    if (!developerId) {
+      return next(createAppError('Developer not authenticated', 401));
+    }
+
+    if (!verificationId) {
+      return next(createAppError('Verification ID is required', 400));
+    }
+
+    const result = await ownerVerificationService.verifyOwnership(verificationId);
+
+    if (result.success) {
+      res.status(200).json({
+        success: true,
+        message: result.message,
+        data: {
+          verificationId: result.verificationId,
+          verified: true
+        }
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: result.message,
+        data: {
+          verificationId: result.verificationId,
+          verified: false
+        }
+      });
+    }
+
+  } catch (error) {
+    logger.error('Error in verifyComprehensiveOwnership:', error);
+    return next(createAppError('Internal server error', 500));
+  }
+};
+
+/**
+ * Get comprehensive verification status
+ * GET /api/verification/v2/:verificationId
+ */
+export const getComprehensiveVerificationStatus = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { verificationId } = req.params;
+    const developerId = req.developer?.id;
+
+    if (!developerId) {
+      return next(createAppError('Developer not authenticated', 401));
+    }
+
+    if (!verificationId) {
+      return next(createAppError('Verification ID is required', 400));
+    }
+
+    const verification = await ownerVerificationService.getVerificationStatus(verificationId);
+
+    if (!verification) {
+      return next(createAppError('Verification not found', 404));
+    }
+
+    // Check if verification belongs to the authenticated developer
+    if (verification.developerId !== developerId) {
+      return next(createAppError('Access denied', 403));
+    }
+
+    res.status(200).json({
+      success: true,
+      data: {
+        id: verification.id,
+        domain: verification.domain,
+        verificationType: verification.verificationType,
+        status: verification.status,
+        verifiedAt: verification.verifiedAt,
+        expiresAt: verification.expiresAt,
+        failureReason: verification.failureReason,
+        retryCount: verification.retryCount,
+        maxRetries: verification.maxRetries,
+        app: verification.app,
+        createdAt: verification.createdAt,
+        updatedAt: verification.updatedAt
+      }
+    });
+
+  } catch (error) {
+    logger.error('Error in getComprehensiveVerificationStatus:', error);
+    return next(createAppError('Internal server error', 500));
+  }
+};
+
+/**
+ * List all verifications for a developer
+ * GET /api/verification/v2/list
+ */
+export const listComprehensiveVerifications = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const developerId = req.developer?.id;
+
+    if (!developerId) {
+      return next(createAppError('Developer not authenticated', 401));
+    }
+
+    const verifications = await ownerVerificationService.listVerifications(developerId);
+
+    res.status(200).json({
+      success: true,
+      data: verifications.map(v => ({
+        id: v.id,
+        domain: v.domain,
+        verificationType: v.verificationType,
+        status: v.status,
+        verifiedAt: v.verifiedAt,
+        expiresAt: v.expiresAt,
+        failureReason: v.failureReason,
+        retryCount: v.retryCount,
+        maxRetries: v.maxRetries,
+        app: v.app,
+        createdAt: v.createdAt,
+        updatedAt: v.updatedAt
+      }))
+    });
+
+  } catch (error) {
+    logger.error('Error in listComprehensiveVerifications:', error);
+    return next(createAppError('Internal server error', 500));
+  }
+};
+
+/**
+ * Delete a verification
+ * DELETE /api/verification/v2/:verificationId
+ */
+export const deleteComprehensiveVerification = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { verificationId } = req.params;
+    const developerId = req.developer?.id;
+
+    if (!developerId) {
+      return next(createAppError('Developer not authenticated', 401));
+    }
+
+    if (!verificationId) {
+      return next(createAppError('Verification ID is required', 400));
+    }
+
+    const success = await ownerVerificationService.deleteVerification(verificationId, developerId);
+
+    if (success) {
+      res.status(200).json({
+        success: true,
+        message: 'Verification deleted successfully'
+      });
+    } else {
+      return next(createAppError('Verification not found or access denied', 404));
+    }
+
+  } catch (error) {
+    logger.error('Error in deleteComprehensiveVerification:', error);
+    return next(createAppError('Internal server error', 500));
+  }
+};

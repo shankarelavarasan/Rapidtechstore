@@ -13,11 +13,14 @@ async function main() {
       id: 'dev-1',
       email: 'contact@techcorp.com',
       password: 'hashedpassword123',
+      firstName: 'John',
+      lastName: 'Smith',
       companyName: 'TechCorp Solutions Ltd',
       businessEmail: 'business@techcorp.com',
       website: 'https://techcorp.com',
       address: '123 Tech Street, Silicon Valley, CA',
       phoneNumber: '+1-555-0123',
+      country: 'United States',
       isEmailVerified: true,
       verificationStatus: 'APPROVED',
       approvedAt: new Date(),
@@ -32,11 +35,14 @@ async function main() {
       id: 'dev-2',
       email: 'hello@innovatelabs.io',
       password: 'hashedpassword456',
+      firstName: 'Sarah',
+      lastName: 'Johnson',
       companyName: 'InnovateLabs Inc',
       businessEmail: 'business@innovatelabs.io',
       website: 'https://innovatelabs.io',
       address: '456 Innovation Ave, Austin, TX',
       phoneNumber: '+1-555-0456',
+      country: 'United States',
       isEmailVerified: true,
       verificationStatus: 'APPROVED',
       approvedAt: new Date(),
@@ -179,35 +185,77 @@ async function main() {
     }
   });
 
-  // Create sample reviews
+  // Create sample reviews (ensuring unique user-app combinations)
   await Promise.all([
-    prisma.review.create({
-      data: {
+    prisma.review.upsert({
+      where: {
+        userId_appId: {
+          userId: user1.id,
+          appId: app1.id
+        }
+      },
+      update: {},
+      create: {
         id: 'review-1',
         userId: user1.id,
         appId: app1.id,
         rating: 5,
+        title: 'Outstanding Project Management Tool',
         comment: 'Excellent tool! Has transformed how our team manages projects.',
         isVerified: true
       }
     }),
-    prisma.review.create({
-      data: {
+    prisma.review.upsert({
+      where: {
+        userId_appId: {
+          userId: user2.id,
+          appId: app1.id
+        }
+      },
+      update: {},
+      create: {
         id: 'review-2',
         userId: user2.id,
         appId: app1.id,
         rating: 4,
+        title: 'Good but needs mobile improvements',
         comment: 'Great features, but could use better mobile app integration.',
         isVerified: true
       }
     }),
-    prisma.review.create({
-      data: {
+    prisma.review.upsert({
+      where: {
+        userId_appId: {
+          userId: user1.id,
+          appId: app2.id
+        }
+      },
+      update: {},
+      create: {
         id: 'review-3',
         userId: user1.id,
         appId: app2.id,
         rating: 5,
+        title: 'AI Content Generation at its Best',
         comment: 'Amazing AI capabilities. Saves me hours of writing time.',
+        isVerified: true
+      }
+    }),
+    prisma.review.upsert({
+      where: {
+        userId_appId: {
+          userId: user2.id,
+          appId: app3.id
+        }
+      },
+      update: {},
+      create: {
+        id: 'review-4',
+        userId: user2.id,
+        appId: app3.id,
+        rating: 5,
+        title: 'Comprehensive Analytics Platform',
+        comment: 'Perfect for business intelligence. The dashboards are incredibly detailed.',
         isVerified: true
       }
     })
@@ -218,7 +266,7 @@ async function main() {
   console.log(`   - 2 developers`);
   console.log(`   - 2 users`);
   console.log(`   - 3 apps`);
-  console.log(`   - 3 reviews`);
+  console.log(`   - 4 reviews`);
 }
 
 main()

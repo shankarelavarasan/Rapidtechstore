@@ -1,7 +1,7 @@
 import axios from 'axios';
 import cheerio from 'cheerio';
 import { PrismaClient } from '@prisma/client';
-import logger from '../utils/logger';
+import { logger } from '../utils/logger';
 import sharp from 'sharp';
 import { createAppError } from '../middleware/errorHandler';
 
@@ -52,13 +52,16 @@ interface ComplianceCheck {
 }
 
 export class AIConversionService {
-  private readonly openaiApiKey: string;
+  private readonly openaiApiKey: string | null;
   private readonly maxRetries = 3;
 
   constructor() {
-    this.openaiApiKey = process.env.OPENAI_API_KEY!;
+    this.openaiApiKey = process.env.OPENAI_API_KEY || null;
+  }
+
+  private checkApiKey(): void {
     if (!this.openaiApiKey) {
-      throw new Error('OpenAI API key is required for AI conversion service');
+      throw new Error('OpenAI API key is required for AI conversion service. Please configure OPENAI_API_KEY environment variable.');
     }
   }
 
@@ -71,6 +74,8 @@ export class AIConversionService {
     appName?: string,
     appDescription?: string
   ): Promise<string> {
+    this.checkApiKey();
+    
     try {
       logger.info(`Starting AI conversion for website: ${websiteUrl}`);
 
@@ -387,6 +392,8 @@ ${html.substring(0, 5000)}...`;
     appName?: string,
     appDescription?: string
   ): Promise<AppConfiguration> {
+    this.checkApiKey();
+    
     try {
       const prompt = `Based on the following website metadata, generate a mobile app configuration. Return only a JSON object:
 
@@ -618,6 +625,8 @@ Ensure the response is valid JSON only.`;
    * Call OpenAI API
    */
   private async callOpenAI(prompt: string, model: string = 'gpt-3.5-turbo'): Promise<string> {
+    this.checkApiKey();
+    
     try {
       const response = await axios.post(
         'https://api.openai.com/v1/chat/completions',

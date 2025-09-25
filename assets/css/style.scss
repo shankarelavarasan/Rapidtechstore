@@ -1,0 +1,85 @@
+---
+---
+
+@import "{{ site.theme }}";
+
+/* Custom styles for Rapid Tech Store */
+.site-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.site-title {
+  color: white !important;
+  font-weight: bold;
+}
+
+.site-nav .page-link {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.site-nav .page-link:hover {
+  color: white !important;
+}
+
+/* Investment highlights */
+.investment-highlight {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  padding: 2rem;
+  border-radius: 10px;
+  margin: 2rem 0;
+  text-align: center;
+}
+
+.investment-highlight h2 {
+  color: white;
+  margin-bottom: 1rem;
+}
+
+/* Market opportunity cards */
+.market-card {
+  background: white;
+  border: 1px solid #e1e4e8;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 1rem 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease;
+}
+
+.market-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .investment-highlight {
+    padding: 1rem;
+    margin: 1rem 0;
+  }
+  
+  .market-card {
+    padding: 1rem;
+  }
+}
+
+/* Button styles */
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 5px;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  color: white;
+  text-decoration: none;
+}

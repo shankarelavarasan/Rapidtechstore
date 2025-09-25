@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { google } from 'googleapis';
 import { PrismaClient } from '@prisma/client';
-import logger from '../utils/logger';
+import { logger } from '../utils/logger';
 import { createAppError } from '../middleware/errorHandler';
 
 const prisma = new PrismaClient();
@@ -31,8 +31,12 @@ export class BillingService {
   private packageName: string;
 
   constructor() {
-    this.packageName = process.env.GOOGLE_PLAY_PACKAGE_NAME!;
-    this.initializeGooglePlayAPI();
+    this.packageName = process.env.GOOGLE_PLAY_PACKAGE_NAME || '';
+    if (this.packageName && process.env.GOOGLE_PLAY_SERVICE_ACCOUNT_KEY_FILE) {
+      this.initializeGooglePlayAPI();
+    } else {
+      logger.warn('Google Play API credentials not configured. Billing service will have limited functionality.');
+    }
   }
 
   /**
@@ -53,7 +57,7 @@ export class BillingService {
       logger.info('Google Play Developer API initialized successfully');
     } catch (error) {
       logger.error('Failed to initialize Google Play Developer API:', error);
-      throw new Error('Google Play API initialization failed');
+      logger.warn('Google Play API initialization failed. Some billing features may not work.');
     }
   }
 

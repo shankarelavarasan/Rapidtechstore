@@ -1,0 +1,123 @@
+name: Auto Label Issues and PRs
+
+on:
+  issues:
+    types: [opened, edited]
+  pull_request:
+    types: [opened, edited, synchronize]
+
+jobs:
+  auto-label:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Auto Label Based on Files
+        uses: actions/labeler@v5
+        if: github.event_name == 'pull_request'
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          configuration-path: .github/labeler.yml
+
+      - name: Auto Label Based on Content
+        uses: github/issue-labeler@v3.4
+        if: github.event_name == 'issues'
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          configuration-path: .github/issue-labeler.yml
+
+      - name: Label Based on Keywords
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { context } = require('@actions/github');
+            const issue = context.payload.issue || context.payload.pull_request;
+            const title = issue.title.toLowerCase();
+            const body = (issue.body || '').toLowerCase();
+            const labels = [];
+
+            // Component labels based on keywords
+            if (title.includes('backend') || body.includes('backend') || title.includes('api')) {
+              labels.push('backend');
+            }
+            if (title.includes('frontend') || body.includes('frontend') || title.includes('ui') || title.includes('react')) {
+              labels.push('frontend');
+            }
+            if (title.includes('ai') || body.includes('chatbot') || title.includes('openai')) {
+              labels.push('ai-agent');
+            }
+            if (title.includes('database') || body.includes('prisma') || title.includes('postgresql')) {
+              labels.push('database');
+            }
+            if (title.includes('payment') || body.includes('stripe') || title.includes('transaction')) {
+              labels.push('payment');
+            }
+            if (title.includes('deploy') || body.includes('docker') || title.includes('render')) {
+              labels.push('deployment');
+            }
+
+            // Type labels based on keywords
+            if (title.includes('bug') || title.includes('error') || title.includes('fix')) {
+              labels.push('bug');
+            }
+            if (title.includes('feature') || title.includes('enhancement') || title.includes('add')) {
+              labels.push('enhancement');
+            }
+            if (title.includes('refactor') || title.includes('cleanup') || title.includes('improve')) {
+              labels.push('refactor');
+            }
+            if (title.includes('test') || body.includes('testing') || title.includes('spec')) {
+              labels.push('testing');
+            }
+            if (title.includes('doc') || body.includes('documentation') || title.includes('readme')) {
+              labels.push('documentation');
+            }
+
+            // Priority labels based on keywords
+            if (title.includes('urgent') || title.includes('critical') || title.includes('security')) {
+              labels.push('urgent');
+            }
+            if (title.includes('important') || title.includes('high priority')) {
+              labels.push('high-priority');
+            }
+
+            // Status labels based on keywords
+            if (title.includes('blocked') || body.includes('waiting for') || body.includes('depends on')) {
+              labels.push('blocked');
+            }
+
+            // Internal labels based on keywords
+            if (title.includes('internal') || body.includes('private') || title.includes('team only')) {
+              labels.push('internal-only');
+            }
+            if (title.includes('investor') || title.includes('demo') || title.includes('presentation')) {
+              labels.push('investor-demo');
+            }
+            if (title.includes('security') || body.includes('vulnerability') || title.includes('auth')) {
+              labels.push('security');
+            }
+            if (title.includes('performance') || title.includes('slow') || title.includes('optimize')) {
+              labels.push('performance');
+            }
+
+            // Apply labels if any were found
+            if (labels.length > 0) {
+              const issueNumber = issue.number;
+              const owner = context.repo.owner;
+              const repo = context.repo.repo;
+
+              await github.rest.issues.addLabels({
+                owner,
+                repo,
+                issue_number: issueNumber,
+                labels
+              });
+
+              console.log(`Applied labels: ${labels.join(', ')} to issue/PR #${issueNumber}`);
+            }

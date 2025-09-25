@@ -14,6 +14,10 @@ interface AuthenticatedRequest extends Request {
     email: string;
     role?: string;
   };
+  developer?: {
+    id: string;
+    email: string;
+  };
 }
 
 export class PaymentOrchestratorController {
@@ -73,19 +77,17 @@ export class PaymentOrchestratorController {
 
       // Create payment request
       const paymentRequest = {
+        userId,
         amount,
         currency,
         region: region || 'DEFAULT',
-        customer: {
-          id: userId,
-          email: user.email,
-          name: user.name || user.email,
-        },
+        description,
         metadata: {
           appId,
-          description,
           userId,
           developerId: app.developerId,
+          userEmail: user.email,
+          userName: user.name || user.email,
           ...metadata
         }
       };
@@ -107,7 +109,7 @@ export class PaymentOrchestratorController {
           transactionId: response.transactionId,
           gatewayTransactionId: response.gatewayTransactionId || response.transactionId,
           gateway: response.gateway,
-          type: 'payment',
+          paymentType: 'payment',
           status: response.status,
           amount: response.amount,
           currency: response.currency,
@@ -115,8 +117,9 @@ export class PaymentOrchestratorController {
           userId,
           appId,
           developerId: app.developerId,
-          metadata: response.metadata || {},
+          metadata: JSON.stringify(response.metadata || {}),
           clientSecret: response.clientSecret,
+          grossAmount: response.amount,
         }
       });
 
@@ -159,18 +162,18 @@ export class PaymentOrchestratorController {
       }
 
       const { amount, currency, region, recipient, description, metadata } = req.body;
-      const userId = req.user?.id;
+      const developerId = req.developer?.id;
 
-      if (!userId) {
+      if (!developerId) {
         return res.status(401).json({
           success: false,
           message: 'Authentication required'
         });
       }
 
-      // Verify user is a developer (only developers can create payouts)
+      // Verify developer exists and is active
       const developer = await prisma.developer.findUnique({
-        where: { userId }
+        where: { id: developerId }
       });
 
       if (!developer) {
@@ -182,13 +185,14 @@ export class PaymentOrchestratorController {
 
       // Create payout request
       const payoutRequest = {
+        developerId: developer.id,
         amount,
         currency,
         region: region || 'DEFAULT',
-        recipient,
+        description,
+        bankAccount: recipient?.bankAccount,
+        paypalEmail: recipient?.paypalEmail,
         metadata: {
-          description,
-          userId,
           developerId: developer.id,
           ...metadata
         }
@@ -211,14 +215,15 @@ export class PaymentOrchestratorController {
           transactionId: response.payoutId,
           gatewayTransactionId: response.gatewayPayoutId || response.payoutId,
           gateway: response.gateway,
-          type: 'payout',
+          paymentType: 'payout',
           status: response.status,
           amount: response.amount,
           currency: response.currency,
           region: response.region,
-          userId,
+          userId: developerId,
           developerId: developer.id,
-          metadata: response.metadata || {},
+          metadata: JSON.stringify(response.metadata || {}),
+          grossAmount: response.amount,
         }
       });
 
@@ -291,7 +296,7 @@ export class PaymentOrchestratorController {
           amount: payment.amount,
           currency: payment.currency,
           region: payment.region,
-          type: payment.type,
+          type: payment.paymentType,
           createdAt: payment.createdAt,
           updatedAt: payment.updatedAt,
           app: payment.app,

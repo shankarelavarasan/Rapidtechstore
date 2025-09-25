@@ -1,0 +1,81 @@
+# Jekyll Configuration for Rapid Tech Store GitHub Pages
+title: "🚀 Rapid Tech Store"
+description: "AI-powered digital marketplace platform revolutionizing software discovery. $2M seed round for 20% equity in $87B+ market opportunity."
+url: "https://shankarelavarasan.github.io"
+baseurl: "/Rapidtechstore"
+
+# Site settings
+author: "Shankar Elavarasan"
+email: "shankarelavarasan90@gmail.com"
+company: "Rapid Tech"
+copyright: "© 2024 Rapid Tech - Shankar Elavarasan. All Rights Reserved."
+
+# Build settings
+source: .
+destination: ./_site
+markdown: kramdown
+highlighter: rouge
+theme: minima
+remote_theme: pages-themes/minima@v2.5.0
+
+# Plugins
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+  - jekyll-seo-tag
+  - jekyll-github-metadata
+
+# Exclude files from processing
+exclude:
+  - node_modules/
+  - backend/
+  - frontend/
+  - scripts/
+  - terraform/
+  - k8s/
+  - .github/
+  - "*.json"
+  - "*.js"
+  - "*.ts"
+  - Dockerfile
+  - docker-compose*
+  - cloudbuild.yaml
+  - Gemfile*
+  - vendor/
+
+# Include files
+include:
+  - _pages
+  - assets
+
+# Collections
+collections:
+  pages:
+    output: true
+    permalink: /:name/
+
+# Navigation
+navigation:
+  - title: "Home"
+    url: "/"
+  - title: "About"
+    url: "/about/"
+  - title: "Features"
+    url: "/features/"
+  - title: "Investor Demo"
+    url: "/investor-demo/"
+  - title: "API Documentation"
+    url: "/api-docs/"
+
+# SEO settings
+google_analytics: # Add your GA tracking ID
+social:
+  name: "Rapid Tech Store"
+  links:
+    - "https://github.com/shankarelavarasan/Rapidtechstore"
+
+# GitHub Pages specific settings
+github:
+  repository_url: "https://github.com/shankarelavarasan/Rapidtechstore"
+  repository_name: "Rapidtechstore"
+  owner_name: "shankarelavarasan"

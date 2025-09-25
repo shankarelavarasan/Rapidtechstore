@@ -48,6 +48,9 @@ model User {
   reviewHelpful        ReviewHelpful[]
   refreshTokens        RefreshToken[]
   passwordResetTokens  PasswordResetToken[]
+  chatConversations    ChatConversation[]
+  userFeedback         UserFeedback[]
+  chatFeedback         ChatFeedback[]
 
   @@map("users")
 }
@@ -87,10 +90,11 @@ model Developer {
   updatedAt                DateTime  @updatedAt
 
   // Relationships
-  apps            App[]
-  payouts         Payout[]
-  analytics       DeveloperAnalytics[]
-  unifiedPayments UnifiedPayment[]
+  apps               App[]
+  payouts            Payout[]
+  analytics          DeveloperAnalytics[]
+  unifiedPayments    UnifiedPayment[]
+  verificationProofs VerificationProof[]
 
   @@map("developers")
 }
@@ -137,16 +141,18 @@ model App {
   updatedAt         DateTime  @updatedAt
 
   // Relationships
-  developer       Developer        @relation(fields: [developerId], references: [id], onDelete: Cascade)
-  subscriptions   Subscription[]
-  transactions    Transaction[]
-  downloads       Download[]
-  favorites       Favorite[]
-  reviews         Review[]
-  analytics       AppAnalytics[]
-  purchases       Purchase[]
-  unifiedPayments UnifiedPayment[]
-  reports         AppReport[]
+  developer          Developer           @relation(fields: [developerId], references: [id], onDelete: Cascade)
+  subscriptions      Subscription[]
+  transactions       Transaction[]
+  downloads          Download[]
+  favorites          Favorite[]
+  reviews            Review[]
+  analytics          AppAnalytics[]
+  purchases          Purchase[]
+  unifiedPayments    UnifiedPayment[]
+  reports            AppReport[]
+  verificationProofs VerificationProof[]
+  userFeedback       UserFeedback[]
 
   @@map("apps")
 }
@@ -752,4 +758,116 @@ model PasswordResetToken {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("password_reset_tokens")
+}
+
+// Owner Verification Proof Model
+model VerificationProof {
+  id                String   @id @default(uuid())
+  developerId       String
+  appId             String?  // Optional: for app-specific verification
+  verificationType  String   // DNS_TXT, META_TAG, FILE_UPLOAD, MANUAL_REVIEW
+  domain            String   // Domain being verified
+  verificationToken String   // Token to be placed in DNS/meta/file
+  verificationData  String?  // JSON string containing proof data
+  status            String   @default("PENDING") // PENDING, VERIFIED, FAILED, EXPIRED
+  verifiedAt        DateTime?
+  expiresAt         DateTime
+  failureReason     String?
+  retryCount        Int      @default(0)
+  maxRetries        Int      @default(3)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relationships
+  developer Developer @relation(fields: [developerId], references: [id], onDelete: Cascade)
+  app       App?      @relation(fields: [appId], references: [id], onDelete: Cascade)
+
+  @@unique([developerId, domain, verificationType])
+  @@map("verification_proofs")
+}
+
+// Chat Conversation Model
+model ChatConversation {
+  id          String   @id @default(uuid())
+  sessionId   String   @unique
+  userId      String?  // Optional: for authenticated users
+  userType    String   @default("guest") // guest, customer, vendor
+  status      String   @default("active") // active, closed, archived
+  category    String?  // technical, billing, product, account, general
+  priority    String   @default("medium") // low, medium, high
+  needsHuman  Boolean  @default(false)
+  metadata    String?  // JSON string for additional context
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  closedAt    DateTime?
+
+  // Relationships
+  user     User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  messages ChatMessage[]
+  feedback ChatFeedback[]
+
+  @@map("chat_conversations")
+}
+
+// Chat Message Model
+model ChatMessage {
+  id             String   @id @default(uuid())
+  conversationId String
+  role           String   // user, assistant
+  content        String
+  timestamp      DateTime @default(now())
+  metadata       String?  // JSON string for additional data
+
+  // Relationships
+  conversation ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@map("chat_messages")
+}
+
+// User Feedback Model
+model UserFeedback {
+  id          String   @id @default(uuid())
+  userId      String?  // Optional: for authenticated users
+  email       String?  // For guest users
+  type        String   // bug_report, feature_request, general_feedback, complaint, suggestion
+  category    String?  // ui_ux, performance, functionality, billing, support
+  subject     String
+  description String
+  priority    String   @default("medium") // low, medium, high, urgent
+  status      String   @default("open") // open, in_progress, resolved, closed
+  rating      Int?     // 1-5 star rating
+  appId       String?  // Optional: feedback about specific app
+  page        String?  // Page where feedback was submitted
+  userAgent   String?  // Browser/device info
+  metadata    String?  // JSON string for additional context
+  assignedTo  String?  // Admin/support user ID
+  resolution  String?  // Resolution notes
+  resolvedAt  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relationships
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  app  App?  @relation(fields: [appId], references: [id], onDelete: SetNull)
+
+  @@map("user_feedback")
+}
+
+// Chat Feedback Model (for rating chat conversations)
+model ChatFeedback {
+  id             String   @id @default(uuid())
+  conversationId String
+  userId         String?  // Optional: for authenticated users
+  rating         Int      // 1-5 star rating
+  comment        String?  // Optional feedback comment
+  helpful        Boolean? // Was the chat helpful?
+  resolved       Boolean? // Was the issue resolved?
+  createdAt      DateTime @default(now())
+
+  // Relationships
+  user         User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
+  conversation ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@unique([conversationId, userId])
+  @@map("chat_feedback")
 }

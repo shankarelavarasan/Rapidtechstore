@@ -11,15 +11,19 @@ company: "Rapid Tech"
 copyright: "© 2024 Rapid Tech - Shankar Elavarasan. All Rights Reserved."
 
 # Build settings
+source: .
+destination: ./_site
 markdown: kramdown
 highlighter: rouge
 theme: minima
+remote_theme: pages-themes/minima@v2.5.0
 
 # Plugins
 plugins:
   - jekyll-feed
   - jekyll-sitemap
   - jekyll-seo-tag
+  - jekyll-github-metadata
 
 # Exclude files from processing
 exclude:

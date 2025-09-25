@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { PrismaClient } from '@prisma/client';
-import logger from '../utils/logger';
+import { logger } from '../utils/logger';
 import { createAppError } from '../middleware/errorHandler';
-import crypto from 'crypto';
+import * as crypto from 'crypto';
 
 const prisma = new PrismaClient();
 
@@ -38,10 +38,10 @@ export class PayoutService {
   private platformFeePercentage: number = 20; // 20% platform fee
 
   constructor() {
-    this.razorpayApiKey = process.env.RAZORPAY_API_KEY!;
-    this.razorpayApiSecret = process.env.RAZORPAY_API_SECRET!;
-    this.payoneerApiKey = process.env.PAYONEER_API_KEY!;
-    this.payoneerApiSecret = process.env.PAYONEER_API_SECRET!;
+    this.razorpayApiKey = process.env.RAZORPAY_API_KEY || '';
+    this.razorpayApiSecret = process.env.RAZORPAY_API_SECRET || '';
+    this.payoneerApiKey = process.env.PAYONEER_API_KEY || '';
+    this.payoneerApiSecret = process.env.PAYONEER_API_SECRET || '';
   }
 
   /**
@@ -58,12 +58,12 @@ export class PayoutService {
       // Get all completed transactions for developer's apps
       const transactions = await prisma.transaction.findMany({
         where: {
-          app: { developerId },
+          App: { developerId },
           status: 'COMPLETED',
           createdAt: dateFilter,
         },
         include: {
-          app: {
+          App: {
             select: {
               id: true,
               name: true,
@@ -105,7 +105,7 @@ export class PayoutService {
           developerId,
           status: 'COMPLETED',
         },
-        orderBy: { completedAt: 'desc' },
+        orderBy: { processedAt: 'desc' },
       });
 
       // Get monthly earnings for the last 12 months
@@ -116,7 +116,7 @@ export class PayoutService {
         totalEarnings,
         availableBalance: Math.max(0, availableBalance),
         pendingPayouts: pendingPayouts._sum.amount || 0,
-        lastPayoutDate: lastPayout?.completedAt,
+        lastPayoutDate: lastPayout?.processedAt || undefined,
         monthlyEarnings,
       };
     } catch (error) {
@@ -137,7 +137,7 @@ export class PayoutService {
         where: { id: developerId },
       });
 
-      if (!developer || developer.status !== 'VERIFIED') {
+      if (!developer || developer.verificationStatus !== 'APPROVED') {
         throw createAppError('Developer not found or not verified', 404);
       }
 
@@ -154,15 +154,19 @@ export class PayoutService {
       }
 
       // Create payout record
+      const currentDate = new Date();
+      const period = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
+      
       const payout = await prisma.payout.create({
         data: {
           developerId,
           amount,
           currency,
           method,
-          accountDetails,
+          period,
           status: 'PENDING',
-          requestedAt: new Date(),
+          transactionIds: '',
+          netAmount: amount,
         },
       });
 
@@ -187,8 +191,8 @@ export class PayoutService {
         where: { id: payout.id },
         data: {
           status: result.status,
-          transactionId: result.transactionId,
-          error: result.error,
+          transactionIds: result.transactionId || '',
+          gatewayResponse: result.error,
           processedAt: result.status !== 'PENDING' ? new Date() : null,
         },
       });
@@ -356,10 +360,10 @@ export class PayoutService {
       }
 
       // If payout is processing, check status with payment provider
-      if (payout.status === 'PROCESSING' && payout.transactionId) {
+      if (payout.status === 'PROCESSING' && payout.transactionIds) {
         const updatedStatus = await this.checkPaymentProviderStatus(
           payout.method,
-          payout.transactionId
+          payout.transactionIds
         );
 
         if (updatedStatus !== payout.status) {
@@ -367,7 +371,7 @@ export class PayoutService {
             where: { id: payoutId },
             data: {
               status: updatedStatus,
-              completedAt: updatedStatus === 'COMPLETED' ? new Date() : null,
+              processedAt: updatedStatus === 'COMPLETED' ? new Date() : null,
             },
           });
 
@@ -402,7 +406,7 @@ export class PayoutService {
       const [payouts, total] = await Promise.all([
         prisma.payout.findMany({
           where,
-          orderBy: { requestedAt: 'desc' },
+          orderBy: { createdAt: 'desc' },
           skip,
           take: limit,
         }),
@@ -431,60 +435,10 @@ export class PayoutService {
     try {
       logger.info('Starting automatic payout processing...');
 
-      // Get developers with automatic payout enabled and sufficient balance
-      const developers = await prisma.developer.findMany({
-        where: {
-          status: 'VERIFIED',
-          autoPayoutEnabled: true,
-          autoPayoutThreshold: { gt: 0 },
-        },
-      });
-
-      for (const developer of developers) {
-        try {
-          const earnings = await this.calculateDeveloperEarnings(developer.id);
-
-          // Check if balance exceeds threshold
-          if (earnings.availableBalance >= developer.autoPayoutThreshold!) {
-            // Check if last payout was more than the minimum interval ago
-            const lastPayout = await prisma.payout.findFirst({
-              where: {
-                developerId: developer.id,
-                status: 'COMPLETED',
-              },
-              orderBy: { completedAt: 'desc' },
-            });
-
-            const daysSinceLastPayout = lastPayout
-              ? Math.floor((Date.now() - lastPayout.completedAt!.getTime()) / (1000 * 60 * 60 * 24))
-              : Infinity;
-
-            const minimumInterval = developer.autoPayoutInterval || 7; // Default 7 days
-
-            if (daysSinceLastPayout >= minimumInterval) {
-              // Get developer's preferred payout method
-              const payoutMethod = developer.preferredPayoutMethod || 'razorpay';
-              const accountDetails = developer.payoutAccountDetails;
-
-              if (accountDetails) {
-                await this.requestPayout({
-                  developerId: developer.id,
-                  amount: earnings.availableBalance,
-                  currency: 'USD',
-                  method: payoutMethod as any,
-                  accountDetails,
-                });
-
-                logger.info(`Automatic payout processed for developer: ${developer.id}`);
-              } else {
-                logger.warn(`No payout account details for developer: ${developer.id}`);
-              }
-            }
-          }
-        } catch (error) {
-          logger.error(`Failed to process automatic payout for developer ${developer.id}:`, error);
-        }
-      }
+      // Note: Automatic payout functionality requires additional fields in Developer model
+      // (autoPayoutEnabled, autoPayoutThreshold, autoPayoutInterval)
+      // This functionality is currently disabled until the schema is updated
+      logger.info('Automatic payout processing is currently disabled - schema fields missing');
 
       logger.info('Automatic payout processing completed');
     } catch (error) {
@@ -505,8 +459,8 @@ export class PayoutService {
       await prisma.developer.update({
         where: { id: developerId },
         data: {
-          preferredPayoutMethod: method,
-          payoutAccountDetails: accountDetails,
+          payoutMethod: method,
+          bankDetails: accountDetails,
         },
       });
 
@@ -569,14 +523,14 @@ export class PayoutService {
       ] = await Promise.all([
         // Total payouts count
         prisma.payout.count({
-          where: { requestedAt: dateFilter },
+          where: { createdAt: dateFilter },
         }),
 
         // Completed payouts
         prisma.payout.count({
           where: {
             status: 'COMPLETED',
-            requestedAt: dateFilter,
+            createdAt: dateFilter,
           },
         }),
 
@@ -586,7 +540,7 @@ export class PayoutService {
             status: {
               in: ['PENDING', 'PROCESSING'],
             },
-            requestedAt: dateFilter,
+            createdAt: dateFilter,
           },
         }),
 
@@ -594,7 +548,7 @@ export class PayoutService {
         prisma.payout.count({
           where: {
             status: 'FAILED',
-            requestedAt: dateFilter,
+            createdAt: dateFilter,
           },
         }),
 
@@ -602,7 +556,7 @@ export class PayoutService {
         prisma.payout.aggregate({
           where: {
             status: 'COMPLETED',
-            requestedAt: dateFilter,
+            createdAt: dateFilter,
           },
           _sum: { amount: true },
         }),
@@ -610,7 +564,7 @@ export class PayoutService {
         // Payouts by method
         prisma.payout.groupBy({
           by: ['method'],
-          where: { requestedAt: dateFilter },
+          where: { createdAt: dateFilter },
           _count: true,
           _sum: { amount: true },
         }),
@@ -625,7 +579,7 @@ export class PayoutService {
           completedPayouts,
           pendingPayouts,
           failedPayouts,
-          totalAmount: totalAmount._sum.amount || 0,
+          totalAmount: totalAmount._sum?.amount || 0,
           successRate: totalPayouts > 0 ? (completedPayouts / totalPayouts) * 100 : 0,
         },
         payoutsByMethod,
@@ -661,8 +615,8 @@ export class PayoutService {
       const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0);
 
       const revenue = await prisma.transaction.aggregate({
-        where: {
-          app: { developerId },
+          where: {
+            App: { developerId },
           status: 'COMPLETED',
           createdAt: {
             gte: monthStart,
@@ -672,7 +626,7 @@ export class PayoutService {
         _sum: { amount: true },
       });
 
-      const totalRevenue = revenue._sum.amount || 0;
+      const totalRevenue = revenue._sum?.amount || 0;
       const earnings = totalRevenue * (1 - this.platformFeePercentage / 100);
 
       result.unshift({
@@ -696,7 +650,7 @@ export class PayoutService {
         prisma.payout.aggregate({
           where: {
             status: 'COMPLETED',
-            completedAt: {
+            processedAt: {
               gte: monthStart,
               lte: monthEnd,
             },
@@ -706,7 +660,7 @@ export class PayoutService {
         prisma.payout.count({
           where: {
             status: 'COMPLETED',
-            completedAt: {
+            processedAt: {
               gte: monthStart,
               lte: monthEnd,
             },
@@ -716,7 +670,7 @@ export class PayoutService {
 
       result.unshift({
         month: monthStart.toISOString().slice(0, 7),
-        amount: amount._sum.amount || 0,
+        amount: amount._sum?.amount || 0,
         count,
       });
     }

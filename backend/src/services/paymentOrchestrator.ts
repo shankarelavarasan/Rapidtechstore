@@ -1,6 +1,6 @@
 import { stripe } from './stripeService';
 import { logger } from '../utils/logger';
-import { GeoRoutingService } from './geoRoutingService';
+import { GeoRoutingService, GeoLocation } from './geoRoutingService';
 import { RazorpayService, createRazorpayService, RazorpayConfig } from './razorpayService';
 import { PayoneerService, createPayoneerService, PayoneerConfig } from './payoneerService';
 import { WiseService, createWiseService, WiseConfig } from './wiseService';
@@ -78,6 +78,9 @@ export interface PayoutResponse {
   region: string;
   estimatedArrival?: string;
   error?: string;
+  errorCode?: string;
+  transactionId?: string;
+  gatewayResponse?: string;
   metadata?: Record<string, any>;
   geoLocation?: GeoLocation;
 }
@@ -500,8 +503,8 @@ export class PaymentOrchestrator {
       currency: request.currency.toLowerCase(),
       metadata: {
         userId: request.userId,
-        region: geoLocation?.region || request.region,
-        country: geoLocation?.country,
+        region: geoLocation?.region || request.region || 'DEFAULT',
+        country: geoLocation?.country || request.country || 'UNKNOWN',
         ...request.metadata
       }
     });
@@ -897,5 +900,38 @@ export class PaymentOrchestrator {
   }) {
     // TODO: Implement database logging
     logger.info('Transaction logged', transaction);
+  }
+
+  /**
+   * Get supported payment methods for a region
+   */
+  static getSupportedPaymentMethods(region: string): string[] {
+    const eligibleGateways = this.getEligibleGateways(region, 'USD', 'payment', 1000);
+    const methods: string[] = [];
+    
+    eligibleGateways.forEach(gateway => {
+      switch (gateway) {
+        case 'stripe':
+          methods.push('card', 'bank_transfer', 'wallet');
+          break;
+        case 'razorpay':
+          methods.push('card', 'upi', 'netbanking', 'wallet');
+          break;
+        case 'paypal':
+          methods.push('paypal', 'card');
+          break;
+        default:
+          methods.push('card');
+      }
+    });
+    
+    return Array.from(new Set(methods)); // Remove duplicates
+  }
+
+  /**
+   * Get supported gateways for a region
+   */
+  static getSupportedGateways(region: string): PaymentGateway[] {
+    return this.getEligibleGateways(region, 'USD', 'payment', 1000);
   }
 }

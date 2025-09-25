@@ -1,13 +1,18 @@
 import Stripe from 'stripe';
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('STRIPE_SECRET_KEY is required');
+// Initialize Stripe only if a valid API key is provided
+let stripe: Stripe | null = null;
+
+if (process.env.STRIPE_SECRET_KEY && 
+    (process.env.STRIPE_SECRET_KEY.startsWith('sk_test_') || 
+     process.env.STRIPE_SECRET_KEY.startsWith('sk_live_'))) {
+  stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: '2023-10-16',
+    typescript: true,
+  });
 }
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2023-10-16',
-  typescript: true,
-});
+export { stripe };
 
 export interface CreatePaymentIntentParams {
   amount: number; // Amount in cents
@@ -28,6 +33,10 @@ export class StripeService {
    * Create a payment intent for processing payments
    */
   static async createPaymentIntent(params: CreatePaymentIntentParams): Promise<Stripe.PaymentIntent> {
+    if (!stripe) {
+      throw new Error('Stripe is not initialized. Please check your STRIPE_SECRET_KEY configuration.');
+    }
+    
     try {
       const paymentIntent = await stripe.paymentIntents.create({
         amount: params.amount,
@@ -51,6 +60,10 @@ export class StripeService {
    * Create a Stripe customer
    */
   static async createCustomer(params: CreateCustomerParams): Promise<Stripe.Customer> {
+    if (!stripe) {
+      throw new Error('Stripe is not initialized. Please check your STRIPE_SECRET_KEY configuration.');
+    }
+    
     try {
       const customer = await stripe.customers.create({
         email: params.email,
@@ -69,6 +82,10 @@ export class StripeService {
    * Retrieve a payment intent
    */
   static async retrievePaymentIntent(paymentIntentId: string): Promise<Stripe.PaymentIntent> {
+    if (!stripe) {
+      throw new Error('Stripe is not initialized. Please check your STRIPE_SECRET_KEY configuration.');
+    }
+    
     try {
       return await stripe.paymentIntents.retrieve(paymentIntentId);
     } catch (error) {
@@ -84,6 +101,10 @@ export class StripeService {
     paymentIntentId: string,
     paymentMethodId: string
   ): Promise<Stripe.PaymentIntent> {
+    if (!stripe) {
+      throw new Error('Stripe is not initialized. Please check your STRIPE_SECRET_KEY configuration.');
+    }
+    
     try {
       return await stripe.paymentIntents.confirm(paymentIntentId, {
         payment_method: paymentMethodId,
@@ -102,6 +123,10 @@ export class StripeService {
     amount?: number,
     reason?: Stripe.RefundCreateParams.Reason
   ): Promise<Stripe.Refund> {
+    if (!stripe) {
+      throw new Error('Stripe is not initialized. Please check your STRIPE_SECRET_KEY configuration.');
+    }
+    
     try {
       const refund = await stripe.refunds.create({
         payment_intent: paymentIntentId,
@@ -124,6 +149,10 @@ export class StripeService {
     signature: string,
     endpointSecret: string
   ): Stripe.Event {
+    if (!stripe) {
+      throw new Error('Stripe is not initialized. Please check your STRIPE_SECRET_KEY configuration.');
+    }
+    
     try {
       return stripe.webhooks.constructEvent(payload, signature, endpointSecret);
     } catch (error) {

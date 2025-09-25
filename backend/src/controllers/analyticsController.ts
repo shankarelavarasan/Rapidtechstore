@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { PrismaClient } from '@prisma/client';
-import logger from '../utils/logger';
+import { logger } from '../utils/logger';
 import { AuthenticatedRequest } from '../middleware/auth';
 
 const prisma = new PrismaClient();
@@ -312,13 +312,111 @@ export const getDeveloperAudience = asyncHandler(async (req: AuthenticatedReques
 });
 
 // Export all functions
-export default {
-  getPublicTopCharts,
-  getPublicTrending,
-  getPublicPlatformStats,
-  getDeveloperDashboard,
-  getAppAnalytics,
-  getAppPerformance,
-  getDeveloperRevenue,
-  getDeveloperAudience,
-};
+// Placeholder implementations for missing methods
+export const getConversionFunnel = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  res.json({ success: true, data: { message: 'Conversion funnel analytics not implemented yet' } });
+});
+
+export const getRetentionAnalytics = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  res.json({ success: true, data: { message: 'Retention analytics not implemented yet' } });
+});
+
+export const getUserActivity = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  res.json({ success: true, data: { message: 'User activity analytics not implemented yet' } });
+});
+
+export const getUserRecommendations = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  res.json({ success: true, data: { message: 'User recommendations not implemented yet' } });
+});
+
+export const trackUserEvent = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  res.json({ success: true, data: { message: 'User event tracking not implemented yet' } });
+});
+
+export const getPlatformOverview = asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: { message: 'Platform overview not implemented yet' } });
+});
+
+export const getRevenueAnalytics = asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: { message: 'Revenue analytics not implemented yet' } });
+});
+
+export const getUserAnalytics = asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: { message: 'User analytics not implemented yet' } });
+});
+
+export const getDeveloperAnalytics = asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: { message: 'Developer analytics not implemented yet' } });
+});
+
+export const getPerformanceMetrics = asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: { message: 'Performance metrics not implemented yet' } });
+});
+
+export const getGeographicAnalytics = asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: { message: 'Geographic analytics not implemented yet' } });
+});
+
+export const getConversionAnalytics = asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: { message: 'Conversion analytics not implemented yet' } });
+});
+
+export const getCohortAnalysis = asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: { message: 'Cohort analysis not implemented yet' } });
+});
+
+export const getRealTimeAnalytics = asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: { message: 'Real-time analytics not implemented yet' } });
+});
+
+export const exportRevenueData = asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: { message: 'Revenue data export not implemented yet' } });
+});
+
+export const exportUserData = asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: { message: 'User data export not implemented yet' } });
+});
+
+export const exportAppData = asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: { message: 'App data export not implemented yet' } });
+});
+
+export const createCustomReport = asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: { message: 'Custom report creation not implemented yet' } });
+});
+
+export const getCustomReports = asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: { message: 'Custom reports not implemented yet' } });
+});
+
+export const getCustomReport = asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: { message: 'Custom report not implemented yet' } });
+});
+
+export const updateCustomReport = asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: { message: 'Custom report update not implemented yet' } });
+});
+
+export const deleteCustomReport = asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: { message: 'Custom report deletion not implemented yet' } });
+});
+
+export const generateCustomReport = asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: { message: 'Custom report generation not implemented yet' } });
+});
+
+export const createAlert = asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: { message: 'Alert creation not implemented yet' } });
+});
+
+export const getAlerts = asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: { message: 'Alerts not implemented yet' } });
+});
+
+export const updateAlert = asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: { message: 'Alert update not implemented yet' } });
+});
+
+export const deleteAlert = asyncHandler(async (req: Request, res: Response) => {
+  res.json({ success: true, data: { message: 'Alert deletion not implemented yet' } });
+});

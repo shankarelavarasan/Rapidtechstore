@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
+import * as jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
 import { createAppError } from './errorHandler';
 
@@ -117,6 +117,103 @@ export const authenticateUser = async (
       id: user.id,
       email: user.email,
     };
+
+    next();
+  } catch (error) {
+    if (error instanceof jwt.JsonWebTokenError) {
+      return next(createAppError('Invalid token', 401));
+    }
+    if (error instanceof jwt.TokenExpiredError) {
+      return next(createAppError('Token expired', 401));
+    }
+    next(error);
+  }
+};
+
+// Generic token authentication (for any user type)
+export const authenticateToken = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const token = extractToken(req);
+    
+    if (!token) {
+      return next(createAppError('Access token is required', 401));
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret-key') as JWTPayload;
+    
+    // Check based on token type
+    if (decoded.type === 'user') {
+      const user = await prisma.user.findUnique({
+        where: { id: decoded.id },
+        select: {
+          id: true,
+          email: true,
+          isEmailVerified: true,
+        },
+      });
+
+      if (!user) {
+        return next(createAppError('User not found', 401));
+      }
+
+      req.user = {
+        id: user.id,
+        email: user.email,
+      };
+    } else if (decoded.type === 'developer') {
+      const developer = await prisma.developer.findUnique({
+        where: { id: decoded.id },
+        select: {
+          id: true,
+          email: true,
+          isActive: true,
+          verificationStatus: true,
+        },
+      });
+
+      if (!developer) {
+        return next(createAppError('Developer not found', 401));
+      }
+
+      if (!developer.isActive) {
+        return next(createAppError('Account is deactivated', 401));
+      }
+
+      req.developer = {
+        id: developer.id,
+        email: developer.email,
+      };
+    } else if (decoded.type === 'admin') {
+      const admin = await prisma.admin.findUnique({
+        where: { id: decoded.id },
+        select: {
+          id: true,
+          email: true,
+          role: true,
+          isActive: true,
+        },
+      });
+
+      if (!admin) {
+        return next(createAppError('Admin not found', 401));
+      }
+
+      if (!admin.isActive) {
+        return next(createAppError('Account is deactivated', 401));
+      }
+
+      req.admin = {
+        id: admin.id,
+        email: admin.email,
+        role: admin.role,
+      };
+    } else {
+      return next(createAppError('Invalid token type', 401));
+    }
 
     next();
   } catch (error) {
@@ -297,3 +394,6 @@ export const verifyToken = (token: string): JWTPayload => {
   const secret = process.env.JWT_SECRET || 'fallback-secret-key';
   return jwt.verify(token, secret) as JWTPayload;
 };
+
+// Export the interface for use in other files
+export type { AuthenticatedRequest };

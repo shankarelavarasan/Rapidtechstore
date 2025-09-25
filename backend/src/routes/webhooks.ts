@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import { createWebhookHandler } from '../services/webhookHandler';
 import { PrismaClient } from '@prisma/client';
-import logger from '../utils/logger';
+import { logger } from '../utils/logger';
 
 const router = express.Router();
 const prisma = new PrismaClient();
@@ -19,33 +19,19 @@ router.post('/stripe', express.raw({ type: 'application/json' }), async (req: Re
       });
     }
 
-    const result = await webhookHandler.handleStripeWebhook(req.body, signature);
+    // The webhook handler handles the response directly
+    await webhookHandler.handleStripeWebhook(req, res);
+    return;
     
-    if (!result.success) {
-      logger.error('Stripe webhook processing failed:', result.error);
-      return res.status(400).json({
-        success: false,
-        message: 'Webhook processing failed',
-        error: result.error
-      });
-    }
-
-    // Process the webhook event
-    if (result.event) {
-      await processWebhookEvent('stripe', result.event);
-    }
-
-    res.status(200).json({
-      success: true,
-      message: 'Stripe webhook processed successfully'
-    });
-
   } catch (error) {
     logger.error('Stripe webhook error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error'
-    });
+    if (!res.headersSent) {
+      res.status(500).json({
+        success: false,
+        message: 'Internal server error'
+      });
+    }
+    return;
   }
 });
 
@@ -61,33 +47,19 @@ router.post('/razorpay', express.json(), async (req: Request, res: Response) => 
       });
     }
 
-    const result = await webhookHandler.handleRazorpayWebhook(req.body, signature);
+    // The webhook handler handles the response directly
+    await webhookHandler.handleRazorpayWebhook(req, res);
+    return;
     
-    if (!result.success) {
-      logger.error('Razorpay webhook processing failed:', result.error);
-      return res.status(400).json({
-        success: false,
-        message: 'Webhook processing failed',
-        error: result.error
-      });
-    }
-
-    // Process the webhook event
-    if (result.event) {
-      await processWebhookEvent('razorpay', result.event);
-    }
-
-    res.status(200).json({
-      success: true,
-      message: 'Razorpay webhook processed successfully'
-    });
-
   } catch (error) {
     logger.error('Razorpay webhook error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error'
-    });
+    if (!res.headersSent) {
+      res.status(500).json({
+        success: false,
+        message: 'Internal server error'
+      });
+    }
+    return;
   }
 });
 
@@ -103,33 +75,19 @@ router.post('/payoneer', express.json(), async (req: Request, res: Response) => 
       });
     }
 
-    const result = await webhookHandler.handlePayoneerWebhook(req.body, signature);
+    // The webhook handler handles the response directly
+    await webhookHandler.handlePayoneerWebhook(req, res);
+    return;
     
-    if (!result.success) {
-      logger.error('Payoneer webhook processing failed:', result.error);
-      return res.status(400).json({
-        success: false,
-        message: 'Webhook processing failed',
-        error: result.error
-      });
-    }
-
-    // Process the webhook event
-    if (result.event) {
-      await processWebhookEvent('payoneer', result.event);
-    }
-
-    res.status(200).json({
-      success: true,
-      message: 'Payoneer webhook processed successfully'
-    });
-
   } catch (error) {
     logger.error('Payoneer webhook error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error'
-    });
+    if (!res.headersSent) {
+      res.status(500).json({
+        success: false,
+        message: 'Internal server error'
+      });
+    }
+    return;
   }
 });
 
@@ -145,33 +103,19 @@ router.post('/wise', express.json(), async (req: Request, res: Response) => {
       });
     }
 
-    const result = await webhookHandler.handleWiseWebhook(req.body, signature);
+    // The webhook handler handles the response directly
+    await webhookHandler.handleWiseWebhook(req, res);
+    return;
     
-    if (!result.success) {
-      logger.error('Wise webhook processing failed:', result.error);
-      return res.status(400).json({
-        success: false,
-        message: 'Webhook processing failed',
-        error: result.error
-      });
-    }
-
-    // Process the webhook event
-    if (result.event) {
-      await processWebhookEvent('wise', result.event);
-    }
-
-    res.status(200).json({
-      success: true,
-      message: 'Wise webhook processed successfully'
-    });
-
   } catch (error) {
     logger.error('Wise webhook error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Internal server error'
-    });
+    if (!res.headersSent) {
+      res.status(500).json({
+        success: false,
+        message: 'Internal server error'
+      });
+    }
+    return;
   }
 });
 
@@ -212,10 +156,11 @@ router.get('/status', async (req: Request, res: Response) => {
         gateway: payment.gateway,
         amount: payment.amount,
         currency: payment.currency,
-        type: payment.type,
+        type: payment.paymentType,
         updatedAt: payment.updatedAt
       }
     });
+    return;
 
   } catch (error) {
     logger.error('Webhook status check error:', error);
@@ -223,6 +168,7 @@ router.get('/status', async (req: Request, res: Response) => {
       success: false,
       message: 'Internal server error'
     });
+    return;
   }
 });
 
@@ -306,10 +252,7 @@ async function handlePaymentSuccess(gateway: string, event: any) {
       where: {
         userId: event.metadata.userId,
         appId: event.metadata.appId,
-        OR: [
-          { stripePaymentIntentId: gatewayTransactionId },
-          { razorpayOrderId: gatewayTransactionId }
-        ]
+        stripePaymentIntentId: gatewayTransactionId
       }
     });
 
@@ -322,8 +265,7 @@ async function handlePaymentSuccess(gateway: string, event: any) {
           currency: event.currency || 'USD',
           status: 'COMPLETED',
           purchaseDate: new Date(),
-          ...(gateway === 'stripe' && { stripePaymentIntentId: gatewayTransactionId }),
-          ...(gateway === 'razorpay' && { razorpayOrderId: gatewayTransactionId })
+          ...(gateway === 'stripe' && { stripePaymentIntentId: gatewayTransactionId })
         }
       });
     }
@@ -402,7 +344,7 @@ async function handlePayoutSuccess(gateway: string, event: any) {
         { transactionId },
         { gatewayTransactionId }
       ],
-      type: 'payout'
+      paymentType: 'payout'
     },
     data: {
       status: 'completed',
@@ -431,7 +373,7 @@ async function handlePayoutFailure(gateway: string, event: any) {
         { transactionId },
         { gatewayTransactionId }
       ],
-      type: 'payout'
+      paymentType: 'payout'
     },
     data: {
       status: 'failed',

@@ -68,8 +68,13 @@ export class WiseService {
       if (!this.isCurrencySupported(request.currency)) {
         return {
           success: false,
+          transactionId: '',
+          gateway: 'wise' as const,
+          status: 'failed' as const,
+          amount: request.amount,
+          currency: request.currency,
+          region: request.region || 'INTERNATIONAL',
           error: `Currency ${request.currency} not supported by Wise`,
-          errorCode: 'UNSUPPORTED_CURRENCY',
         };
       }
 
@@ -78,8 +83,13 @@ export class WiseService {
       if (request.amount < limits.min || request.amount > limits.max) {
         return {
           success: false,
+          transactionId: '',
+          gateway: 'wise' as const,
+          status: 'failed' as const,
+          amount: request.amount,
+          currency: request.currency,
+          region: request.region || 'INTERNATIONAL',
           error: `Amount must be between ${limits.min} and ${limits.max} ${request.currency}`,
-          errorCode: 'INVALID_AMOUNT',
         };
       }
 
@@ -92,18 +102,11 @@ export class WiseService {
       return {
         success: true,
         transactionId: paymentId,
-        orderId: paymentId,
+        gateway: 'wise' as const,
+        status: 'pending' as const,
         amount: request.amount,
         currency: request.currency,
-        status: 'PENDING',
-        gatewayResponse: JSON.stringify({
-          paymentId,
-          status: 'pending',
-          amount: request.amount,
-          currency: request.currency,
-          quote: quote,
-          description: request.description,
-        }),
+        region: request.region || 'INTERNATIONAL',
         clientSecret: paymentId,
         metadata: {
           wisePaymentId: paymentId,
@@ -113,15 +116,21 @@ export class WiseService {
           exchangeRate: quote.rate,
           estimatedFee: quote.fee,
           estimatedProcessingTime: '1-4 business days',
+          quote: quote,
+          description: request.description,
         },
       };
     } catch (error: any) {
       console.error('Wise payment creation failed:', error);
       return {
         success: false,
+        transactionId: '',
+        gateway: 'wise' as const,
+        status: 'failed' as const,
+        amount: request.amount,
+        currency: request.currency,
+        region: request.region || 'INTERNATIONAL',
         error: error.message || 'Payment creation failed',
-        errorCode: 'WISE_ERROR',
-        gatewayResponse: JSON.stringify(error),
       };
     }
   }
@@ -141,6 +150,12 @@ export class WiseService {
       if (!this.isCurrencySupported(request.currency)) {
         return {
           success: false,
+          payoutId: '',
+          gateway: 'wise' as const,
+          status: 'failed' as const,
+          amount: request.amount,
+          currency: request.currency,
+          region: request.region || 'DEFAULT',
           error: `Currency ${request.currency} not supported by Wise`,
           errorCode: 'UNSUPPORTED_CURRENCY',
         };
@@ -150,6 +165,12 @@ export class WiseService {
       if (!request.bankAccount) {
         return {
           success: false,
+          payoutId: '',
+          gateway: 'wise' as const,
+          status: 'failed' as const,
+          amount: request.amount,
+          currency: request.currency,
+          region: request.region || 'DEFAULT',
           error: 'Bank account details required for Wise payouts',
           errorCode: 'MISSING_BANK_ACCOUNT',
         };
@@ -163,10 +184,15 @@ export class WiseService {
       
       return {
         success: true,
-        transactionId: payoutId,
+        payoutId: payoutId,
+        gatewayPayoutId: payoutId,
+        gateway: 'wise' as const,
+        status: 'processing' as const,
         amount: request.amount,
         currency: request.currency,
-        status: 'processing',
+        region: request.region || 'INTERNATIONAL',
+        estimatedArrival: this.getEstimatedArrival(request.currency),
+        transactionId: payoutId,
         gatewayResponse: JSON.stringify({
           payoutId,
           status: 'processing',

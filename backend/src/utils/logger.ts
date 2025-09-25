@@ -1,5 +1,5 @@
-import winston from 'winston';
-import DailyRotateFile from 'winston-daily-rotate-file';
+const winston = require('winston');
+const DailyRotateFile = require('winston-daily-rotate-file');
 
 const logFormat = winston.format.combine(
   winston.format.timestamp(),
@@ -10,7 +10,7 @@ const logFormat = winston.format.combine(
 const consoleFormat = winston.format.combine(
   winston.format.colorize(),
   winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-  winston.format.printf(({ timestamp, level, message, ...meta }) => {
+  winston.format.printf(({ timestamp, level, message, ...meta }: { timestamp: string; level: string; message: string; [key: string]: any }) => {
     return `${timestamp} [${level}]: ${message} ${
       Object.keys(meta).length ? JSON.stringify(meta, null, 2) : ''
     }`;
@@ -27,27 +27,28 @@ export const logger = winston.createLogger({
     new winston.transports.Console({
       format: process.env.NODE_ENV === 'production' ? logFormat : consoleFormat,
     }),
-
-    // File transport for errors
-    new DailyRotateFile({
-      filename: 'logs/error-%DATE%.log',
-      datePattern: 'YYYY-MM-DD',
-      level: 'error',
-      maxSize: '20m',
-      maxFiles: '14d',
-      format: logFormat,
-    }),
-
-    // File transport for all logs
-    new DailyRotateFile({
-      filename: 'logs/combined-%DATE%.log',
-      datePattern: 'YYYY-MM-DD',
-      maxSize: '20m',
-      maxFiles: '14d',
-      format: logFormat,
-    }),
   ],
 });
+
+// Add file transports only if LOG_FILE_ENABLED is true
+if (process.env.LOG_FILE_ENABLED === 'true') {
+  logger.add(new DailyRotateFile({
+    filename: 'logs/error-%DATE%.log',
+    datePattern: 'YYYY-MM-DD',
+    level: 'error',
+    maxSize: '20m',
+    maxFiles: '14d',
+    format: logFormat,
+  }));
+
+  logger.add(new DailyRotateFile({
+    filename: 'logs/combined-%DATE%.log',
+    datePattern: 'YYYY-MM-DD',
+    maxSize: '20m',
+    maxFiles: '14d',
+    format: logFormat,
+  }));
+}
 
 // Handle uncaught exceptions and unhandled rejections
 logger.exceptions.handle(

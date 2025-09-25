@@ -85,7 +85,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
       <div id="search-instructions" className="sr-only">
         Press Enter to search, or Escape to clear the search field
       </div>
-      </div>
       
       {/* Hidden submit button for form submission */}
       <button type="submit" className="sr-only">
